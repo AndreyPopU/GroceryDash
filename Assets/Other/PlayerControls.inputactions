@@ -154,7 +154,7 @@
                 {
                     "name": "",
                     "id": "7c1ed0c1-c721-4f17-978a-e84afaa38542",
-                    "path": "<Keyboard>/ctrl",
+                    "path": "<Keyboard>/f",
                     "interactions": "",
                     "processors": "",
                     "groups": "Keyboard",
@@ -176,7 +176,7 @@
                 {
                     "name": "",
                     "id": "0d65fb8c-b14f-4b1c-8cb0-80a5fcbd9e53",
-                    "path": "<Keyboard>/f",
+                    "path": "<Keyboard>/e",
                     "interactions": "",
                     "processors": "",
                     "groups": "Keyboard",
