@@ -13,6 +13,7 @@ public class Player : MonoBehaviour
     [SerializeField] private float throwForce = 5;
 
     [Header("Product Management")]
+    public ShoppingList shoppingList;
     public Product closestProduct;
     public Product holdProduct;
     public Transform holdParent;
@@ -42,7 +43,7 @@ public class Player : MonoBehaviour
 
         if (dashing) return;
 
-        rb.velocity = new Vector3(movement.x, rb.velocity.y, movement.y) * speed * Time.fixedDeltaTime;
+        rb.velocity = new Vector3(movement.x, 0, movement.y) * speed * Time.fixedDeltaTime;
         gfx.forward = Vector3.Lerp(gfx.forward, new Vector3(movement.x, 0, movement.y), rotateSpeed);
     }
 
@@ -114,7 +115,7 @@ public class Player : MonoBehaviour
             holdProduct.transform.localPosition = Vector3.zero;
             holdProduct.transform.localEulerAngles = Vector3.zero;
             holdProduct.rb.isKinematic = true;
-
+            holdProduct.player = this;
         }
     }
 }
