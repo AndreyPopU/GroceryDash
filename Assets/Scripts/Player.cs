@@ -84,8 +84,6 @@ public class Player : MonoBehaviour
 
     private void ThrowProduct()
     {
-        print("Throwing");
-
         if (holdProduct != null)
         {
             holdProduct.transform.SetParent(null);
@@ -105,10 +103,18 @@ public class Player : MonoBehaviour
         }
         else if (closestProduct != null)
         {
-            holdProduct = closestProduct.GetComponent<Product>();
-            closestProduct.transform.SetParent(holdParent);
-            closestProduct.transform.localPosition = Vector3.zero;
+            if (!closestProduct.gameObject.activeInHierarchy) // If product is from shelf - instantiate 
+            {
+                Product product = Instantiate(closestProduct.gameObject, Vector3.zero, Quaternion.identity).GetComponent<Product>();
+                holdProduct = product;
+            }
+            else holdProduct = closestProduct.GetComponent<Product>();
+
+            holdProduct.transform.SetParent(holdParent);
+            holdProduct.transform.localPosition = Vector3.zero;
+            holdProduct.transform.localEulerAngles = Vector3.zero;
             holdProduct.rb.isKinematic = true;
+
         }
     }
 }

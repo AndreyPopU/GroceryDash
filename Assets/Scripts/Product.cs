@@ -8,7 +8,7 @@ public class Product : MonoBehaviour
     [HideInInspector]
     public Rigidbody rb;
 
-    void Start()
+    void Awake()
     {
         rb = GetComponent<Rigidbody>();    
     }
