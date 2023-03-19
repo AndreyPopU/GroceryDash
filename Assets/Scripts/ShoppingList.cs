@@ -14,7 +14,7 @@ public class ShoppingList : MonoBehaviour
     void Start()
     {
         shoppingItems.Add("Apple", 3);
-        shoppingItems.Add("Pineapple", 2);
+        shoppingItems.Add("Milk", 2);
         shoppingItems.Add("Water", 1);
 
         foreach (KeyValuePair<string, int> pair in shoppingItems)
