@@ -24,7 +24,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 3505755549248172020}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0.5, z: 1}
+  m_LocalPosition: {x: 0, y: 1.5, z: 1}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -128,6 +128,7 @@ GameObject:
   - component: {fileID: 8792655865386420076}
   - component: {fileID: 8792655865386420079}
   - component: {fileID: 8792655865386420048}
+  - component: {fileID: 6062664887922126031}
   m_Layer: 0
   m_Name: Player
   m_TagString: Untagged
@@ -163,12 +164,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 94e1364f80e589648ab9b4b48b0070d8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  closestProduct: {fileID: 0}
-  holdProduct: {fileID: 0}
-  holdParent: {fileID: 1426811517591356764}
   speed: 250
   rotateSpeed: 0.4
   throwForce: 10
+  shoppingList: {fileID: 0}
+  closestProduct: {fileID: 0}
+  holdProduct: {fileID: 0}
+  holdParent: {fileID: 1426811517591356764}
   dashRange: 5
   dashDuration: 0.15
   dashCD: 1
@@ -299,4 +301,17 @@ BoxCollider:
   m_Enabled: 1
   serializedVersion: 2
   m_Size: {x: 1, y: 1, z: 1}
+  m_Center: {x: 0, y: 0, z: 0}
+--- !u!65 &6062664887922126031
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8792655865386420054}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 1
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Size: {x: 2, y: 2, z: 2}
   m_Center: {x: 0, y: 0, z: 0}

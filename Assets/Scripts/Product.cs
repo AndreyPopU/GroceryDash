@@ -17,17 +17,28 @@ public class Product : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        if (other.TryGetComponent(out Player player))
+        if (other.TryGetComponent(out Player _player))
         {
-            player.closestProduct = this;
+            _player.closestProduct = this;
+        }
+
+        if (other.GetComponent<Checkout>())
+        {
+            if (player.shoppingList.shoppingItems[productName] <= 0) return;
+
+            if (player.holdProduct == null)
+            {
+                player.shoppingList.Add(productName);
+                Destroy(gameObject);
+            }
         }
     }
 
     private void OnTriggerExit(Collider other)
     {
-        if (other.TryGetComponent(out Player player))
+        if (other.TryGetComponent(out Player _player))
         {
-            if (player.closestProduct == this) player.closestProduct = null;
+            if (_player.closestProduct == this) _player.closestProduct = null;
         }
     }
 }

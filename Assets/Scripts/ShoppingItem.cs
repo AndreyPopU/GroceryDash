@@ -2,19 +2,26 @@ using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class ShoppingItem : MonoBehaviour
 {
-    [HideInInspector]
-    public TextMeshProUGUI text;
+    [HideInInspector] public TextMeshProUGUI text;
+    private Toggle toggle;
 
     private void Awake()
     {
         text = GetComponentInChildren<TextMeshProUGUI>();
+        toggle = GetComponentInChildren<Toggle>();
     }
 
     public void SetText(int value, string key)
     {
-        text.text = value + " " + key;
+        if (value > 0) text.text = value + " " + key;
+        else
+        {
+            text.text = "<s>" + key + "</s>";
+            toggle.isOn = true;
+        }
     }
 }
