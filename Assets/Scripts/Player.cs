@@ -18,6 +18,10 @@ public class Player : MonoBehaviour
     public Product holdProduct;
     public Transform holdParent;
 
+    [Header("Basket")]
+    public Basket holdBasket;
+    public Basket closestBasket;
+
     [Header("Dash")]
     public float dashRange;
     public float dashDuration = .25f;
@@ -96,13 +100,24 @@ public class Player : MonoBehaviour
 
     private void Grab()
     {
-        if (holdProduct != null)
+        if (holdBasket)
+        {
+            // Sell basket products
+
+            // Drop basket
+        }
+        else if (holdProduct != null) // Pick up basket
+        {
+
+        }
+
+        if (holdProduct != null) // Drop product
         {
             holdProduct.transform.SetParent(null);
             holdProduct.rb.isKinematic = false;
             holdProduct = null;
         }
-        else if (closestProduct != null)
+        else if (closestProduct != null) // Pick up product
         {
             if (!closestProduct.gameObject.activeInHierarchy) // If product is from shelf - instantiate 
             {
