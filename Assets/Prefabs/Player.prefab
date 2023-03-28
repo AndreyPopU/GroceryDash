@@ -164,13 +164,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 94e1364f80e589648ab9b4b48b0070d8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  speed: 250
+  speed: 300
+  slowSpeed: 150
   rotateSpeed: 0.4
   throwForce: 10
   shoppingList: {fileID: 0}
   closestProduct: {fileID: 0}
   holdProduct: {fileID: 0}
   holdParent: {fileID: 1426811517591356764}
+  closestPlayer: {fileID: 0}
+  holdBasket: {fileID: 0}
+  closestBasket: {fileID: 0}
+  canDash: 1
   dashRange: 5
   dashDuration: 0.15
   dashCD: 1
@@ -217,7 +222,19 @@ MonoBehaviour:
     m_ActionId: 912f95af-2cbf-4ebe-98b0-237224f74d0d
     m_ActionName: PlayerMovement/Movement[/Keyboard/w,/Keyboard/s,/Keyboard/a,/Keyboard/d,/DualShock4GamepadHID/leftStick,/XInputControllerWindows/leftStick]
   - m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 8792655865386420049}
+        m_TargetAssemblyTypeName: Player, Assembly-CSharp
+        m_MethodName: OnHold
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
     m_ActionId: 5aabb948-fafb-4ad7-bbf9-f722c1a13255
     m_ActionName: PlayerMovement/Hold[/Keyboard/space]
   - m_PersistentCalls:

@@ -131,6 +131,17 @@
                 },
                 {
                     "name": "",
+                    "id": "a32f6df4-92ba-474b-983c-d6df23f7e382",
+                    "path": "<Gamepad>/rightTrigger",
+                    "interactions": "Hold(duration=0.01)",
+                    "processors": "",
+                    "groups": "Gamepad",
+                    "action": "Hold",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
                     "id": "085ceef7-4cb0-4126-8335-eb1b15f0e415",
                     "path": "<Keyboard>/shift",
                     "interactions": "",
