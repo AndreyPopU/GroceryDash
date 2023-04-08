@@ -5653,7 +5653,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!1001 &1478473512328414405
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -5810,6 +5810,10 @@ PrefabInstance:
     - target: {fileID: 1893181423616440501, guid: ceff2f103b512be429ee9bb71d121419, type: 3}
       propertyPath: m_Name
       value: Spill
+      objectReference: {fileID: 0}
+    - target: {fileID: 1893181423616440501, guid: ceff2f103b512be429ee9bb71d121419, type: 3}
+      propertyPath: m_IsActive
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: ceff2f103b512be429ee9bb71d121419, type: 3}

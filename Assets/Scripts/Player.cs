@@ -31,6 +31,7 @@ public class Player : MonoBehaviour
     public float dashRange;
     public float dashDuration = .25f;
     public float dashCD = 1;
+    public ParticleSystem dashEffect;
     private float baseDashCD;
     public bool dashing;
 
@@ -76,6 +77,7 @@ public class Player : MonoBehaviour
         if (movement.x == 0 && movement.y == 0 || dashing || dashCD > 0 || !canDash) return;
         dashing = true;
         dashCD = baseDashCD;
+        dashEffect.Play();
         StartCoroutine(DashCO());
     }
 
@@ -110,6 +112,7 @@ public class Player : MonoBehaviour
         if (closestPlayer != null)
         {
             // Combine movement vectors
+
             print("holding onto");
         }
     }
