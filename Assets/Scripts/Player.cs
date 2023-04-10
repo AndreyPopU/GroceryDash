@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
+using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using static UnityEngine.InputSystem.InputAction;
@@ -9,8 +10,10 @@ public class Player : MonoBehaviour
 {
     [Header("Player stats")]
     [SerializeField] private float speed = 300;
+    [SerializeField] private float basketSpeed = 250;
     [SerializeField] private float slowSpeed = 200;
     [SerializeField] private float rotateSpeed = .4f;
+    [SerializeField] private float slowRotateSpeed = .3f;
     [SerializeField] private float throwForce = 5;
 
     [Header("Product Management")]
@@ -35,16 +38,23 @@ public class Player : MonoBehaviour
     private float baseDashCD;
     public bool dashing;
 
+    [Header("Bumped")]
+    public bool bumped;
+    public float bumpForce;
+    public float bumpDuration;
+
     private Vector2 movement;
     private Rigidbody rb;
     private Transform gfx;
     private float baseSpeed;
+    private float baseRotateSpeed;
 
     void Start()
     {
         rb = GetComponent<Rigidbody>();
         gfx = transform.GetChild(0);
         baseSpeed = speed;
+        baseRotateSpeed = rotateSpeed;
         baseDashCD = dashCD;
     }
 
@@ -52,7 +62,7 @@ public class Player : MonoBehaviour
     {
         if (dashCD > 0) dashCD -= Time.deltaTime;
 
-        if (dashing) return;
+        if (dashing || bumped) return;
 
         rb.velocity = new Vector3(movement.x, 0, movement.y) * speed * Time.fixedDeltaTime;
         gfx.forward = Vector3.Lerp(gfx.forward, new Vector3(movement.x, 0, movement.y), rotateSpeed);
@@ -121,13 +131,35 @@ public class Player : MonoBehaviour
     {
         if (holdBasket)
         {
-            // Sell basket products
-
-            // Drop basket
+            if (closestProduct == null) // Drop basket
+            {
+                holdBasket.transform.SetParent(null);
+                holdBasket.boxCollider.enabled = true;
+                holdBasket.meshCollider.enabled = false;
+                holdBasket.rb.isKinematic = false;
+                closestBasket = holdBasket;
+                holdBasket = null;
+                speed = baseSpeed;
+                rotateSpeed = baseRotateSpeed;
+                return;
+            }
         }
-        else if (holdProduct != null) // Pick up basket
+        else if (closestBasket != null && holdProduct == null) // Pick up basket if not holding product already
         {
+            if (closestBasket.player != null) return;
 
+            closestBasket.transform.SetParent(holdParent);
+            closestBasket.transform.localPosition = new Vector3(0, -1.4f, 1.25f);
+            closestBasket.transform.localEulerAngles = Vector3.up * -90;
+            closestBasket.rb.isKinematic = true;
+            closestBasket.boxCollider.enabled = false;
+            closestBasket.meshCollider.enabled = true;
+            closestBasket.player = this;
+            holdBasket = closestBasket;
+            closestBasket = null;
+            speed = basketSpeed;
+            rotateSpeed = slowRotateSpeed;
+            return;
         }
 
         if (holdProduct != null) // Drop product
@@ -135,9 +167,24 @@ public class Player : MonoBehaviour
             holdProduct.transform.SetParent(null);
             holdProduct.rb.isKinematic = false;
             holdProduct = null;
+            return;
         }
         else if (closestProduct != null) // Pick up product
         {
+            if (closestProduct.player != null) return;
+
+            if (holdBasket != null) // If player carries a basket drop products there
+            {
+                if (!closestProduct.gameObject.activeInHierarchy) // If product is from shelf - instantiate 
+                {
+                    Product product = Instantiate(closestProduct.gameObject, Vector3.zero, Quaternion.identity).GetComponent<Product>();
+                    holdBasket.AddProduct(product);
+                }
+                else holdBasket.AddProduct(closestProduct);
+
+                return;
+            }
+
             if (!closestProduct.gameObject.activeInHierarchy) // If product is from shelf - instantiate 
             {
                 Product product = Instantiate(closestProduct.gameObject, Vector3.zero, Quaternion.identity).GetComponent<Product>();
@@ -153,10 +200,39 @@ public class Player : MonoBehaviour
         }
     }
 
+    public void Bump(Vector3 direction)
+    {
+        bumped = true;
+        StartCoroutine(BumpCO(direction));
+    }
+
+    private IEnumerator BumpCO(Vector3 direction)
+    {
+        YieldInstruction waitForFixedUpdate = new WaitForFixedUpdate();
+
+        float startTime = Time.time;
+        rb.velocity = Vector3.zero;
+
+        while (Time.time < startTime + bumpDuration)
+        {
+            rb.velocity += direction * bumpForce;
+            yield return waitForFixedUpdate;
+        }
+        bumped = false;
+    }
+
     public void SlowDown(bool slow)
     {
-        if (slow) speed = slowSpeed;
-        else speed = baseSpeed;
+        if (slow)
+        {
+            speed = slowSpeed;
+            rotateSpeed = slowRotateSpeed;
+        }
+        else
+        {
+            speed = holdBasket != null ? basketSpeed : baseSpeed;
+            rotateSpeed = holdBasket != null ? slowRotateSpeed : baseRotateSpeed;
+        }
 
         canDash = !slow;
     }
@@ -169,5 +245,17 @@ public class Player : MonoBehaviour
     private void OnTriggerExit(Collider other)
     {
         if (other.GetComponent<Player>() && closestPlayer == other.GetComponent<Player>()) closestPlayer = null;
+    }
+
+    private void OnCollisionEnter(Collision collision)
+    {
+        if (collision.collider.TryGetComponent(out Player player))
+        {
+            if (dashing)
+            {
+                player.Bump(new Vector3(movement.x, 0, movement.y));
+            }
+        }
+        
     }
 }

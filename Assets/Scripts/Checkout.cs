@@ -13,8 +13,6 @@ public class Checkout : MonoBehaviour
     {
         lights = GetComponentInChildren<MeshRenderer>();
         lights.material = openMat;
-
-        InvokeRepeating("ChangeColor", 3, 3);
     }
 
     private void ChangeColor()

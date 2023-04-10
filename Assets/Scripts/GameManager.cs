@@ -7,10 +7,20 @@ using UnityEngine.InputSystem;
 
 public class GameManager : MonoBehaviour
 {
+    public static GameManager instance;
+
+    public bool roundStarted = true;
+
     public ShoppingList shoppingList1;
     public ShoppingList shoppingList2;
 
     private PlayerInputManager playerInputManager;
+
+    private void Awake()
+    {
+        if (instance == null) instance = this;
+        else Destroy(gameObject);
+    }
 
     void Update()
     {
@@ -31,5 +41,10 @@ public class GameManager : MonoBehaviour
         }
 
         CameraManager.instance.targets.Add(input.transform);
+    }
+
+    public void EndRound()
+    {
+        roundStarted = false;
     }
 }

@@ -200,8 +200,8 @@ ParticleSystem:
     startSpeed:
       serializedVersion: 2
       minMaxState: 3
-      scalar: 7
-      minScalar: 4
+      scalar: -4
+      minScalar: -2
       maxCurve:
         serializedVersion: 2
         m_Curve:
@@ -5045,8 +5045,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   speed: 300
+  basketSpeed: 250
   slowSpeed: 150
   rotateSpeed: 0.4
+  slowRotateSpeed: 0.2
   throwForce: 10
   shoppingList: {fileID: 0}
   closestProduct: {fileID: 0}
@@ -5061,6 +5063,9 @@ MonoBehaviour:
   dashCD: 1
   dashEffect: {fileID: 5829612913896766864}
   dashing: 0
+  bumped: 0
+  bumpForce: 3
+  bumpDuration: 0.15
 --- !u!114 &8792655865386420076
 MonoBehaviour:
   m_ObjectHideFlags: 0
