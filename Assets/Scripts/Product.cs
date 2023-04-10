@@ -6,7 +6,8 @@ using UnityEngine;
 public class Product : MonoBehaviour
 {
     public string productName;
-    public Player player;
+    public Player owner;
+    public Player lastOwner;
     [HideInInspector]
     public Rigidbody rb;
 
@@ -17,18 +18,15 @@ public class Product : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        if (other.TryGetComponent(out Player _player))
-        {
-            _player.closestProduct = this;
-        }
+        if (other.TryGetComponent(out Player _player)) _player.closestProduct = this;
 
         if (other.GetComponent<Checkout>())
         {
-            if (player.shoppingList.shoppingItems[productName] <= 0) return;
+            if (lastOwner.shoppingList.shoppingItems[productName] <= 0) return;
 
-            if (player.holdProduct == null)
+            if (lastOwner.holdProduct == null)
             {
-                player.shoppingList.Add(productName);
+                lastOwner.shoppingList.Add(productName);
                 Destroy(gameObject);
             }
         }

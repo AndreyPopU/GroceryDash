@@ -11,7 +11,7 @@ public class ShoppingList : MonoBehaviour
     public GameObject itemPrefab;
     int offset = 100;
 
-    void Start()
+    void Awake()
     {
         shoppingItems.Add("Apple", 3);
         shoppingItems.Add("Milk", 2);

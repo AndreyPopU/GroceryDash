@@ -5050,6 +5050,7 @@ MonoBehaviour:
   rotateSpeed: 0.4
   slowRotateSpeed: 0.2
   throwForce: 10
+  canMove: 0
   shoppingList: {fileID: 0}
   closestProduct: {fileID: 0}
   holdProduct: {fileID: 0}

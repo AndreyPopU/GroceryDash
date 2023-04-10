@@ -21,11 +21,12 @@ public class Timer : MonoBehaviour
                 roundText.gameObject.SetActive(true);
                 countdownText.gameObject.SetActive(false);
                 currentTime = 180;
+                GameManager.instance.StartRound(true);
             }
             else
             {
                 currentTime = 0;
-                GameManager.instance.EndRound();
+                GameManager.instance.StartRound(false);
             }
         }
         else currentTime -= 1 * Time.deltaTime;

@@ -41,10 +41,26 @@ public class GameManager : MonoBehaviour
         }
 
         CameraManager.instance.targets.Add(input.transform);
+        input.transform.position = transform.GetChild(input.playerIndex).position;
+        MeshRenderer renderer = input.GetComponentInChildren<MeshRenderer>();
+        renderer.material.color = input.playerIndex == 0 ? Color.green : Color.yellow;
+
     }
 
-    public void EndRound()
+    public void StartRound(bool start)
     {
-        roundStarted = false;
+        roundStarted = start;
+        Player[] players = FindObjectsOfType<Player>();
+
+        for (int i = 0; i < players.Length; i++) players[i].canMove = start;
+
+        if (start)
+        {
+            
+        }
+        else
+        {
+
+        }
     }
 }

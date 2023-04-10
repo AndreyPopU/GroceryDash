@@ -15,6 +15,7 @@ public class Player : MonoBehaviour
     [SerializeField] private float rotateSpeed = .4f;
     [SerializeField] private float slowRotateSpeed = .3f;
     [SerializeField] private float throwForce = 5;
+    public bool canMove = true;
 
     [Header("Product Management")]
     public ShoppingList shoppingList;
@@ -51,6 +52,7 @@ public class Player : MonoBehaviour
 
     void Start()
     {
+        DontDestroyOnLoad(gameObject);
         rb = GetComponent<Rigidbody>();
         gfx = transform.GetChild(0);
         baseSpeed = speed;
@@ -62,7 +64,7 @@ public class Player : MonoBehaviour
     {
         if (dashCD > 0) dashCD -= Time.deltaTime;
 
-        if (dashing || bumped) return;
+        if (dashing || bumped || !canMove) return;
 
         rb.velocity = new Vector3(movement.x, 0, movement.y) * speed * Time.fixedDeltaTime;
         gfx.forward = Vector3.Lerp(gfx.forward, new Vector3(movement.x, 0, movement.y), rotateSpeed);
@@ -113,6 +115,7 @@ public class Player : MonoBehaviour
             holdProduct.transform.SetParent(null);
             holdProduct.rb.isKinematic = false;
             holdProduct.rb.AddForce(gfx.forward * throwForce, ForceMode.Impulse);
+            holdProduct.owner = null;
             holdProduct = null;
         }
     }
@@ -166,12 +169,13 @@ public class Player : MonoBehaviour
         {
             holdProduct.transform.SetParent(null);
             holdProduct.rb.isKinematic = false;
+            holdProduct.owner = null;
             holdProduct = null;
             return;
         }
         else if (closestProduct != null) // Pick up product
         {
-            if (closestProduct.player != null) return;
+            if (closestProduct.owner != null) return;
 
             if (holdBasket != null) // If player carries a basket drop products there
             {
@@ -196,13 +200,21 @@ public class Player : MonoBehaviour
             holdProduct.transform.localPosition = Vector3.zero;
             holdProduct.transform.localEulerAngles = Vector3.zero;
             holdProduct.rb.isKinematic = true;
-            holdProduct.player = this;
+            holdProduct.owner = this;
+            holdProduct.lastOwner = this;
         }
     }
 
     public void Bump(Vector3 direction)
     {
         bumped = true;
+        if (holdProduct != null)
+        {
+            holdProduct.transform.SetParent(null);
+            holdProduct.rb.isKinematic = false;
+            holdProduct.owner = null;
+            holdProduct = null;
+        }
         StartCoroutine(BumpCO(direction));
     }
 
