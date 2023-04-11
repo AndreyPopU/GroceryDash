@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using TMPro;
+using UnityEditor;
 using UnityEngine;
 
 public class ShoppingList : MonoBehaviour
@@ -38,5 +39,16 @@ public class ShoppingList : MonoBehaviour
                 break;
             }
         }
+
+        Player[] players = FindObjectsOfType<Player>();
+        for (int i = 0; i < players.Length; i++)
+        {
+            foreach (KeyValuePair<string, int> pair in players[i].shoppingList.shoppingItems)
+            {
+                if (pair.Value > 0) return;
+            }
+        }
+
+        GameManager.instance.StartRound(false);
     }
 }

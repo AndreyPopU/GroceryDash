@@ -194,13 +194,14 @@ public class SettingsMenu : MonoBehaviour
 
     public IEnumerator Fade()
     {
+        YieldInstruction waitForFixedUpdate = new WaitForFixedUpdate();
+
         if (fadePanel.alpha > 0)
         {
             while (fadePanel.alpha > 0)
             {
                 fadePanel.alpha -= Time.deltaTime;
-                // Fade out music
-                yield return new WaitForSeconds(.02f);
+                yield return waitForFixedUpdate;
             }
         }
         else if (fadePanel.alpha < 1)
@@ -208,9 +209,8 @@ public class SettingsMenu : MonoBehaviour
             Cursor.visible = false;
             while (fadePanel.alpha < 1)
             {
-                fadePanel.alpha += 1.5f * Time.deltaTime;
-                // Fade in music
-                yield return new WaitForSeconds(.02f);
+                fadePanel.alpha += Time.deltaTime;
+                yield return waitForFixedUpdate;
             }
         }
     }
