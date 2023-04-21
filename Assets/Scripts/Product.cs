@@ -5,6 +5,7 @@ using UnityEngine;
 
 public class Product : MonoBehaviour
 {
+    public bool canPickUp = true;
     public string productName;
     public Player owner;
     public Player lastOwner;
@@ -20,16 +21,18 @@ public class Product : MonoBehaviour
     {
         if (other.TryGetComponent(out Player _player)) _player.closestProduct = this;
 
-        if (other.GetComponent<Checkout>())
-        {
-            if (lastOwner.shoppingList.shoppingItems[productName] <= 0) return;
+        // Old shopping code
 
-            if (lastOwner.holdProduct == null)
-            {
-                lastOwner.shoppingList.Add(productName);
-                Destroy(gameObject);
-            }
-        }
+        //if (other.GetComponent<Checkout>())
+        //{
+        //    if (lastOwner.shoppingList.shoppingItems.ContainsKey(productName) && lastOwner.shoppingList.shoppingItems[productName] <= 0) return;
+
+        //    if (lastOwner.holdProduct == null) // ???
+        //    {
+        //        lastOwner.shoppingList.Add(productName);
+        //        Destroy(gameObject);
+        //    }
+        //}
     }
 
     private void OnTriggerExit(Collider other)

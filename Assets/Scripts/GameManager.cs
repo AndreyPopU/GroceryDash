@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -20,11 +21,8 @@ public class GameManager : MonoBehaviour
     {
         if (instance == null) instance = this;
         else Destroy(gameObject);
-    }
 
-    void Update()
-    {
-        playerInputManager = FindObjectOfType<PlayerInputManager>();    
+        playerInputManager = FindObjectOfType<PlayerInputManager>();
     }
 
     public void BindShoppingList(PlayerInput input)
@@ -56,11 +54,50 @@ public class GameManager : MonoBehaviour
 
         if (start)
         {
-            
+            for (int i = 0; i < players.Length; i++)
+            {
+                if (players[i].index == 0)
+                {
+                    players[i].shoppingList.shoppingItems.Add("Apple", 2);
+                    players[i].shoppingList.shoppingItems.Add("Milk", 1);
+                    players[i].shoppingList.shoppingItems.Add("Bread", 1);
+                    players[i].shoppingList.shoppingItems.Add("Water", 2);
+                    players[i].shoppingList.shoppingItems.Add("Croissant", 1);
+
+                    foreach (KeyValuePair<string, int> pair in players[i].shoppingList.shoppingItems)
+                    {
+                        ShoppingItem item = Instantiate(players[i].shoppingList.itemPrefab, Vector3.zero, Quaternion.identity, players[i].shoppingList.contents).GetComponent<ShoppingItem>();
+                        item.transform.localPosition = new Vector3(0, players[i].shoppingList.offset, 0);
+                        item.SetText(pair.Value, pair.Key);
+                        players[i].shoppingList.items.Add(item);
+                        players[i].shoppingList.offset -= 50;
+                    }
+                }
+                else
+                {
+                    players[i].shoppingList.shoppingItems.Add("Apple", 1);
+                    players[i].shoppingList.shoppingItems.Add("Milk", 2);
+                    players[i].shoppingList.shoppingItems.Add("Cheese", 1);
+                    players[i].shoppingList.shoppingItems.Add("Crab", 1);
+                    players[i].shoppingList.shoppingItems.Add("Fish", 2);
+
+                    foreach (KeyValuePair<string, int> pair in players[i].shoppingList.shoppingItems)
+                    {
+                        ShoppingItem item = Instantiate(players[i].shoppingList.itemPrefab, Vector3.zero, Quaternion.identity, players[i].shoppingList.contents).GetComponent<ShoppingItem>();
+                        item.transform.localPosition = new Vector3(0, players[i].shoppingList.offset, 0);
+                        item.SetText(pair.Value, pair.Key);
+                        players[i].shoppingList.items.Add(item);
+                        players[i].shoppingList.offset -= 50;
+                    }
+                }
+            }
         }
         else
         {
-
+            Timer timer = GetComponent<Timer>();
+            timer.countdownText.text = "Time's Up!";
+            timer.countdownText.gameObject.SetActive(true);
+            timer.roundText.gameObject.SetActive(false);
         }
     }
 }

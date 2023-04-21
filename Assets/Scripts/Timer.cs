@@ -7,13 +7,11 @@ public class Timer : MonoBehaviour
 {
     public float currentTime;
 
-    [SerializeField] TextMeshProUGUI roundText;
-    [SerializeField] TextMeshProUGUI countdownText;
+    public TextMeshProUGUI roundText;
+    public TextMeshProUGUI countdownText;
 
     void Update()
     {
-        if (!GameManager.instance.roundStarted) return;
-
         if (currentTime <= 0)
         {
             if (!roundText.gameObject.activeInHierarchy)
