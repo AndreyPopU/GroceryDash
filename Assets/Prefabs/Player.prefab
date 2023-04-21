@@ -5045,9 +5045,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   index: 0
-  speed: 900
-  basketSpeed: 250
-  slowSpeed: 150
+  speed: 1000
+  counterMovement: 250
+  maxSpeed: 7
+  basketSpeed: 850
+  slowSpeed: 700
   rotateSpeed: 0.4
   slowRotateSpeed: 0.2
   throwForce: 10
@@ -5066,9 +5068,8 @@ MonoBehaviour:
   dashCD: 1
   dashEffect: {fileID: 5829612913896766864}
   dashing: 0
-  bumped: 0
-  bumpForce: 3
-  bumpDuration: 0.15
+  bumpForce: 600
+  rb: {fileID: 0}
 --- !u!114 &8792655865386420076
 MonoBehaviour:
   m_ObjectHideFlags: 0

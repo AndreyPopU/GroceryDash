@@ -8,14 +8,15 @@ using static UnityEngine.InputSystem.InputAction;
 
 public class Player : MonoBehaviour
 {
-    [Header("Player stats")]
     public int index;
-    [SerializeField] private float speed = 300;
-    [SerializeField] private float basketSpeed = 250;
-    [SerializeField] private float slowSpeed = 200;
+    [Header("Player stats")]
+    [SerializeField] private float speed = 1000;
+    [SerializeField] private float counterMovement = 250;
+    [SerializeField] private float maxSpeed = 7;
     [SerializeField] private float rotateSpeed = .4f;
-    [SerializeField] private float slowRotateSpeed = .3f;
-    [SerializeField] private float throwForce = 5;
+    [SerializeField] private float slowRotateSpeed = .2f;
+    [SerializeField] private float throwForce = 10;
+
     public bool canMove = true;
     public bool holding;
 
@@ -39,16 +40,16 @@ public class Player : MonoBehaviour
     public float dashCD = 1;
     public ParticleSystem dashEffect;
     private float baseDashCD;
+    private float threshold = .01f;
     public bool dashing;
 
     [Header("Bumped")]
-    public bool bumped;
     public float bumpForce;
-    public float bumpDuration;
+    private float bumpDuration;
 
     private Vector2 movement;
     private Vector3 dashDirection;
-    private Rigidbody rb;
+    [HideInInspector] public Rigidbody rb;
     private Transform gfx;
     private float baseSpeed;
     private float baseRotateSpeed;
@@ -60,6 +61,9 @@ public class Player : MonoBehaviour
 
         controls.PlayerMovement.Hold.started += ctx => holding = !holding;
         controls.PlayerMovement.Hold.canceled += ctx => holding = false;
+        controls.PlayerMovement.Dash.started += ctx => Dash(new Vector3(movement.x, 0, movement.y).normalized);
+        controls.PlayerMovement.Throw.started += ctx => ThrowProduct();
+        controls.PlayerMovement.Grab.started += ctx => Grab();
     }
 
     void Start()
@@ -76,31 +80,38 @@ public class Player : MonoBehaviour
     {
         if (dashCD > 0) dashCD -= Time.deltaTime;
 
-        if (dashing || bumped || !canMove) return;
+        if (dashing || bumpDuration > 0 || !canMove) return;
 
-        rb.velocity = new Vector3(movement.x, 0, movement.y) * speed * Time.fixedDeltaTime;
-
+        Movement();
+        Hold();
         gfx.forward = Vector3.Lerp(gfx.forward, new Vector3(movement.x, 0, movement.y), rotateSpeed);
     }
 
     private void Update()
     {
-        if (dashing || bumped || !canMove) return;
-
-        Hold();
+        if (bumpDuration > 0) bumpDuration -= Time.deltaTime;
     }
 
-    #region Input
+    private void Movement()
+    {
+        // Cap speed
+        if (rb.velocity.magnitude > maxSpeed) rb.velocity = Vector3.ClampMagnitude(rb.velocity, maxSpeed);
+
+        //Counteract sliding and sloppy movement
+        CounterMovement();
+
+        //Apply forces to move player
+        rb.AddForce(new Vector3(movement.x, 0, movement.y) * speed * Time.deltaTime);
+    }
+
+    private void CounterMovement()
+    {
+        // Counter movement
+        if (Mathf.Abs(movement.x) <= .01f) rb.AddForce(new Vector3(-rb.velocity.x, 0, 0) * counterMovement * Time.deltaTime);
+        if (Mathf.Abs(movement.y) <= .01f) rb.AddForce(new Vector3(0, 0, -rb.velocity.z) * counterMovement * Time.deltaTime);
+    }
 
     public void OnMove(CallbackContext context) => movement = context.ReadValue<Vector2>();
-
-    public void OnDash(CallbackContext context) => context.action.started += _ => Dash(new Vector3(movement.x, 0, movement.y).normalized);
-
-    public void OnThrow(CallbackContext context) => context.action.started += _ => ThrowProduct();
-
-    public void OnGrab(CallbackContext context) => context.action.started += _ => Grab();
-
-    #endregion
 
     private void Dash(Vector3 direction)
     {
@@ -187,8 +198,7 @@ public class Player : MonoBehaviour
             closestBasket.player = this;
             holdBasket = closestBasket;
             closestBasket = null;
-            speed = basketSpeed;
-            rotateSpeed = slowRotateSpeed;
+            SlowDown(true);
             return;
         }
 
@@ -236,8 +246,11 @@ public class Player : MonoBehaviour
 
     public void Bump(Vector3 direction, float force)
     {
-        if (bumped) return;
-        bumped = true;
+        if (bumpDuration > 0) return;
+
+        rb.velocity = Vector3.zero;
+        rb.AddForce(direction * force * Time.deltaTime, ForceMode.Impulse);
+
         if (holdProduct != null) // Drop product
         {
             holdProduct.transform.SetParent(null);
@@ -245,37 +258,20 @@ public class Player : MonoBehaviour
             holdProduct.owner = null;
             holdProduct = null;
         }
-        StartCoroutine(BumpCO(direction, force));
-    }
 
-    private IEnumerator BumpCO(Vector3 direction, float force)
-    {
-        print("Triggered " + direction);
-
-        YieldInstruction waitForFixedUpdate = new WaitForFixedUpdate();
-
-        float startTime = Time.time;
-        rb.velocity = Vector3.zero;
-
-        while (Time.time < startTime + bumpDuration)
-        {
-            rb.velocity += direction * force;
-            yield return waitForFixedUpdate;
-        }
-
-        bumped = false;
+        bumpDuration = .2f;
     }
 
     public void SlowDown(bool slow)
     {
         if (slow)
         {
-            speed = slowSpeed;
+            maxSpeed = holdBasket != null ? 5.5f : 2.5f;
             rotateSpeed = slowRotateSpeed;
         }
         else
         {
-            speed = holdBasket != null ? basketSpeed : baseSpeed;
+            maxSpeed = holdBasket != null ? 4.5f : 7;
             rotateSpeed = holdBasket != null ? slowRotateSpeed : baseRotateSpeed;
         }
 
@@ -300,7 +296,6 @@ public class Player : MonoBehaviour
                 player.Bump(dashDirection, bumpForce);
                 StopCoroutine("DashCO");
                 rb.velocity = Vector3.zero;
-                Bump(-gfx.forward, bumpForce / 2);
             }
     }
 
