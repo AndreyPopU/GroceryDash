@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using static UnityEngine.InputSystem.InputAction;
@@ -15,7 +16,7 @@ public class Player : MonoBehaviour
     [SerializeField] private float maxSpeed = 7;
     [SerializeField] private float rotateSpeed = .4f;
     [SerializeField] private float slowRotateSpeed = .2f;
-    [SerializeField] private float throwForce = 10;
+    public float throwForce = 10;
 
     public bool canMove = true;
     public bool holding;
@@ -50,7 +51,7 @@ public class Player : MonoBehaviour
     private Vector2 movement;
     private Vector3 dashDirection;
     [HideInInspector] public Rigidbody rb;
-    private Transform gfx;
+    [HideInInspector] public Transform gfx;
     private float baseSpeed;
     private float baseRotateSpeed;
     private PlayerControls controls;
@@ -59,11 +60,7 @@ public class Player : MonoBehaviour
     {
         controls = new PlayerControls();
 
-        controls.PlayerMovement.Hold.started += ctx => holding = !holding;
-        controls.PlayerMovement.Hold.canceled += ctx => holding = false;
-        controls.PlayerMovement.Dash.started += ctx => Dash(new Vector3(movement.x, 0, movement.y).normalized);
-        controls.PlayerMovement.Throw.started += ctx => ThrowProduct();
-        controls.PlayerMovement.Grab.started += ctx => Grab();
+        
     }
 
     void Start()
@@ -111,7 +108,19 @@ public class Player : MonoBehaviour
         if (Mathf.Abs(movement.y) <= .01f) rb.AddForce(new Vector3(0, 0, -rb.velocity.z) * counterMovement * Time.deltaTime);
     }
 
+    #region Input
+
     public void OnMove(CallbackContext context) => movement = context.ReadValue<Vector2>();
+
+    public void OnDash(CallbackContext context) => context.action.started += _ => Dash(new Vector3(movement.x, 0, movement.y).normalized);
+
+    public void OnThrow(CallbackContext context) => context.action.started += _ => ThrowItem();
+
+    public void OnGrab(CallbackContext context) => context.action.started += _ => Grab();
+
+    public void OnHold(CallbackContext context) => context.action.started += _ => holding = !holding;
+
+    #endregion
 
     private void Dash(Vector3 direction)
     {
@@ -142,15 +151,31 @@ public class Player : MonoBehaviour
         dashing = false;
     }
 
-    private void ThrowProduct()
+    private void ThrowItem()
     {
-        if (holdProduct != null && GameManager.instance.roundStarted)
+        if (!GameManager.instance.roundStarted) return;
+
+        if (holdProduct != null)
         {
             holdProduct.transform.SetParent(null);
             holdProduct.rb.isKinematic = false;
             holdProduct.rb.AddForce(gfx.forward * throwForce, ForceMode.Impulse);
             holdProduct.owner = null;
             holdProduct = null;
+        }
+        else if (holdBasket != null)
+        {
+            holdBasket.transform.SetParent(null);
+            holdBasket.coreCollider.enabled = true;
+            holdBasket.containCollider.enabled = false;
+            holdBasket.AddRigidbody();
+            holdBasket.rb.isKinematic = false;
+            holdBasket.rb.AddForce(gfx.forward * throwForce * 1.5f, ForceMode.Impulse);
+            holdBasket.lastOwner = holdBasket.player;
+            holdBasket.player = null;
+            holdBasket = null;
+            SlowDown(false);
+            return;
         }
     }
 
@@ -160,8 +185,6 @@ public class Player : MonoBehaviour
 
         if (closestPlayer != null && GameManager.instance.roundStarted)
         {
-            // Combine movement vectors
-
             print("holding onto");
         }
     }
@@ -175,13 +198,14 @@ public class Player : MonoBehaviour
             if (closestProduct == null) // Drop basket
             {
                 holdBasket.transform.SetParent(null);
-                holdBasket.boxCollider.enabled = true;
-                holdBasket.meshCollider.enabled = false;
+                holdBasket.coreCollider.enabled = true;
+                holdBasket.containCollider.enabled = false;
+                holdBasket.AddRigidbody();
                 holdBasket.rb.isKinematic = false;
                 closestBasket = holdBasket;
+                holdBasket.player = null;
                 holdBasket = null;
-                speed = baseSpeed;
-                rotateSpeed = baseRotateSpeed;
+                SlowDown(false);
                 return;
             }
         }
@@ -189,16 +213,28 @@ public class Player : MonoBehaviour
         {
             if (closestBasket.player != null) return;
 
+            // Anchor basket in player's hands
             closestBasket.transform.SetParent(holdParent);
             closestBasket.transform.localPosition = new Vector3(0, -1.4f, 1.25f);
             closestBasket.transform.localEulerAngles = Vector3.up * -90;
-            closestBasket.rb.isKinematic = true;
-            closestBasket.boxCollider.enabled = false;
-            closestBasket.meshCollider.enabled = true;
+            Destroy(closestBasket.rb);
+            closestBasket.coreCollider.enabled = false;
+            closestBasket.containCollider.enabled = true;
             closestBasket.player = this;
             holdBasket = closestBasket;
+
+            // Give ownership of every product in the basket to the player who holds it
+            foreach (Product product in holdBasket.products)
+            {
+                product.owner = this;
+                product.lastOwner = this;
+            }
+
             closestBasket = null;
+
+            // Slow Down player
             SlowDown(true);
+            maxSpeed = 5.5f;
             return;
         }
 
@@ -258,6 +294,14 @@ public class Player : MonoBehaviour
             holdProduct.owner = null;
             holdProduct = null;
         }
+        else if (holdBasket != null)
+        {
+            holdBasket.transform.SetParent(null);
+            holdBasket.AddRigidbody();
+            holdBasket.rb.isKinematic = false;
+            holdBasket.player = null;
+            holdBasket = null;
+        }
 
         bumpDuration = .2f;
     }
@@ -266,7 +310,7 @@ public class Player : MonoBehaviour
     {
         if (slow)
         {
-            maxSpeed = holdBasket != null ? 5.5f : 2.5f;
+            maxSpeed = 2.5f;
             rotateSpeed = slowRotateSpeed;
         }
         else

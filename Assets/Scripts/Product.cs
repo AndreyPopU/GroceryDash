@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using Unity.VisualScripting;
 using UnityEngine;
 
@@ -11,15 +12,31 @@ public class Product : MonoBehaviour
     public Player lastOwner;
     [HideInInspector]
     public Rigidbody rb;
+    public bool anchor;
 
     void Awake()
     {
         rb = GetComponent<Rigidbody>();    
     }
 
+    private void OnCollisionEnter(Collision collision)
+    {
+        if (anchor)
+        {
+            rb.isKinematic = true;
+            GetComponent<Collider>().enabled = false;
+        }
+    }
+
     private void OnTriggerEnter(Collider other)
     {
-        if (other.TryGetComponent(out Player _player)) _player.closestProduct = this;
+        if (other.TryGetComponent(out Player _player))
+        {
+            // If player holds a basket and that basket contains the product, make it impossible to interact with
+            if (_player.holdBasket && _player.holdBasket.products.Contains(this)) return;
+
+            _player.closestProduct = this;
+        }
 
         // Old shopping code
 

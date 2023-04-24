@@ -65,6 +65,7 @@ public class Checkout : MonoBehaviour
         canvas.gameObject.SetActive(true);
 
         // Anchor product
+        scanningProduct.transform.parent = null;
         scanningProduct.canPickUp = false;
         scanningProduct.rb.isKinematic = true;
         scanningProduct.transform.position = scanPosition.position;
