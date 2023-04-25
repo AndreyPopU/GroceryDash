@@ -24,7 +24,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 3505755549248172020}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 1.5, z: 1}
+  m_LocalPosition: {x: 0, y: 1.5, z: 0.25}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -5048,8 +5048,6 @@ MonoBehaviour:
   speed: 1000
   counterMovement: 250
   maxSpeed: 7
-  basketSpeed: 850
-  slowSpeed: 700
   rotateSpeed: 0.4
   slowRotateSpeed: 0.2
   throwForce: 10
@@ -5070,6 +5068,7 @@ MonoBehaviour:
   dashing: 0
   bumpForce: 600
   rb: {fileID: 0}
+  gfx: {fileID: 0}
 --- !u!114 &8792655865386420076
 MonoBehaviour:
   m_ObjectHideFlags: 0
