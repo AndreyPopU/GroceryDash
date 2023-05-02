@@ -1,15 +1,16 @@
 using System;
 using System.Collections;
-using System.Collections.Generic;
-using System.Runtime.CompilerServices;
-using Unity.VisualScripting;
+using TMPro;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using static UnityEngine.InputSystem.InputAction;
 
 public class Player : MonoBehaviour
 {
+
     public int index;
+    public string nickname;
+    public Color color;
     [Header("Player stats")]
     [SerializeField] private float speed = 1000;
     [SerializeField] private float counterMovement = 250;
@@ -33,6 +34,7 @@ public class Player : MonoBehaviour
     [Header("Basket")]
     public Basket holdBasket;
     public Basket closestBasket;
+    public BoxCollider basketCollider;
 
     [Header("Dash")]
     [SerializeField] private bool canDash = true;
@@ -59,15 +61,14 @@ public class Player : MonoBehaviour
     private void Awake()
     {
         controls = new PlayerControls();
-
-        
+        gfx = transform.GetChild(0);
+        gfx.GetComponent<MeshRenderer>().material.color = color;
     }
 
     void Start()
     {
         DontDestroyOnLoad(gameObject);
         rb = GetComponent<Rigidbody>();
-        gfx = transform.GetChild(0);
         baseSpeed = speed;
         baseRotateSpeed = rotateSpeed;
         baseDashCD = dashCD;
@@ -112,13 +113,13 @@ public class Player : MonoBehaviour
 
     public void OnMove(CallbackContext context) => movement = context.ReadValue<Vector2>();
 
-    public void OnDash(CallbackContext context) => context.action.started += _ => Dash(new Vector3(movement.x, 0, movement.y).normalized);
+    public void OnDash(CallbackContext context) => context.action.performed += _ => Dash(new Vector3(movement.x, 0, movement.y).normalized);
 
-    public void OnThrow(CallbackContext context) => context.action.started += _ => ThrowItem();
+    public void OnThrow(CallbackContext context) => context.action.performed += _ => ThrowItem();
 
-    public void OnGrab(CallbackContext context) => context.action.started += _ => Grab();
+    public void OnGrab(CallbackContext context) => context.action.performed += _ => Grab();
 
-    public void OnHold(CallbackContext context) => context.action.started += _ => holding = !holding;
+    public void OnHold(CallbackContext context) => context.action.performed += _ => holding = !holding;
 
     #endregion
 
@@ -167,12 +168,11 @@ public class Player : MonoBehaviour
         {
             holdBasket.transform.SetParent(null);
             holdBasket.coreCollider.enabled = true;
-            holdBasket.containCollider.enabled = false;
-            holdBasket.AddRigidbody();
             holdBasket.rb.isKinematic = false;
             holdBasket.rb.AddForce(gfx.forward * throwForce * 1.5f, ForceMode.Impulse);
             holdBasket.lastOwner = holdBasket.player;
             holdBasket.player = null;
+            basketCollider.enabled = false;
             holdBasket = null;
             SlowDown(false);
             return;
@@ -199,10 +199,9 @@ public class Player : MonoBehaviour
             {
                 holdBasket.transform.SetParent(null);
                 holdBasket.coreCollider.enabled = true;
-                holdBasket.containCollider.enabled = false;
-                holdBasket.AddRigidbody();
                 holdBasket.rb.isKinematic = false;
                 closestBasket = holdBasket;
+                basketCollider.enabled = false;
                 holdBasket.player = null;
                 holdBasket = null;
                 SlowDown(false);
@@ -217,9 +216,9 @@ public class Player : MonoBehaviour
             closestBasket.transform.SetParent(holdParent);
             closestBasket.transform.localPosition = new Vector3(0, -1.4f, 1.25f);
             closestBasket.transform.localEulerAngles = Vector3.up * -90;
-            Destroy(closestBasket.rb);
+            closestBasket.rb.isKinematic = true;
             closestBasket.coreCollider.enabled = false;
-            closestBasket.containCollider.enabled = true;
+            basketCollider.enabled = true;
             closestBasket.player = this;
             holdBasket = closestBasket;
 
@@ -252,6 +251,14 @@ public class Player : MonoBehaviour
 
             if (holdBasket != null) // If player carries a basket drop products there
             {
+                // Check capacity
+                if (holdBasket.products.Count >= holdBasket.capacity)
+                {
+                    // User feedback that basket is full
+
+                    return;
+                }
+
                 if (!closestProduct.gameObject.activeInHierarchy) // If product is from shelf - instantiate 
                 {
                     Product product = Instantiate(closestProduct.gameObject, Vector3.zero, Quaternion.identity).GetComponent<Product>();
@@ -297,14 +304,40 @@ public class Player : MonoBehaviour
         else if (holdBasket != null)
         {
             holdBasket.transform.SetParent(null);
-            holdBasket.AddRigidbody();
             holdBasket.rb.isKinematic = false;
             holdBasket.player = null;
+            basketCollider.enabled = false;
             holdBasket = null;
         }
 
         bumpDuration = .2f;
     }
+
+    #region Events
+
+    public void DisconnectPlayer(PlayerInput input)
+    {
+        GameObject disconnected = Instantiate(GameManager.instance.disconnectedTextPrefab, GameManager.instance.GetComponentInChildren<Canvas>().transform);
+        // Set Color and Name to match the player
+        disconnected.GetComponent<TextMeshProUGUI>().color = color;
+        disconnected.GetComponent<TextMeshProUGUI>().text = nickname + index + " Disconnected!";
+        disconnected.transform.position -= Vector3.up * (70 * index);
+        GameManager.instance.StartCoroutine(GameManager.instance.ScaleText(disconnected.transform, 1));
+        Destroy(disconnected, 3);
+    }
+
+    public void ReconnectPlayer(PlayerInput input)
+    {
+        GameObject reconnected = Instantiate(GameManager.instance.disconnectedTextPrefab, GameManager.instance.GetComponentInChildren<Canvas>().transform);
+        // Set Color and Name to match the player
+        reconnected.GetComponent<TextMeshProUGUI>().color = color;
+        reconnected.GetComponent<TextMeshProUGUI>().text = nickname + index + " Reconnected!";
+        reconnected.transform.position -= Vector3.up * (70 * index);
+        GameManager.instance.StartCoroutine(GameManager.instance.ScaleText(reconnected.transform, 1));
+        Destroy(reconnected, 3);
+    }
+
+    #endregion
 
     public void SlowDown(bool slow)
     {
@@ -335,12 +368,28 @@ public class Player : MonoBehaviour
     private void OnCollisionStay(Collision collision)
     {
         if (collision.collider.TryGetComponent(out Player player))
+        {
             if (dashing)
             {
                 player.Bump(dashDirection, bumpForce);
                 StopCoroutine("DashCO");
                 rb.velocity = Vector3.zero;
             }
+
+            if (player.dashing && holdBasket != null)
+            {
+                holdBasket.transform.SetParent(null);
+                holdBasket.coreCollider.enabled = true;
+                holdBasket.rb.isKinematic = false;
+                holdBasket.rb.AddForce(player.gfx.forward * player.throwForce * 1.5f, ForceMode.Impulse);
+                SlowDown(false);
+                holdBasket.lastOwner = this;
+                holdBasket.player = null;
+                holdBasket.rb.mass = holdBasket.mass;
+                basketCollider.enabled = false;
+                holdBasket = null;
+            }
+        }
     }
 
     public void OnEnable()

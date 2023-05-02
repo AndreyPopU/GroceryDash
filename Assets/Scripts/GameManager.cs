@@ -12,10 +12,13 @@ public class GameManager : MonoBehaviour
 
     public bool roundStarted = true;
 
+    public GameObject disconnectedTextPrefab;
+
     public ShoppingList shoppingList1;
     public ShoppingList shoppingList2;
 
     private PlayerInputManager playerInputManager;
+    private int times;
 
     private void Awake()
     {
@@ -40,9 +43,7 @@ public class GameManager : MonoBehaviour
 
         CameraManager.instance.targets.Add(input.transform);
         input.transform.position = transform.GetChild(input.playerIndex).position;
-        MeshRenderer renderer = input.GetComponentInChildren<MeshRenderer>();
-        renderer.material.color = input.playerIndex == 0 ? Color.green : Color.yellow;
-
+        input.GetComponent<Player>().color = input.playerIndex == 0 ? Color.green : Color.yellow;
     }
 
     public void StartRound(bool start)
@@ -58,8 +59,8 @@ public class GameManager : MonoBehaviour
             {
                 if (players[i].index == 0)
                 {
-                    players[i].shoppingList.shoppingItems.Add("Apple", 2);
                     players[i].shoppingList.shoppingItems.Add("Milk", 1);
+                    players[i].shoppingList.shoppingItems.Add("Apple", 2);
                     players[i].shoppingList.shoppingItems.Add("Bread", 1);
                     players[i].shoppingList.shoppingItems.Add("Water", 2);
                     players[i].shoppingList.shoppingItems.Add("Croissant", 1);
@@ -94,10 +95,30 @@ public class GameManager : MonoBehaviour
         }
         else
         {
-            Timer timer = GetComponent<Timer>();
-            timer.countdownText.text = "Time's Up!";
-            timer.countdownText.gameObject.SetActive(true);
-            timer.roundText.gameObject.SetActive(false);
+            StartCoroutine(Time());
         }
+    }
+
+    public IEnumerator ScaleText(Transform text, int desire)
+    {
+        YieldInstruction waitForFixedUpdate = new WaitForFixedUpdate();
+
+        while (text.localScale.x < desire)
+        {
+            text.localScale += Vector3.one * .1f;
+            yield return waitForFixedUpdate;
+        }
+    }
+
+    private IEnumerator Time() // Invoked
+    {
+        Timer timer = GetComponent<Timer>();
+        timer.enabled = false;
+        timer.countdownText.transform.localScale = Vector3.zero;
+        timer.countdownText.gameObject.SetActive(true);
+        timer.roundText.gameObject.SetActive(false);
+        yield return null;
+        timer.countdownText.text = "Time's Up!";
+        StartCoroutine(ScaleText(timer.countdownText.transform, 1));
     }
 }

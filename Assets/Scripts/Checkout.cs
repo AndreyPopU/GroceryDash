@@ -9,6 +9,7 @@ public class Checkout : MonoBehaviour
     public Product scanningProduct;
     public Transform scanPosition;
     public bool scanning;
+    public bool cooldown;
     public bool open = true;
     public Material openMat, closedMat;
 
@@ -50,7 +51,9 @@ public class Checkout : MonoBehaviour
 
     public void Scan()
     {
+        if (cooldown) return;
         scanning = true;
+        cooldown = true;
         if (runningCoroutine != null) StopCoroutine(runningCoroutine);
         runningCoroutine = StartCoroutine(ScanCO());
     }
@@ -104,7 +107,11 @@ public class Checkout : MonoBehaviour
         scanning = false;
 
         // Wait some time for players to recognize, can be interrupted by another purchase
-        yield return new WaitForSeconds(1.5f);
+        yield return new WaitForSeconds(.5f);
+        cooldown = false;
+
+        // Then wait some more
+        yield return new WaitForSeconds(1f);
 
         canvas.gameObject.SetActive(false);
         runningCoroutine = null;

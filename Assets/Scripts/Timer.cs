@@ -23,7 +23,6 @@ public class Timer : MonoBehaviour
             }
             else
             {
-                currentTime = 0;
                 GameManager.instance.StartRound(false);
             }
         }

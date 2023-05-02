@@ -24,7 +24,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 3505755549248172020}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 1.5, z: 0.25}
+  m_LocalPosition: {x: 0, y: 1.5, z: 1}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -4921,6 +4921,7 @@ GameObject:
   - component: {fileID: 7502154649309586002}
   - component: {fileID: 1451141228420772460}
   - component: {fileID: 4495611041110724032}
+  - component: {fileID: 3659113347030278368}
   m_Layer: 0
   m_Name: GFX
   m_TagString: Untagged
@@ -4995,6 +4996,19 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 4963889604099100063}
   m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!65 &3659113347030278368
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4963889604099100063}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 0
+  serializedVersion: 2
+  m_Size: {x: 1.1, y: 1.4, z: 1.8}
+  m_Center: {x: 0, y: 0.2, z: 2.25}
 --- !u!1 &8792655865386420054
 GameObject:
   m_ObjectHideFlags: 0
@@ -5044,7 +5058,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 94e1364f80e589648ab9b4b48b0070d8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  basketCollider: {fileID: 3659113347030278368}
   index: 0
+  nickname: Player
+  color: {r: 0, g: 0, b: 0, a: 0}
   speed: 1000
   counterMovement: 250
   maxSpeed: 7
@@ -5086,10 +5103,34 @@ MonoBehaviour:
   m_UIInputModule: {fileID: 0}
   m_DeviceLostEvent:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 8792655865386420049}
+        m_TargetAssemblyTypeName: Player, Assembly-CSharp
+        m_MethodName: DisconnectPlayer
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
   m_DeviceRegainedEvent:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 8792655865386420049}
+        m_TargetAssemblyTypeName: Player, Assembly-CSharp
+        m_MethodName: ReconnectPlayer
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
   m_ControlsChangedEvent:
     m_PersistentCalls:
       m_Calls: []

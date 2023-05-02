@@ -6,21 +6,15 @@ public class Spill : MonoBehaviour
 {
     private void OnTriggerEnter(Collider other)
     {
-        if (!other.isTrigger && other.TryGetComponent(out Player player)) player.SlowDown(true);
+        if (!other.isTrigger && other.GetComponent<Player>()) other.GetComponent<Player>().SlowDown(true);
 
-        if (other.TryGetComponent(out Basket basket))
-        {
-            if (basket.player != null) basket.player.SlowDown(true);
-        }
+        if (other.transform.parent != null && other.transform.parent.GetComponent<Player>()) other.transform.parent.GetComponent<Player>().SlowDown(true);
     }
 
     private void OnTriggerExit(Collider other)
     {
-        if (!other.isTrigger && other.TryGetComponent(out Player player)) player.SlowDown(false);
+        if (!other.isTrigger && other.GetComponent<Player>()) other.GetComponent<Player>().SlowDown(false);
 
-        if (other.TryGetComponent(out Basket basket))
-        {
-            if (basket.player != null) basket.player.SlowDown(true);
-        }
+        if (other.transform.parent != null && other.transform.parent.GetComponent<Player>()) other.transform.parent.GetComponent<Player>().SlowDown(false);
     }
 }

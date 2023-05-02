@@ -30,7 +30,7 @@ Transform:
   m_GameObject: {fileID: 2265868001246916304}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0.42, y: 0, z: 5.68}
-  m_LocalScale: {x: 1.3, y: 1.3, z: 1.3}
+  m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
@@ -98,9 +98,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 84a65415b9fd52941a2c098813f5e0ee, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  canPickUp: 1
   productName: Crab
-  player: {fileID: 0}
+  owner: {fileID: 0}
+  lastOwner: {fileID: 0}
   rb: {fileID: 0}
+  anchor: 0
 --- !u!54 &4252765544496091050
 Rigidbody:
   m_ObjectHideFlags: 0

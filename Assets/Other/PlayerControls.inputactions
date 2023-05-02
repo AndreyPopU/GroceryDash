@@ -119,6 +119,61 @@
                     "isPartOfComposite": false
                 },
                 {
+                    "name": "Movement",
+                    "id": "d1271231-f8eb-4c7f-a2ea-6fa3d38945ca",
+                    "path": "2DVector",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Movement",
+                    "isComposite": true,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "up",
+                    "id": "c0099bd2-5a3c-4893-b5b7-8613177d03dd",
+                    "path": "<Keyboard>/upArrow",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "SplitKeyboard",
+                    "action": "Movement",
+                    "isComposite": false,
+                    "isPartOfComposite": true
+                },
+                {
+                    "name": "down",
+                    "id": "300b126f-3b39-4bac-a083-8507050e98ba",
+                    "path": "<Keyboard>/downArrow",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "SplitKeyboard",
+                    "action": "Movement",
+                    "isComposite": false,
+                    "isPartOfComposite": true
+                },
+                {
+                    "name": "left",
+                    "id": "73376d4b-80ce-4545-b14f-218d5f66e101",
+                    "path": "<Keyboard>/leftArrow",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "SplitKeyboard",
+                    "action": "Movement",
+                    "isComposite": false,
+                    "isPartOfComposite": true
+                },
+                {
+                    "name": "right",
+                    "id": "21e54e62-e418-4853-a904-1c3fa1bd7c22",
+                    "path": "<Keyboard>/rightArrow",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "SplitKeyboard",
+                    "action": "Movement",
+                    "isComposite": false,
+                    "isPartOfComposite": true
+                },
+                {
                     "name": "",
                     "id": "f7040647-9725-4e01-b89d-fdf7d681e8b0",
                     "path": "<Keyboard>/space",
@@ -136,6 +191,17 @@
                     "interactions": "Hold(duration=0.01)",
                     "processors": "",
                     "groups": "Gamepad",
+                    "action": "Hold",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "15973c0c-f369-4b55-bcb8-e52fd46b26fa",
+                    "path": "<Keyboard>/o",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "SplitKeyboard",
                     "action": "Hold",
                     "isComposite": false,
                     "isPartOfComposite": false
@@ -164,6 +230,17 @@
                 },
                 {
                     "name": "",
+                    "id": "d50efe3f-62a2-47be-9cee-dfea80ab0dc4",
+                    "path": "<Keyboard>/p",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "SplitKeyboard",
+                    "action": "Dash",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
                     "id": "7c1ed0c1-c721-4f17-978a-e84afaa38542",
                     "path": "<Keyboard>/f",
                     "interactions": "",
@@ -180,6 +257,17 @@
                     "interactions": "",
                     "processors": "",
                     "groups": "Gamepad",
+                    "action": "Throw",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "f995d847-aefc-4087-ba5e-11d5e137e4c0",
+                    "path": "<Keyboard>/k",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "SplitKeyboard",
                     "action": "Throw",
                     "isComposite": false,
                     "isPartOfComposite": false
@@ -205,6 +293,17 @@
                     "action": "Grab",
                     "isComposite": false,
                     "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "c862f85c-9f65-427b-8832-c588c784027d",
+                    "path": "<Keyboard>/l",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "SplitKeyboard",
+                    "action": "Grab",
+                    "isComposite": false,
+                    "isPartOfComposite": false
                 }
             ]
         }
@@ -227,6 +326,17 @@
             "devices": [
                 {
                     "devicePath": "<Gamepad>",
+                    "isOptional": true,
+                    "isOR": false
+                }
+            ]
+        },
+        {
+            "name": "SplitKeyboard",
+            "bindingGroup": "SplitKeyboard",
+            "devices": [
+                {
+                    "devicePath": "<Keyboard>",
                     "isOptional": true,
                     "isOR": false
                 }
