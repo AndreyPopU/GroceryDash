@@ -12,33 +12,40 @@ public class FadePanel : MonoBehaviour
     {
         if (instance == null) instance = this;
         else Destroy(transform.parent.gameObject);
+
+        DontDestroyOnLoad(transform.parent.gameObject);
     }
 
     private void Start()
     {
         group = GetComponent<CanvasGroup>();
-        StartCoroutine(Fade(0));
+        Fade(0);
     }
 
-    public IEnumerator Fade(int desire)
+    public void Fade(int desire)
+    {
+        StartCoroutine(FadeCO(desire));
+    }
+
+    private IEnumerator FadeCO(int desire)
     {
         if (group.alpha > desire)
         {
             while(group.alpha > desire)
             {
-                group.alpha -= .05f;
-                yield return Time.deltaTime;
+                group.alpha -= Time.deltaTime;
+                yield return null;
             }
 
             group.alpha = desire;
             yield break;
         }
-        else
+        else if (group.alpha < desire)
         {
             while (group.alpha < desire)
             {
-                group.alpha += .2f;
-                yield return Time.deltaTime;
+                group.alpha += Time.deltaTime;
+                yield return null;
             }
 
             group.alpha = desire;

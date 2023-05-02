@@ -300,7 +300,7 @@ MonoBehaviour:
   m_HandleRect: {fileID: 0}
   m_Direction: 0
   m_MinValue: 0
-  m_MaxValue: 10
+  m_MaxValue: 12
   m_WholeNumbers: 0
   m_Value: 0
   m_OnValueChanged:
@@ -618,9 +618,14 @@ MonoBehaviour:
   scanningProduct: {fileID: 0}
   scanPosition: {fileID: 2116566034}
   scanning: 0
+  scans: 10
+  workCD: 0
+  cooldown: 0
   open: 1
+  self: 1
   openMat: {fileID: 2100000, guid: 3a5084de46a51174194dd0f151967d43, type: 2}
   closedMat: {fileID: 2100000, guid: 5177fcf4f0c9f5b429532bd01c202bfb, type: 2}
+  cashier: {fileID: 0}
   canvas: {fileID: 671556489}
   circularSlider: {fileID: 1047868509}
   feedbackImage: {fileID: 1661391235}

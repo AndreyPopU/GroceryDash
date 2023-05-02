@@ -35,6 +35,7 @@ public class Player : MonoBehaviour
     public Basket holdBasket;
     public Basket closestBasket;
     public BoxCollider basketCollider;
+    public BoxCollider pickUpCollider;
 
     [Header("Dash")]
     [SerializeField] private bool canDash = true;
@@ -49,6 +50,9 @@ public class Player : MonoBehaviour
     [Header("Bumped")]
     public float bumpForce;
     private float bumpDuration;
+
+    [Header("Customization")]
+    public bool customize;
 
     private Vector2 movement;
     private Vector3 dashDirection;
@@ -126,7 +130,8 @@ public class Player : MonoBehaviour
     private void Dash(Vector3 direction)
     {
         // If input is neutral return
-        if (direction.x == 0 && direction.z == 0 || !GameManager.instance.roundStarted || dashing || dashCD > 0 || !canDash) return;
+        if (direction.x == 0 && direction.z == 0 || (GameManager.instance.gameStarted && !GameManager.instance.roundStarted)
+            || dashing || dashCD > 0 || !canDash) return;
         
         dashEffect.Play();
         dashing = true;
@@ -152,74 +157,89 @@ public class Player : MonoBehaviour
         dashing = false;
     }
 
-    private void ThrowItem()
-    {
-        if (!GameManager.instance.roundStarted) return;
-
-        if (holdProduct != null)
-        {
-            holdProduct.transform.SetParent(null);
-            holdProduct.rb.isKinematic = false;
-            holdProduct.rb.AddForce(gfx.forward * throwForce, ForceMode.Impulse);
-            holdProduct.owner = null;
-            holdProduct = null;
-        }
-        else if (holdBasket != null)
-        {
-            holdBasket.transform.SetParent(null);
-            holdBasket.coreCollider.enabled = true;
-            holdBasket.rb.isKinematic = false;
-            holdBasket.rb.AddForce(gfx.forward * throwForce * 1.5f, ForceMode.Impulse);
-            holdBasket.lastOwner = holdBasket.player;
-            holdBasket.player = null;
-            basketCollider.enabled = false;
-            holdBasket = null;
-            SlowDown(false);
-            return;
-        }
-    }
 
     private void Hold()
     {
-        if (!holding) return;
+        if (!holding || (GameManager.instance.gameStarted && !GameManager.instance.roundStarted)) return;
 
-        if (closestPlayer != null && GameManager.instance.roundStarted)
+        if (closestPlayer != null)
         {
             print("holding onto");
         }
     }
 
+    private void ThrowItem()
+    {
+        if (GameManager.instance.gameStarted && !GameManager.instance.roundStarted) return;
+
+        if (holdProduct != null) LaunchProduct(gfx.forward);
+        else if (holdBasket != null) LaunchBasket(gfx.forward);
+    }
     private void Grab()
     {
-        if (!GameManager.instance.roundStarted) return;
+        if (customize)
+        {
+            // Enter toilet
+            CustomizationManager.instance.player = this;
+            CustomizationManager.instance.ChangeColor(1);
 
-        if (holdBasket)
+            // Open customization menu
+        }
+
+        if (GameManager.instance.gameStarted && !GameManager.instance.roundStarted) return;
+
+        if (holdProduct != null) // Drop product
+        {
+            PickUpProduct(false);
+            return;
+        }
+        else if (closestProduct != null) // Pick up product
+        {
+            // If closest product is held by another player or can't be picked up - return
+            if (closestProduct.owner != null || !closestProduct.canPickUp) return; 
+
+            PickUpProduct(true);
+        }
+
+        if (holdBasket != null)
         {
             if (closestProduct == null) // Drop basket
             {
-                holdBasket.transform.SetParent(null);
-                holdBasket.coreCollider.enabled = true;
-                holdBasket.rb.isKinematic = false;
-                closestBasket = holdBasket;
-                basketCollider.enabled = false;
-                holdBasket.player = null;
-                holdBasket = null;
-                SlowDown(false);
+                PickUpBasket(false);
                 return;
             }
         }
+        
         else if (closestBasket != null && holdProduct == null) // Pick up basket if not holding product already
         {
             if (closestBasket.player != null) return;
 
+            PickUpBasket(true);
+            return;
+        }
+
+    }
+    
+    #region Grab Functions
+
+    public void PickUpBasket(bool pickUp)
+    {
+        // Slow Down player
+        SlowDown(pickUp);
+
+        // Enable colliders
+        basketCollider.enabled = pickUp;
+        pickUpCollider.enabled = pickUp;
+
+        if (pickUp)
+        {
             // Anchor basket in player's hands
             closestBasket.transform.SetParent(holdParent);
             closestBasket.transform.localPosition = new Vector3(0, -1.4f, 1.25f);
             closestBasket.transform.localEulerAngles = Vector3.up * -90;
+            closestBasket.player = this;
             closestBasket.rb.isKinematic = true;
             closestBasket.coreCollider.enabled = false;
-            basketCollider.enabled = true;
-            closestBasket.player = this;
             holdBasket = closestBasket;
 
             // Give ownership of every product in the basket to the player who holds it
@@ -232,60 +252,99 @@ public class Player : MonoBehaviour
             closestBasket = null;
 
             // Slow Down player
-            SlowDown(true);
-            maxSpeed = 5.5f;
-            return;
+            maxSpeed = 5.5f - holdBasket.rb.mass;
         }
-
-        if (holdProduct != null) // Drop product
+        else
         {
-            holdProduct.transform.SetParent(null);
-            holdProduct.rb.isKinematic = false;
-            holdProduct.owner = null;
-            holdProduct = null;
-            return;
+            holdBasket.transform.SetParent(null);
+            holdBasket.player = null;
+            holdBasket.rb.isKinematic = false;
+            holdBasket.coreCollider.enabled = true;
+            closestBasket = holdBasket;
+            holdBasket = null;
         }
-        else if (closestProduct != null) // Pick up product
-        {
-            if (closestProduct.owner != null) return; // If closest product is held by another player return
+        
+    }
 
+    public void LaunchBasket(Vector3 direction)
+    {
+        // Separate from player physics and enable it's own
+        holdBasket.transform.SetParent(null);
+        holdBasket.coreCollider.enabled = true;
+        holdBasket.rb.isKinematic = false;
+
+        // Launch
+        holdBasket.rb.AddForce(direction * throwForce * 1.5f, ForceMode.Impulse);
+        
+        // Deal with ownership
+        holdBasket.lastOwner = holdBasket.player;
+        holdBasket.player = null;
+        basketCollider.enabled = false;
+        holdBasket = null;
+        SlowDown(false);
+    }
+
+    public void PickUpProduct(bool pickUp)
+    {
+        if (pickUp)
+        {
             if (holdBasket != null) // If player carries a basket drop products there
             {
                 // Check capacity
-                if (holdBasket.products.Count >= holdBasket.capacity)
-                {
-                    // User feedback that basket is full
+                if (holdBasket.products.Count >= holdBasket.capacity) return;
 
-                    return;
-                }
-
-                if (!closestProduct.gameObject.activeInHierarchy) // If product is from shelf - instantiate 
-                {
-                    Product product = Instantiate(closestProduct.gameObject, Vector3.zero, Quaternion.identity).GetComponent<Product>();
-                    holdBasket.AddProduct(product);
-                }
-                else holdBasket.AddProduct(closestProduct);
-
+                holdBasket.AddProduct(GetProduct());
+                maxSpeed = 5.5f - holdBasket.rb.mass;
                 return;
             }
+            
+            holdProduct = GetProduct();
 
-            if (!closestProduct.canPickUp) return;
-
-            if (!closestProduct.gameObject.activeInHierarchy) // If product is from shelf - instantiate 
-            {
-                Product product = Instantiate(closestProduct.gameObject, Vector3.zero, Quaternion.identity).GetComponent<Product>();
-                holdProduct = product;
-            }
-            else holdProduct = closestProduct.GetComponent<Product>();
-
+            // Anchor to player's hands
             holdProduct.transform.SetParent(holdParent);
             holdProduct.transform.localPosition = Vector3.zero;
             holdProduct.transform.localEulerAngles = Vector3.zero;
             holdProduct.rb.isKinematic = true;
+
+            // Assign ownership
             holdProduct.owner = this;
             holdProduct.lastOwner = this;
         }
+        else
+        {
+            // Separate from player and enable physics
+            holdProduct.transform.SetParent(null);
+            holdProduct.rb.isKinematic = false;
+            holdProduct.owner = null;
+            holdProduct = null;
+        }
     }
+
+    public void LaunchProduct(Vector3 direction)
+    {
+        // Separate from player and enable own physics
+        holdProduct.transform.SetParent(null);
+        holdProduct.rb.isKinematic = false;
+
+        // Launch
+        holdProduct.rb.AddForce(direction * throwForce, ForceMode.Impulse);
+
+        // Deal with ownership
+        holdProduct.lastOwner = holdProduct.owner;
+        holdProduct.owner = null;
+        holdProduct = null;
+    }
+
+    public Product GetProduct()
+    {
+        if (!closestProduct.gameObject.activeInHierarchy) // If product is from shelf - Instantiate 
+        {
+            return Instantiate(closestProduct.gameObject, Vector3.zero, Quaternion.identity).GetComponent<Product>();
+        }
+        else return closestProduct; // Else pick up off the floor
+    }
+
+    #endregion
 
     public void Bump(Vector3 direction, float force)
     {
@@ -345,24 +404,27 @@ public class Player : MonoBehaviour
         {
             maxSpeed = 2.5f;
             rotateSpeed = slowRotateSpeed;
+            canDash = false;
         }
         else
         {
-            maxSpeed = holdBasket != null ? 4.5f : 7;
+            maxSpeed = holdBasket != null ? 5.5f - holdBasket.rb.mass: 7;
             rotateSpeed = holdBasket != null ? slowRotateSpeed : baseRotateSpeed;
+            canDash = holdBasket != null ? false : true;
         }
-
-        canDash = !slow;
     }
 
     private void OnTriggerEnter(Collider other)
     {
         if (other.GetComponent<Player>()) closestPlayer = other.GetComponent<Player>();
+        if (other.GetComponent<CustomizationManager>()) customize = true;
     }
 
     private void OnTriggerExit(Collider other)
     {
         if (other.GetComponent<Player>() && closestPlayer == other.GetComponent<Player>()) closestPlayer = null;
+        if (other.GetComponent<CustomizationManager>()) customize = false;
+
     }
 
     private void OnCollisionStay(Collision collision)
@@ -378,16 +440,8 @@ public class Player : MonoBehaviour
 
             if (player.dashing && holdBasket != null)
             {
-                holdBasket.transform.SetParent(null);
-                holdBasket.coreCollider.enabled = true;
-                holdBasket.rb.isKinematic = false;
-                holdBasket.rb.AddForce(player.gfx.forward * player.throwForce * 1.5f, ForceMode.Impulse);
-                SlowDown(false);
-                holdBasket.lastOwner = this;
-                holdBasket.player = null;
-                holdBasket.rb.mass = holdBasket.mass;
-                basketCollider.enabled = false;
-                holdBasket = null;
+                LaunchBasket(player.gfx.forward);
+                
             }
         }
     }

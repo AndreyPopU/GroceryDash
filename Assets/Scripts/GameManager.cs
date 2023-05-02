@@ -5,45 +5,64 @@ using System.Linq;
 using TMPro;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.Windows;
 
 public class GameManager : MonoBehaviour
 {
     public static GameManager instance;
 
+    public int playerCount;
+    public List<Player> players;
     public bool roundStarted = true;
+    public bool gameStarted = false;
 
     public GameObject disconnectedTextPrefab;
 
     public ShoppingList shoppingList1;
     public ShoppingList shoppingList2;
 
+    public GameObject[] canvasJoin;
+    
     private PlayerInputManager playerInputManager;
-    private int times;
 
     private void Awake()
     {
         if (instance == null) instance = this;
         else Destroy(gameObject);
 
+        DontDestroyOnLoad(gameObject);
         playerInputManager = FindObjectOfType<PlayerInputManager>();
     }
 
-    public void BindShoppingList(PlayerInput input)
+    public void SpawnPlayer(PlayerInput input)
     {
-        if (input.playerIndex == 0)
-        {
-            input.GetComponent<Player>().shoppingList = shoppingList1;
-            shoppingList1.gameObject.SetActive(true);
-        }
-        else
-        {
-            input.GetComponent<Player>().shoppingList = shoppingList2;
-            shoppingList2.gameObject.SetActive(true);
-        }
-
-        CameraManager.instance.targets.Add(input.transform);
         input.transform.position = transform.GetChild(input.playerIndex).position;
-        input.GetComponent<Player>().color = input.playerIndex == 0 ? Color.green : Color.yellow;
+        playerCount++;
+        StartZone zone = FindObjectOfType<StartZone>();
+        zone.playerCountText.text = zone.playerCount + "/" + playerCount;
+        canvasJoin[input.playerIndex].SetActive(false);
+
+        Player player = input.GetComponent<Player>();
+        player.color = CustomizationManager.instance.colors[UnityEngine.Random.Range(0, 8)];
+        players.Add(player);
+    }
+
+    public void BindShoppingList()
+    {
+        for (int i = 0; i < players.Count; i++)
+        {
+            if (i == 0)
+            {
+                players[i].shoppingList = shoppingList1;
+                shoppingList1.gameObject.SetActive(true);
+            }
+            else
+            {
+                players[i].shoppingList = shoppingList2;
+                shoppingList2.gameObject.SetActive(true);
+            }
+        }
+        LevelManager.instance.listsBound = true;
     }
 
     public void StartRound(bool start)
@@ -55,6 +74,8 @@ public class GameManager : MonoBehaviour
 
         if (start)
         {
+            if (!LevelManager.instance.listsBound) BindShoppingList();
+
             for (int i = 0; i < players.Length; i++)
             {
                 if (players[i].index == 0)
@@ -118,7 +139,7 @@ public class GameManager : MonoBehaviour
         timer.countdownText.gameObject.SetActive(true);
         timer.roundText.gameObject.SetActive(false);
         yield return null;
-        timer.countdownText.text = "Time's Up!";
+        timer.countdownText.text = "Round Ended!";
         StartCoroutine(ScaleText(timer.countdownText.transform, 1));
     }
 }

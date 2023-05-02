@@ -4922,6 +4922,8 @@ GameObject:
   - component: {fileID: 1451141228420772460}
   - component: {fileID: 4495611041110724032}
   - component: {fileID: 3659113347030278368}
+  - component: {fileID: 1652266048184796619}
+  - component: {fileID: 329675667009514225}
   m_Layer: 0
   m_Name: GFX
   m_TagString: Untagged
@@ -5009,6 +5011,32 @@ BoxCollider:
   serializedVersion: 2
   m_Size: {x: 1.1, y: 1.4, z: 1.8}
   m_Center: {x: 0, y: 0.2, z: 2.25}
+--- !u!65 &1652266048184796619
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4963889604099100063}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 1
+  m_Enabled: 0
+  serializedVersion: 2
+  m_Size: {x: 1.9, y: 2.2, z: 2.6}
+  m_Center: {x: 0, y: 0.2, z: 2.25}
+--- !u!114 &329675667009514225
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4963889604099100063}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e148a46f1281fd640a7bf15e66be6e76, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  player: {fileID: 0}
 --- !u!1 &8792655865386420054
 GameObject:
   m_ObjectHideFlags: 0
@@ -5058,7 +5086,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 94e1364f80e589648ab9b4b48b0070d8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  basketCollider: {fileID: 3659113347030278368}
   index: 0
   nickname: Player
   color: {r: 0, g: 0, b: 0, a: 0}
@@ -5068,7 +5095,7 @@ MonoBehaviour:
   rotateSpeed: 0.4
   slowRotateSpeed: 0.2
   throwForce: 10
-  canMove: 0
+  canMove: 1
   holding: 0
   shoppingList: {fileID: 0}
   closestProduct: {fileID: 0}
@@ -5077,6 +5104,8 @@ MonoBehaviour:
   closestPlayer: {fileID: 0}
   holdBasket: {fileID: 0}
   closestBasket: {fileID: 0}
+  basketCollider: {fileID: 3659113347030278368}
+  pickUpCollider: {fileID: 1652266048184796619}
   canDash: 1
   dashRange: 5
   dashDuration: 0.15

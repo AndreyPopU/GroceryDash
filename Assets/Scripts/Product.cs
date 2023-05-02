@@ -37,19 +37,11 @@ public class Product : MonoBehaviour
 
             _player.closestProduct = this;
         }
-
-        // Old shopping code
-
-        //if (other.GetComponent<Checkout>())
-        //{
-        //    if (lastOwner.shoppingList.shoppingItems.ContainsKey(productName) && lastOwner.shoppingList.shoppingItems[productName] <= 0) return;
-
-        //    if (lastOwner.holdProduct == null) // ???
-        //    {
-        //        lastOwner.shoppingList.Add(productName);
-        //        Destroy(gameObject);
-        //    }
-        //}
+        else if (other.TryGetComponent(out PickUp pick))
+        {
+            if (pick.player.holdBasket && pick.player.holdBasket.products.Contains(this)) return;
+            pick.player.closestProduct = this;
+        }
     }
 
     private void OnTriggerExit(Collider other)
@@ -58,5 +50,10 @@ public class Product : MonoBehaviour
         {
             if (_player.closestProduct == this) _player.closestProduct = null;
         }
+        else if (other.TryGetComponent(out PickUp pick))
+        {
+            if (pick.player.closestProduct == this) pick.player.closestProduct = null;
+        }
+
     }
 }

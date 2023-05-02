@@ -27,7 +27,7 @@ public class Basket : MonoBehaviour
         float randomZ = Random.Range(-.5f, .5f);
         products.Add(product);
         product.owner = player;
-        product.lastOwner = player;
+        if (!product.lastOwner) product.lastOwner = player;
         product.transform.position = transform.position + new Vector3(randomX, 1, randomZ);
         product.transform.SetParent(transform);
         product.rb.isKinematic = false;

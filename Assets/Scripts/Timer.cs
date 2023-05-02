@@ -12,7 +12,7 @@ public class Timer : MonoBehaviour
 
     void Update()
     {
-        if (currentTime <= 0)
+        if (currentTime <= 0.04f)
         {
             if (!roundText.gameObject.activeInHierarchy)
             {

@@ -9,9 +9,13 @@ public class Checkout : MonoBehaviour
     public Product scanningProduct;
     public Transform scanPosition;
     public bool scanning;
+    public int scans;
+    public float workCD;
     public bool cooldown;
     public bool open = true;
+    public bool self;
     public Material openMat, closedMat;
+    public GameObject cashier;
 
     [Header("UI")]
     public Canvas canvas;
@@ -31,6 +35,12 @@ public class Checkout : MonoBehaviour
     private void Update()
     {
         if (scanningProduct != null && !scanning) Scan();
+
+        if (!self)
+        {
+            if (workCD > 0 && scans <= 0) workCD -= Time.deltaTime;
+            else if (!open) Open(true);
+        }
     }
 
     private void ChangeColor()
@@ -41,17 +51,18 @@ public class Checkout : MonoBehaviour
         else lights.material = closedMat;
     }
 
-    private void OnTriggerEnter(Collider other)
+    private void OnTriggerStay(Collider other)
     {
         if (other.TryGetComponent(out Product product))
         {
-            if (product != null && product.owner == null) scanningProduct = product;
+            if (product != null && product.owner == null && scanningProduct == null) scanningProduct = product;
         }
     }
 
     public void Scan()
     {
-        if (cooldown) return;
+        if (cooldown || workCD > 0) return;
+
         scanning = true;
         cooldown = true;
         if (runningCoroutine != null) StopCoroutine(runningCoroutine);
@@ -106,6 +117,12 @@ public class Checkout : MonoBehaviour
         scanningProduct = null;
         scanning = false;
 
+        if (!self)
+        {
+            scans--;
+            if (scans <= 0) Open(false);
+        }
+
         // Wait some time for players to recognize, can be interrupted by another purchase
         yield return new WaitForSeconds(.5f);
         cooldown = false;
@@ -117,4 +134,12 @@ public class Checkout : MonoBehaviour
         runningCoroutine = null;
     }
 
+    void Open(bool _open)
+    {
+        if (_open) scans = 10;
+        else workCD = 15;
+        open = _open;
+        cashier.SetActive(_open);
+        lights.material = _open ? openMat : closedMat;
+    }
 }
