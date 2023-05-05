@@ -7,7 +7,10 @@ public class Basket : MonoBehaviour
 {
     public List<Product> products;
 
+    public Vector3 holdOffset;
+    public Vector3 center;
     public int capacity = 5;
+    [HideInInspector] public BasketStack stackParent;
     [HideInInspector] public Rigidbody rb;
     [HideInInspector]public float mass;
     public BoxCollider coreCollider;
@@ -16,6 +19,7 @@ public class Basket : MonoBehaviour
 
     void Start()
     {
+        if (transform.parent != null) stackParent = transform.parent.GetComponent<BasketStack>();
         rb = GetComponent<Rigidbody>();
         mass = rb.mass;
     }

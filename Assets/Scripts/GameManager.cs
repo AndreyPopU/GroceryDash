@@ -11,17 +11,18 @@ public class GameManager : MonoBehaviour
 {
     public static GameManager instance;
 
+    [Header("Players")]
     public int playerCount;
     public List<Player> players;
     public bool roundStarted = true;
     public bool gameStarted = false;
+    public bool paused;
 
-    public GameObject disconnectedTextPrefab;
-
+    [Header("UI")]
     public ShoppingList shoppingList1;
     public ShoppingList shoppingList2;
-
     public GameObject[] canvasJoin;
+    public GameObject disconnectedTextPrefab;
     
     private PlayerInputManager playerInputManager;
 
@@ -114,9 +115,20 @@ public class GameManager : MonoBehaviour
                 }
             }
         }
+        else StartCoroutine(TimeEnd());
+    }
+
+    public void PauseGame()
+    {
+        paused = !paused;
+
+        if (paused)
+        {
+            Time.timeScale = 0;
+        }
         else
         {
-            StartCoroutine(Time());
+            Time.timeScale = 1;
         }
     }
 
@@ -131,7 +143,7 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    private IEnumerator Time() // Invoked
+    private IEnumerator TimeEnd() // Invoked
     {
         Timer timer = GetComponent<Timer>();
         timer.enabled = false;

@@ -10,10 +10,7 @@ public class LevelManager : MonoBehaviour
     public Transform[] spawnPositions;
     public bool listsBound;
 
-    private void Awake()
-    {
-        instance = this;
-    }
+    private void Awake() => instance = this;
 
     void Start()
     {

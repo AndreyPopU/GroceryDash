@@ -125,6 +125,8 @@ public class Player : MonoBehaviour
 
     public void OnHold(CallbackContext context) => context.action.performed += _ => holding = !holding;
 
+    public void OnPause(CallbackContext context) => context.action.performed += _ => GameManager.instance.PauseGame();
+
     #endregion
 
     private void Dash(Vector3 direction)
@@ -227,15 +229,19 @@ public class Player : MonoBehaviour
         // Slow Down player
         SlowDown(pickUp);
 
-        // Enable colliders
-        basketCollider.enabled = pickUp;
-        pickUpCollider.enabled = pickUp;
-
         if (pickUp)
         {
+            // If basket was part of stack - remove it 
+            if (closestBasket.stackParent != null)
+            {
+                closestBasket.stackParent.baskets.RemoveAt(0);
+                if (closestBasket.stackParent.baskets.Count == 0) Destroy(closestBasket.stackParent.gameObject);
+                closestBasket.stackParent = null;
+            }
+
             // Anchor basket in player's hands
             closestBasket.transform.SetParent(holdParent);
-            closestBasket.transform.localPosition = new Vector3(0, -1.4f, 1.25f);
+            closestBasket.transform.localPosition = closestBasket.holdOffset;
             closestBasket.transform.localEulerAngles = Vector3.up * -90;
             closestBasket.player = this;
             closestBasket.rb.isKinematic = true;
@@ -263,7 +269,17 @@ public class Player : MonoBehaviour
             closestBasket = holdBasket;
             holdBasket = null;
         }
-        
+
+        // Enable & adjust colliders
+        if (holdBasket != null)
+        {
+            basketCollider.center = holdBasket.center;
+            basketCollider.size = new Vector3(holdBasket.coreCollider.size.z, holdBasket.coreCollider.size.y, holdBasket.coreCollider.size.x);
+            pickUpCollider.center = holdBasket.center;
+            pickUpCollider.size = basketCollider.size + Vector3.one;
+        }
+        basketCollider.enabled = pickUp;
+        pickUpCollider.enabled = pickUp;
     }
 
     public void LaunchBasket(Vector3 direction)
@@ -377,7 +393,13 @@ public class Player : MonoBehaviour
     public void DisconnectPlayer(PlayerInput input)
     {
         GameObject disconnected = Instantiate(GameManager.instance.disconnectedTextPrefab, GameManager.instance.GetComponentInChildren<Canvas>().transform);
+
+        // If reconnected text is still active - destroy it
+        GameObject reconnected = GameObject.Find("Reconnected" + index.ToString());
+        if (reconnected != null) Destroy(reconnected);
+
         // Set Color and Name to match the player
+        disconnected.gameObject.name = "Disconnected" + index.ToString();
         disconnected.GetComponent<TextMeshProUGUI>().color = color;
         disconnected.GetComponent<TextMeshProUGUI>().text = nickname + index + " Disconnected!";
         disconnected.transform.position -= Vector3.up * (70 * index);
@@ -388,7 +410,13 @@ public class Player : MonoBehaviour
     public void ReconnectPlayer(PlayerInput input)
     {
         GameObject reconnected = Instantiate(GameManager.instance.disconnectedTextPrefab, GameManager.instance.GetComponentInChildren<Canvas>().transform);
+        
+        // If disconnected text is still active - destroy it
+        GameObject disconnected = GameObject.Find("Disconnected" + index.ToString());
+        if (disconnected != null) Destroy(disconnected);
+
         // Set Color and Name to match the player
+        reconnected.gameObject.name = "Reconnected" + index.ToString();
         reconnected.GetComponent<TextMeshProUGUI>().color = color;
         reconnected.GetComponent<TextMeshProUGUI>().text = nickname + index + " Reconnected!";
         reconnected.transform.position -= Vector3.up * (70 * index);
