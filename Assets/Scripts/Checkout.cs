@@ -1,7 +1,10 @@
+using Mono.Reflection;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.AI;
 using UnityEngine.UI;
 
 public class Checkout : MonoBehaviour
@@ -16,6 +19,7 @@ public class Checkout : MonoBehaviour
     public bool self;
     public Material openMat, closedMat;
     public GameObject cashier;
+    public Transform checkoutPoint, exitPoint;
 
     [Header("UI")]
     public Canvas canvas;
@@ -71,6 +75,12 @@ public class Checkout : MonoBehaviour
 
     private IEnumerator ScanCO()
     {
+        if (scanningProduct.basket != null)
+        {
+            Basket basket = scanningProduct.basket;
+            basket.StartCoroutine(basket.ActivateLevel(basket.products.Count, false));
+        }
+
         YieldInstruction waitForFixedUpdate = new WaitForFixedUpdate();
 
         // Setup Canvas
@@ -141,5 +151,7 @@ public class Checkout : MonoBehaviour
         open = _open;
         cashier.SetActive(_open);
         lights.material = _open ? openMat : closedMat;
+        Vector3 destination = _open ? checkoutPoint.position : exitPoint.position;
+        cashier.GetComponent<NavMeshAgent>().SetDestination(destination);
     }
 }

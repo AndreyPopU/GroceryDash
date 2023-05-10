@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -26,18 +27,51 @@ public class Basket : MonoBehaviour
 
     public void AddProduct(Product product)
     {
-        // Place in cart and anchor
-        float randomX = Random.Range(-.85f, .85f);
-        float randomZ = Random.Range(-.5f, .5f);
         products.Add(product);
+
+        // Keep the product
         product.owner = player;
+        product.basket = this;
         if (!product.lastOwner) product.lastOwner = player;
-        product.transform.position = transform.position + new Vector3(randomX, 1, randomZ);
-        product.transform.SetParent(transform);
-        product.rb.isKinematic = false;
-        product.anchor = true;
+        product.transform.position = Vector3.up * -100;
         mass += .25f;
         rb.mass = mass;
+
+        StartCoroutine(ActivateLevel(products.Count - 1, true));
+    }
+
+    public IEnumerator ActivateLevel(int index, bool active)
+    {
+        YieldInstruction instruction = new WaitForFixedUpdate();
+
+        Transform[] levelItems = transform.GetChild(0).GetChild(index).GetComponentsInChildren<Transform>();
+
+        if (active)
+        {
+            float scale = 0;
+            while(scale < 1)
+            {
+                scale += .1f;
+
+                foreach (Transform item in levelItems)
+                    item.transform.localScale = Vector3.one * scale;
+
+                yield return instruction;
+            }
+        }
+        else
+        {
+            float scale = 1;
+            while (scale > 0)
+            {
+                scale -= .1f;
+
+                foreach (Transform item in levelItems)
+                    item.transform.localScale = Vector3.one * scale;
+
+                yield return instruction;
+            }
+        }
     }
 
     private void OnTriggerEnter(Collider other)
@@ -58,8 +92,8 @@ public class Basket : MonoBehaviour
             if (!checkout.scanning && checkout.scanningProduct == null)
             {
                 checkout.scanningProduct = products[0];
-                checkout.Scan();
                 products.RemoveAt(0);
+                checkout.Scan();
             }
         }
     }

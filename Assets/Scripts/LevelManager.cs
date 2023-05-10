@@ -16,7 +16,7 @@ public class LevelManager : MonoBehaviour
     {
         GameManager.instance.gameStarted = true;
 
-        players.AddRange(FindObjectsOfType<Player>());
+        players = GameManager.instance.players;
 
         for (int i =0; i < players.Count; i++)
         {
@@ -32,7 +32,6 @@ public class LevelManager : MonoBehaviour
 
     private void StartRound()
     {
-        // Depending on GameMode bind shopping lists
         GameManager.instance.GetComponent<Timer>().enabled = true;
         GameManager.instance.GetComponent<Timer>().countdownText.gameObject.SetActive(true);
     }

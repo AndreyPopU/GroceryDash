@@ -2,10 +2,19 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class Shelf : MonoBehaviour
 {
     public Product product;
+    public Image productImage;
+
+    private void Start()
+    {
+        productImage.sprite = Resources.Load<Sprite>(product.name + "Icon");
+    }
+
+    public void ShowProduct(bool active) => productImage.gameObject.SetActive(active);
 
     private void OnTriggerEnter(Collider other)
     {

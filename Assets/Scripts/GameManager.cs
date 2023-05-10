@@ -11,6 +11,9 @@ public class GameManager : MonoBehaviour
 {
     public static GameManager instance;
 
+    public enum GameMode { Round, Elimination, Time, Race }
+
+    public GameMode gameMode;
     [Header("Players")]
     public int playerCount;
     public List<Player> players;
@@ -74,47 +77,8 @@ public class GameManager : MonoBehaviour
         for (int i = 0; i < players.Length; i++) players[i].canMove = start;
 
         if (start)
-        {
-            if (!LevelManager.instance.listsBound) BindShoppingList();
-
-            for (int i = 0; i < players.Length; i++)
-            {
-                if (players[i].index == 0)
-                {
-                    players[i].shoppingList.shoppingItems.Add("Milk", 1);
-                    players[i].shoppingList.shoppingItems.Add("Apple", 2);
-                    players[i].shoppingList.shoppingItems.Add("Bread", 1);
-                    players[i].shoppingList.shoppingItems.Add("Water", 2);
-                    players[i].shoppingList.shoppingItems.Add("Croissant", 1);
-
-                    foreach (KeyValuePair<string, int> pair in players[i].shoppingList.shoppingItems)
-                    {
-                        ShoppingItem item = Instantiate(players[i].shoppingList.itemPrefab, Vector3.zero, Quaternion.identity, players[i].shoppingList.contents).GetComponent<ShoppingItem>();
-                        item.transform.localPosition = new Vector3(0, players[i].shoppingList.offset, 0);
-                        item.SetText(pair.Value, pair.Key);
-                        players[i].shoppingList.items.Add(item);
-                        players[i].shoppingList.offset -= 50;
-                    }
-                }
-                else
-                {
-                    players[i].shoppingList.shoppingItems.Add("Apple", 1);
-                    players[i].shoppingList.shoppingItems.Add("Milk", 2);
-                    players[i].shoppingList.shoppingItems.Add("Cheese", 1);
-                    players[i].shoppingList.shoppingItems.Add("Crab", 1);
-                    players[i].shoppingList.shoppingItems.Add("Fish", 2);
-
-                    foreach (KeyValuePair<string, int> pair in players[i].shoppingList.shoppingItems)
-                    {
-                        ShoppingItem item = Instantiate(players[i].shoppingList.itemPrefab, Vector3.zero, Quaternion.identity, players[i].shoppingList.contents).GetComponent<ShoppingItem>();
-                        item.transform.localPosition = new Vector3(0, players[i].shoppingList.offset, 0);
-                        item.SetText(pair.Value, pair.Key);
-                        players[i].shoppingList.items.Add(item);
-                        players[i].shoppingList.offset -= 50;
-                    }
-                }
-            }
-        }
+            foreach (Player player in players)
+                GenerateShoppingList(player);
         else StartCoroutine(TimeEnd());
     }
 
@@ -153,5 +117,47 @@ public class GameManager : MonoBehaviour
         yield return null;
         timer.countdownText.text = "Round Ended!";
         StartCoroutine(ScaleText(timer.countdownText.transform, 1));
+    }
+
+    public void GenerateShoppingList(Player player) // Individual
+    {
+        // Bind player to shopping list
+        if (!LevelManager.instance.listsBound) BindShoppingList();
+
+        // Assign products to buy based on GameMode
+        if (gameMode == GameMode.Round)
+        {
+            // Randomize products
+            player.shoppingList.shoppingItems.Add("Apple", 1);
+            player.shoppingList.shoppingItems.Add("Milk", 2);
+            player.shoppingList.shoppingItems.Add("Cheese", 1);
+            player.shoppingList.shoppingItems.Add("Crab", 1);
+            player.shoppingList.shoppingItems.Add("Fish", 2);
+        }
+        else if (gameMode == GameMode.Time)
+        {
+
+        }
+        else if (gameMode == GameMode.Race)
+        {
+
+        }
+
+        // Add items to shopping list UI
+        foreach (KeyValuePair<string, int> pair in player.shoppingList.shoppingItems)
+        {
+            ShoppingItem item = Instantiate(player.shoppingList.itemPrefab, Vector3.zero, Quaternion.identity, player.shoppingList.contents).GetComponent<ShoppingItem>();
+            item.transform.localPosition = new Vector3(0, player.shoppingList.offset, 0);
+            item.SetText(pair.Value, pair.Key);
+            player.shoppingList.items.Add(item);
+            player.shoppingList.offset -= 50;
+        }
+    }
+
+    public void GenerateShoppingList(Player[] players) // Teams
+    {
+        // What do we do in case of 3 players
+
+        // Assign player.teammate
     }
 }

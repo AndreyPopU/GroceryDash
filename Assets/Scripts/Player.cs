@@ -1,16 +1,17 @@
 using System;
 using System.Collections;
 using TMPro;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using static UnityEngine.InputSystem.InputAction;
 
 public class Player : MonoBehaviour
 {
-
     public int index;
     public string nickname;
     public Color color;
+    public Player teammate;
     [Header("Player stats")]
     [SerializeField] private float speed = 1000;
     [SerializeField] private float counterMovement = 250;
@@ -53,6 +54,7 @@ public class Player : MonoBehaviour
 
     [Header("Customization")]
     public bool customize;
+    public bool gamemode;
 
     private Vector2 movement;
     private Vector3 dashDirection;
@@ -179,13 +181,25 @@ public class Player : MonoBehaviour
     }
     private void Grab()
     {
+        foreach(Shelf shelf in FindObjectsOfType<Shelf>())
+        {
+            shelf.ShowProduct(true);
+        }
+
+        if (gamemode)
+        {
+            // Change Mode
+            GameMode.instance.ChangeMode();
+        }
+
         if (customize)
         {
             // Enter toilet
             CustomizationManager.instance.player = this;
-            CustomizationManager.instance.ChangeColor(1);
+            CustomizationManager.instance.ChangeColor();
 
             // Open customization menu
+
         }
 
         if (GameManager.instance.gameStarted && !GameManager.instance.roundStarted) return;
@@ -201,6 +215,7 @@ public class Player : MonoBehaviour
             if (closestProduct.owner != null || !closestProduct.canPickUp) return; 
 
             PickUpProduct(true);
+            return;
         }
 
         if (holdBasket != null)
@@ -446,13 +461,14 @@ public class Player : MonoBehaviour
     {
         if (other.GetComponent<Player>()) closestPlayer = other.GetComponent<Player>();
         if (other.GetComponent<CustomizationManager>()) customize = true;
+        if (other.GetComponent<GameMode>()) gamemode = true;
     }
 
     private void OnTriggerExit(Collider other)
     {
         if (other.GetComponent<Player>() && closestPlayer == other.GetComponent<Player>()) closestPlayer = null;
         if (other.GetComponent<CustomizationManager>()) customize = false;
-
+        if (other.GetComponent<GameMode>()) gamemode = false;
     }
 
     private void OnCollisionStay(Collision collision)
@@ -467,9 +483,17 @@ public class Player : MonoBehaviour
             }
 
             if (player.dashing && holdBasket != null)
-            {
                 LaunchBasket(player.gfx.forward);
-                
+        }
+
+        if (holdProduct != null || holdBasket != null) return;
+
+        if (collision.collider.TryGetComponent(out Product product))
+        {
+            if (product.rb.velocity.magnitude > 2.5f)
+            {
+                product.rb.velocity = Vector3.zero;
+                PickUpProduct(product);
             }
         }
     }

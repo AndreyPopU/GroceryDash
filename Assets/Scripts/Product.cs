@@ -12,20 +12,11 @@ public class Product : MonoBehaviour
     public Player lastOwner;
     [HideInInspector]
     public Rigidbody rb;
-    public bool anchor;
+    public Basket basket;
 
     void Awake()
     {
         rb = GetComponent<Rigidbody>();    
-    }
-
-    private void OnCollisionEnter(Collision collision)
-    {
-        if (anchor)
-        {
-            rb.isKinematic = true;
-            GetComponent<Collider>().enabled = false;
-        }
     }
 
     private void OnTriggerEnter(Collider other)

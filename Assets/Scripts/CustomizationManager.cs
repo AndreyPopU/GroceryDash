@@ -13,9 +13,9 @@ public class CustomizationManager : MonoBehaviour
 
     private void Awake() => instance = this;
 
-    public void ChangeColor(int direction)
+    public void ChangeColor()
     {
-        colorIndex += direction;
+        colorIndex++;
 
         // Protect from out of bounds
         if (colorIndex < 0) colorIndex = colors.Length;
