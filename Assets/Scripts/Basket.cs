@@ -113,7 +113,7 @@ public class Basket : MonoBehaviour
         {
             if (products.Contains(product)) return;
 
-            if (product.rb.velocity.magnitude > 2.5f)
+            if (product.rb.velocity.magnitude > 2.5f || product.transform.position.y > transform.position.y)
             {
                 product.rb.velocity = Vector3.zero;
                 AddProduct(product);

@@ -21,7 +21,7 @@ public class GameMode : MonoBehaviour
         index++;
 
         // Protect from out of bounds
-        if (index > 2) index = 0;
+        if (index > 3) index = 0;
 
         // Change Game Mode
         switch (index)

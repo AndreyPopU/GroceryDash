@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using TMPro;
 using Unity.VisualScripting;
 using UnityEngine;
@@ -19,6 +20,9 @@ public class Player : MonoBehaviour
     [SerializeField] private float rotateSpeed = .4f;
     [SerializeField] private float slowRotateSpeed = .2f;
     public float throwForce = 10;
+
+    [Header("Invididual shopping list")]
+    public Dictionary<string, int> shoppingItems = new Dictionary<string, int>();
 
     public bool canMove = true;
     public bool holding;
@@ -78,6 +82,7 @@ public class Player : MonoBehaviour
         baseSpeed = speed;
         baseRotateSpeed = rotateSpeed;
         baseDashCD = dashCD;
+        dashCD = 0;
     }
 
     void FixedUpdate()
@@ -122,6 +127,8 @@ public class Player : MonoBehaviour
     public void OnDash(CallbackContext context) => context.action.performed += _ => Dash(new Vector3(movement.x, 0, movement.y).normalized);
 
     public void OnThrow(CallbackContext context) => context.action.performed += _ => ThrowItem();
+
+    public void OnDisplay(CallbackContext context) => context.action.performed += _ => Display();
 
     public void OnGrab(CallbackContext context) => context.action.performed += _ => Grab();
 
@@ -179,13 +186,15 @@ public class Player : MonoBehaviour
         if (holdProduct != null) LaunchProduct(gfx.forward);
         else if (holdBasket != null) LaunchBasket(gfx.forward);
     }
+
+    private void Display()
+    {
+        foreach (Shelf shelf in FindObjectsOfType<Shelf>())
+            shelf.ShowProduct();
+    }
+
     private void Grab()
     {
-        foreach(Shelf shelf in FindObjectsOfType<Shelf>())
-        {
-            shelf.ShowProduct(true);
-        }
-
         if (gamemode)
         {
             // Change Mode
@@ -291,7 +300,7 @@ public class Player : MonoBehaviour
             basketCollider.center = holdBasket.center;
             basketCollider.size = new Vector3(holdBasket.coreCollider.size.z, holdBasket.coreCollider.size.y, holdBasket.coreCollider.size.x);
             pickUpCollider.center = holdBasket.center;
-            pickUpCollider.size = basketCollider.size + Vector3.one;
+            pickUpCollider.size = basketCollider.size + Vector3.one * 1.5f;
         }
         basketCollider.enabled = pickUp;
         pickUpCollider.enabled = pickUp;

@@ -89,6 +89,8 @@ public class Checkout : MonoBehaviour
         canvas.gameObject.SetActive(true);
 
         // Anchor product
+        scanningProduct.transform.localScale = Vector3.zero;
+        scanningProduct.StartCoroutine(scanningProduct.Enlarge());
         scanningProduct.transform.parent = null;
         scanningProduct.canPickUp = false;
         scanningProduct.rb.isKinematic = true;

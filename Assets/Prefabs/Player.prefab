@@ -5089,6 +5089,7 @@ MonoBehaviour:
   index: 0
   nickname: Player
   color: {r: 0, g: 0, b: 0, a: 0}
+  teammate: {fileID: 0}
   speed: 1000
   counterMovement: 250
   maxSpeed: 7
@@ -5114,6 +5115,7 @@ MonoBehaviour:
   dashing: 0
   bumpForce: 600
   customize: 0
+  gamemode: 0
   rb: {fileID: 0}
   gfx: {fileID: 0}
 --- !u!114 &8792655865386420076
@@ -5261,6 +5263,22 @@ MonoBehaviour:
         m_CallState: 2
     m_ActionId: c6c440e0-2601-4bbf-ae6f-fd906524506e
     m_ActionName: PlayerMovement/Pause[/DualShock4GamepadHID/start,/Keyboard/escape]
+  - m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 8792655865386420049}
+        m_TargetAssemblyTypeName: Player, Assembly-CSharp
+        m_MethodName: OnDisplay
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+    m_ActionId: c075249b-4e05-44f1-8986-af7da9aabaf8
+    m_ActionName: PlayerMovement/Display[/DualShock4GamepadHID/select,/Keyboard/tab]
   m_NeverAutoSwitchControlSchemes: 0
   m_DefaultControlScheme: 
   m_DefaultActionMap: PlayerMovement

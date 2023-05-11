@@ -14,9 +14,17 @@ public class Product : MonoBehaviour
     public Rigidbody rb;
     public Basket basket;
 
-    void Awake()
+    void Awake() => rb = GetComponent<Rigidbody>();    
+
+    public IEnumerator Enlarge()
     {
-        rb = GetComponent<Rigidbody>();    
+        YieldInstruction instruction = new WaitForFixedUpdate();
+
+        while(transform.localScale.x < 1)
+        {
+            transform.localScale += Vector3.one * .1f;
+            yield return instruction;
+        }
     }
 
     private void OnTriggerEnter(Collider other)

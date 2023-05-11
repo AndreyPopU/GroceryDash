@@ -11,28 +11,35 @@ public class ShoppingList : MonoBehaviour
     public Transform contents;
     public GameObject itemPrefab;
     public int offset = 100;
+    public bool shared;
 
     public void Buy(string productName)
     {
-        shoppingItems[productName]--;
-        for (int i = 0; i < items.Count; i++)
+        if (shared)
         {
-            if (items[i].text.text.Contains(productName))
-            {
-                items[i].SetText(shoppingItems[productName], productName);
-                break;
-            }
-        }
 
-        Player[] players = FindObjectsOfType<Player>();
-        for (int i = 0; i < players.Length; i++)
+        }
+        else
         {
-            foreach (KeyValuePair<string, int> pair in players[i].shoppingList.shoppingItems)
+            shoppingItems[productName]--;
+            for (int i = 0; i < items.Count; i++)
             {
-                if (pair.Value > 0) return;
+                if (items[i].text.text.Contains(productName))
+                {
+                    items[i].SetText(shoppingItems[productName], productName);
+                    break;
+                }
             }
-        }
 
-        GameManager.instance.StartRound(false);
+            for (int i = 0; i < GameManager.instance.players.Count; i++)
+            {
+                foreach (KeyValuePair<string, int> pair in GameManager.instance.players[i].shoppingList.shoppingItems)
+                {
+                    if (pair.Value > 0) return;
+                }
+            }
+
+            GameManager.instance.StartRound(false);
+        }
     }
 }

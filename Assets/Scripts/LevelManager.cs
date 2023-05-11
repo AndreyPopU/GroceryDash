@@ -18,16 +18,23 @@ public class LevelManager : MonoBehaviour
 
         players = GameManager.instance.players;
 
-        for (int i =0; i < players.Count; i++)
+        PreparePlayers();
+
+        for (int i = 0; i < players.Count; i++)
+            CameraManager.instance.targets.Add(players[i].transform);
+
+        FadePanel.instance.Fade(0);
+        Invoke("StartRound", .5f);
+    }
+
+    public void PreparePlayers()
+    {
+        for (int i = 0; i < players.Count; i++)
         {
             players[i].transform.position = spawnPositions[i].position;
             players[i].transform.rotation = Quaternion.identity;
             players[i].gfx.transform.rotation = Quaternion.identity;
-            CameraManager.instance.targets.Add(players[i].transform);
         }
-
-        FadePanel.instance.Fade(0);
-        Invoke("StartRound", .5f);
     }
 
     private void StartRound()

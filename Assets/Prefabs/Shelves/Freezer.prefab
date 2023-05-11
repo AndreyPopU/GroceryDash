@@ -99,6 +99,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   product: {fileID: 0}
+  productImage: {fileID: 0}
 --- !u!65 &5288131740747731174
 BoxCollider:
   m_ObjectHideFlags: 0
