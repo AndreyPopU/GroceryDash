@@ -469,14 +469,12 @@ public class Player : MonoBehaviour
     private void OnTriggerEnter(Collider other)
     {
         if (other.GetComponent<Player>()) closestPlayer = other.GetComponent<Player>();
-        if (other.GetComponent<CustomizationManager>()) customize = true;
         if (other.GetComponent<GameMode>()) gamemode = true;
     }
 
     private void OnTriggerExit(Collider other)
     {
         if (other.GetComponent<Player>() && closestPlayer == other.GetComponent<Player>()) closestPlayer = null;
-        if (other.GetComponent<CustomizationManager>()) customize = false;
         if (other.GetComponent<GameMode>()) gamemode = false;
     }
 

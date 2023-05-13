@@ -3,11 +3,13 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UIElements.Experimental;
+using UnityEngine.UI;
 
 public class Basket : MonoBehaviour
 {
     public List<Product> products;
 
+    public Image[] productIcons;
     public Vector3 holdOffset;
     public Vector3 center;
     public int capacity = 5;
@@ -28,6 +30,8 @@ public class Basket : MonoBehaviour
     public void AddProduct(Product product)
     {
         products.Add(product);
+
+        // Asign canvas image product icon
 
         // Keep the product
         product.owner = player;

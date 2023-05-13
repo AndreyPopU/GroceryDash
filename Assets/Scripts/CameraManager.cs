@@ -42,7 +42,7 @@ public class CameraManager : MonoBehaviour
         greatestDistance = bounds.size.x + bounds.size.z;
 
         // Move
-        transform.position = Vector3.SmoothDamp(transform.position, centerPoint + new Vector3(offset.x, offset.y, offset.z - (bounds.size.z / yLimiter)), ref velocity, smoothness);
+        transform.position = Vector3.SmoothDamp(transform.position, centerPoint + new Vector3(offset.x, offset.y + bounds.size.z / 6, offset.z - (bounds.size.z / yLimiter)), ref velocity, smoothness);
 
         // Zoom
         zoom = Mathf.Lerp(minZoom, maxZoom, greatestDistance / zoomLimiter);

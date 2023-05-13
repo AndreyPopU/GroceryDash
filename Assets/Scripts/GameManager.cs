@@ -41,15 +41,20 @@ public class GameManager : MonoBehaviour
 
     public void SpawnPlayer(PlayerInput input)
     {
+        // Spawn player at spawnpoint, update start zone player number and disable join spot
         input.transform.position = transform.GetChild(input.playerIndex).position;
         playerCount++;
         StartZone zone = FindObjectOfType<StartZone>();
         zone.playerCountText.text = zone.playerCount + "/" + playerCount;
         canvasJoin[input.playerIndex].SetActive(false);
 
+        // Assign random color and add to list of players
         Player player = input.GetComponent<Player>();
         player.color = CustomizationManager.instance.colors[UnityEngine.Random.Range(0, 8)];
         players.Add(player);
+
+        // Add to camera follow targets
+        CameraManager.instance.targets.Add(player.transform);
     }
 
     public void BindShoppingList()

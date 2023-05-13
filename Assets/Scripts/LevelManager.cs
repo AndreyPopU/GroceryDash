@@ -20,9 +20,6 @@ public class LevelManager : MonoBehaviour
 
         PreparePlayers();
 
-        for (int i = 0; i < players.Count; i++)
-            CameraManager.instance.targets.Add(players[i].transform);
-
         FadePanel.instance.Fade(0);
         Invoke("StartRound", .5f);
     }

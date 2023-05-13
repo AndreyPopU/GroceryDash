@@ -506,9 +506,33 @@ PrefabInstance:
       propertyPath: m_Name
       value: ProductCanvas
       objectReference: {fileID: 0}
+    - target: {fileID: 1958118233733585207, guid: eb19c83b0bd61874bb2bda4040a8780b, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 3458472838200697018, guid: eb19c83b0bd61874bb2bda4040a8780b, type: 3}
+      propertyPath: m_Sprite
+      value: 
+      objectReference: {fileID: 21300000, guid: 8f9ee62569b09124fad0eb518d2a9620, type: 3}
+    - target: {fileID: 4705914446471502095, guid: eb19c83b0bd61874bb2bda4040a8780b, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 4936637066000761883, guid: eb19c83b0bd61874bb2bda4040a8780b, type: 3}
       propertyPath: m_PresetInfoIsWorld
       value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6088039728223453568, guid: eb19c83b0bd61874bb2bda4040a8780b, type: 3}
+      propertyPath: m_Alpha
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8277518877430623000, guid: eb19c83b0bd61874bb2bda4040a8780b, type: 3}
+      propertyPath: m_SizeDelta.x
+      value: 11
+      objectReference: {fileID: 0}
+    - target: {fileID: 8277518877430623000, guid: eb19c83b0bd61874bb2bda4040a8780b, type: 3}
+      propertyPath: m_SizeDelta.y
+      value: 4.5
       objectReference: {fileID: 0}
     - target: {fileID: 8772582883497735842, guid: eb19c83b0bd61874bb2bda4040a8780b, type: 3}
       propertyPath: m_Pivot.x

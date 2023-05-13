@@ -159,7 +159,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1835124271179161333}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 10, y: 0.5, z: -3}
+  m_LocalPosition: {x: 12.5, y: 0.5, z: -7}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -190,7 +190,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2485097685319111268}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 10, y: 0.5, z: 0}
+  m_LocalPosition: {x: 12.5, y: 0.5, z: -1}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -221,7 +221,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 3404641537270993104}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 10, y: 0.5, z: 3}
+  m_LocalPosition: {x: 12.5, y: 0.5, z: 5}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -420,6 +420,7 @@ MonoBehaviour:
   contents: {fileID: 3404641538753502099}
   itemPrefab: {fileID: 6649610913558276968, guid: 7bdfec6da9c7b6e439ba6620dc3f2ea5, type: 3}
   offset: 100
+  shared: 0
 --- !u!1 &3404641538117116050
 GameObject:
   m_ObjectHideFlags: 0
@@ -678,7 +679,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &3404641538743552331
 Transform:
   m_ObjectHideFlags: 0
@@ -687,7 +688,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 3404641538743552334}
   m_LocalRotation: {x: 0.5, y: -0, z: -0, w: 0.8660254}
-  m_LocalPosition: {x: 0, y: 20, z: -7}
+  m_LocalPosition: {x: 0, y: 15, z: -5}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -760,7 +761,7 @@ MonoBehaviour:
   targets: []
   smoothness: 0.35
   zoomLimiter: 40
-  yLimiter: 8
+  yLimiter: 4
   minZoom: 40
   maxZoom: 70
   offset: {x: 0, y: 15, z: -10}
@@ -1161,6 +1162,7 @@ MonoBehaviour:
   contents: {fileID: 3404641539237143586}
   itemPrefab: {fileID: 6649610913558276968, guid: 7bdfec6da9c7b6e439ba6620dc3f2ea5, type: 3}
   offset: 100
+  shared: 0
 --- !u!1 &3404641539208215351
 GameObject:
   m_ObjectHideFlags: 0
@@ -1185,7 +1187,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 3404641539208215351}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 10, y: 0.5, z: 6}
+  m_LocalPosition: {x: 12.5, y: 0.5, z: 11}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []

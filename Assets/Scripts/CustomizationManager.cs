@@ -10,8 +10,13 @@ public class CustomizationManager : MonoBehaviour
     public int colorIndex;
 
     public Player player;
+    private Animator animator;
 
-    private void Awake() => instance = this;
+    private void Awake()
+    {
+        instance = this;
+        animator = GetComponent<Animator>();
+    }
 
     public void ChangeColor()
     {

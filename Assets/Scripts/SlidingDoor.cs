@@ -8,25 +8,24 @@ public class SlidingDoor : MonoBehaviour
     public List<Transform> inRange;
     public bool open;
 
+    private Animator animator;
+
     private IEnumerator Start()
     {
+        animator = GetComponentInParent<Animator>();
         yield return new WaitForSeconds(1);
         inRange.Clear();
     }
 
     void Update()
     {
-        if (inRange.Count > 0 && !open)
-        {
-            // Play Animation
-            open = true;
-        }
+        // Animate
+        if (inRange.Count > 0 && !open) open = true;
         
-        if (inRange.Count  <= 0 && open)
-        {
-            // Play Animation
-            open = false;
-        }
+        if (inRange.Count  <= 0 && open) open = false;
+
+        animator.SetBool("open", open);
+
     }
 
     private void OnTriggerEnter(Collider other)
