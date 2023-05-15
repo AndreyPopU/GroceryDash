@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
+using static UnityEditor.Experimental.GraphView.GraphView;
 
 public class Shelf : MonoBehaviour
 {
@@ -52,11 +53,11 @@ public class Shelf : MonoBehaviour
     {
         if (other.TryGetComponent(out Player player))
         {
-            player.closestProduct = product;
+            if (!player.productsInRange.Contains(product)) player.productsInRange.Add(product);
         }
         else if (other.TryGetComponent(out PickUp pick))
         {
-            pick.player.closestProduct = product;
+            if (!pick.player.productsInRange.Contains(product)) pick.player.productsInRange.Add(product);
         }
     }
 
@@ -64,11 +65,11 @@ public class Shelf : MonoBehaviour
     {
         if (other.TryGetComponent(out Player player))
         {
-            if (player.closestProduct == product) player.closestProduct = null;
+            if (player.productsInRange.Contains(product)) player.productsInRange.Remove(product);
         }
         else if (other.TryGetComponent(out PickUp pick))
         {
-            if (pick.player.closestProduct == product) pick.player.closestProduct = null;
+            if (pick.player.productsInRange.Contains(product)) pick.player.productsInRange.Remove(product);
         }
     }
 }

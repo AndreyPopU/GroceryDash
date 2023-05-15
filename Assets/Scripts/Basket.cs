@@ -16,7 +16,9 @@ public class Basket : MonoBehaviour
     public int capacity = 5;
     [HideInInspector] public BasketStack stackParent;
     [HideInInspector] public Rigidbody rb;
-    [HideInInspector]public float mass;
+    [HideInInspector] public float mass;
+    [HideInInspector] public Vector3 startPosition;
+    [HideInInspector] public Quaternion startRotation;
     public BoxCollider coreCollider;
     public Player player;
     public Player lastOwner;
@@ -29,6 +31,8 @@ public class Basket : MonoBehaviour
         rb = GetComponent<Rigidbody>();
         mass = rb.mass;
         canvas = productIcons[0].transform.parent;
+        startPosition = transform.position;
+        startRotation = transform.rotation;
     }
 
     public void Update()

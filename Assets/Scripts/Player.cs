@@ -28,8 +28,8 @@ public class Player : MonoBehaviour
     public bool holding;
 
     [Header("Product Management")]
+    public List<Product> productsInRange;
     public ShoppingList shoppingList;
-    public Product closestProduct;
     public Product holdProduct;
     public Transform holdParent;
 
@@ -193,20 +193,30 @@ public class Player : MonoBehaviour
 
     private void Grab()
     {
-        if (gamemode)
-        {
-            // Change Mode
-            GameMode.instance.ChangeMode();
-        }
+        // Change Mode
+        if (gamemode) GameMode.instance.ChangeMode();
 
         if (customize)
         {
-            // Enter toilet
+            // Change color
             CustomizationManager.instance.player = this;
             CustomizationManager.instance.ChangeColor();
+        }
 
-            // Open customization menu
+        if (holdBasket != null)
+        {
+            if (productsInRange.Count <= 0) // Drop basket
+            {
+                PickUpBasket(false);
+                return;
+            }
+        }
+        else if (closestBasket != null && holdProduct == null) // Pick up basket if not holding product already
+        {
+            if (closestBasket.player != null) return;
 
+            PickUpBasket(true);
+            return;
         }
 
         if (GameManager.instance.gameStarted && !GameManager.instance.roundStarted) return;
@@ -216,32 +226,11 @@ public class Player : MonoBehaviour
             PickUpProduct(false);
             return;
         }
-        else if (closestProduct != null) // Pick up product
+        else if (productsInRange.Count > 0) // Pick up product
         {
-            // If closest product is held by another player or can't be picked up - return
-            if (closestProduct.owner != null || !closestProduct.canPickUp) return; 
-
             PickUpProduct(true);
             return;
         }
-
-        if (holdBasket != null)
-        {
-            if (closestProduct == null) // Drop basket
-            {
-                PickUpBasket(false);
-                return;
-            }
-        }
-        
-        else if (closestBasket != null && holdProduct == null) // Pick up basket if not holding product already
-        {
-            if (closestBasket.player != null) return;
-
-            PickUpBasket(true);
-            return;
-        }
-
     }
     
     #region Grab Functions
@@ -254,12 +243,7 @@ public class Player : MonoBehaviour
         if (pickUp)
         {
             // If basket was part of stack - remove it 
-            if (closestBasket.stackParent != null)
-            {
-                closestBasket.stackParent.baskets.RemoveAt(0);
-                if (closestBasket.stackParent.baskets.Count == 0) Destroy(closestBasket.stackParent.gameObject);
-                closestBasket.stackParent = null;
-            }
+            if (closestBasket.stackParent != null) closestBasket.stackParent.baskets.Pop();
 
             // Anchor basket in player's hands
             closestBasket.transform.SetParent(holdParent);
@@ -375,6 +359,25 @@ public class Player : MonoBehaviour
 
     public Product GetProduct()
     {
+        // Loop through the list of products in range
+        int closestIndex = 0;
+        float closestDistance = 999;
+
+        for (int i = 1; i < productsInRange.Count; i++)
+        {
+            // If closest product is held by another player or can't be picked up - return
+            if (productsInRange[0].owner != null || !productsInRange[0].canPickUp) continue;
+
+            float distanceBetween = Vector3.Distance(transform.position, productsInRange[i].transform.position);
+            if (distanceBetween < closestDistance)
+            {
+                closestDistance = distanceBetween;
+                closestIndex = i;
+            }
+        }
+
+        Product closestProduct = productsInRange[closestIndex];
+
         if (!closestProduct.gameObject.activeInHierarchy) // If product is from shelf - Instantiate 
         {
             return Instantiate(closestProduct.gameObject, Vector3.zero, Quaternion.identity).GetComponent<Product>();

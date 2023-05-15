@@ -1,6 +1,9 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
+using UnityEngine.UIElements;
 
 public class LevelManager : MonoBehaviour
 {
@@ -11,6 +14,8 @@ public class LevelManager : MonoBehaviour
     public Transform center;
     public bool listsBound;
 
+    private Basket[] baskets;
+
     private void Awake() => instance = this;
 
     void Start()
@@ -18,6 +23,7 @@ public class LevelManager : MonoBehaviour
         GameManager.instance.gameStarted = true;
 
         players = GameManager.instance.players;
+        baskets = FindObjectsOfType<Basket>();
 
         PreparePlayers();
 
@@ -41,5 +47,41 @@ public class LevelManager : MonoBehaviour
     {
         GameManager.instance.GetComponent<Timer>().enabled = true;
         GameManager.instance.GetComponent<Timer>().countdownText.gameObject.SetActive(true);
+    }
+
+    public void ResetRoom()
+    {
+        // Reset Basket stacks
+        foreach (BasketStack stack in FindObjectsOfType<BasketStack>()) stack.ResetStack();
+
+        foreach (Basket basket in baskets)
+        {
+            // Reset Basket positions
+            basket.transform.position = basket.startPosition;
+            basket.transform.rotation = basket.startRotation;
+
+            int products = basket.products.Count;
+
+            if (products > 0)
+            {
+                for (int i = 0; i < products; i++)
+                {
+                    // Reset basket canvas
+                    basket.productIcons[i].StartCoroutine(basket.FadeIcon(basket.productIcons[i].GetComponent<CanvasGroup>(), 0));
+
+                    // Reset levels of full
+                    Transform[] levelItems = basket.transform.GetChild(0).GetChild(i).GetComponentsInChildren<Transform>();
+
+                    foreach (Transform item in levelItems)
+                        item.transform.localScale = Vector3.zero;
+                }
+            }
+
+            // Reset basket items
+            basket.products.Clear();
+        }
+
+        // Delete Products rolling around
+        foreach (Product product in FindObjectsOfType<Product>()) product.Destroy();
     }
 }

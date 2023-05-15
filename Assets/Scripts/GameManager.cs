@@ -102,7 +102,7 @@ public class GameManager : MonoBehaviour
             players[i].canDash = start;
         }
 
-        if (start) GenerateShoppingList();
+        if (start) StartGame();
         else StartCoroutine(EndGame());
     }
 
@@ -155,6 +155,13 @@ public class GameManager : MonoBehaviour
         resultText.text = "Round " + (4 - rounds) + " Ended!";
         StartCoroutine(ScaleText(resultText.transform, 1));
 
+        // Players drop items
+        foreach (Player player in players)
+        {
+            if (player.holdBasket != null) player.PickUpBasket(false);
+            if (player.holdProduct != null) player.PickUpProduct(false);
+        }
+
         if (rounds > 0)
         {
             // Clear Shopping lists
@@ -170,7 +177,7 @@ public class GameManager : MonoBehaviour
             }
 
             // Stop game
-            GameManager.instance.roundStarted = false;
+            roundStarted = false;
 
             yield return new WaitForSeconds(2);
 
@@ -187,6 +194,7 @@ public class GameManager : MonoBehaviour
             StartCoroutine(ScaleText(timer.countdownText.transform, 1));
             timer.currentTime = 3;
             timer.enabled = true;
+            LevelManager.instance.ResetRoom();
 
             yield return new WaitForSeconds(3);
 
@@ -195,10 +203,14 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    public void GenerateShoppingList() // Individual
+    public void StartGame() // Individual
     {
         // Bind player to shopping list
         if (!LevelManager.instance.listsBound) BindShoppingList();
+
+        // Clear Items
+        shoppingList1.shoppingItems.Clear();
+        shoppingList2.shoppingItems.Clear();
 
         // Assign products to buy based on GameMode
         if (gameMode == GameMode.Round) // Teammode
@@ -206,14 +218,10 @@ public class GameManager : MonoBehaviour
             // Randomize products in both teams' shopping lists
 
             // Team 1
-            shoppingList1.shoppingItems.Add("Apple", 1);
-            shoppingList1.shoppingItems.Add("Milk", 2);
-            shoppingList1.shoppingItems.Add("Cheese", 1);
+            shoppingList1.shoppingItems.Add("Water", 1);
 
             // Team 2
-            shoppingList2.shoppingItems.Add("Apple", 1);
-            shoppingList2.shoppingItems.Add("Milk", 2);
-            shoppingList2.shoppingItems.Add("Cheese", 1);
+            shoppingList2.shoppingItems.Add("Water", 1);
         }
         else if (gameMode == GameMode.Race || gameMode == GameMode.Elimination) // Completely shared list
         {
