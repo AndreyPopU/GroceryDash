@@ -43,7 +43,7 @@ public class Player : MonoBehaviour
     public BoxCollider pickUpCollider;
 
     [Header("Dash")]
-    [SerializeField] private bool canDash = true;
+    public bool canDash = true;
     public float dashRange;
     public float dashDuration = .25f;
     public float dashCD = 1;
@@ -64,7 +64,6 @@ public class Player : MonoBehaviour
     private Vector3 dashDirection;
     [HideInInspector] public Rigidbody rb;
     [HideInInspector] public Transform gfx;
-    private float baseSpeed;
     private float baseRotateSpeed;
     private PlayerControls controls;
 
@@ -79,7 +78,6 @@ public class Player : MonoBehaviour
     {
         DontDestroyOnLoad(gameObject);
         rb = GetComponent<Rigidbody>();
-        baseSpeed = speed;
         baseRotateSpeed = rotateSpeed;
         baseDashCD = dashCD;
         dashCD = 0;
@@ -88,6 +86,9 @@ public class Player : MonoBehaviour
     void FixedUpdate()
     {
         if (dashCD > 0) dashCD -= Time.deltaTime;
+
+        //Counteract sliding and sloppy movement
+        CounterMovement();
 
         if (dashing || bumpDuration > 0 || !canMove) return;
 
@@ -105,9 +106,6 @@ public class Player : MonoBehaviour
     {
         // Cap speed
         if (rb.velocity.magnitude > maxSpeed) rb.velocity = Vector3.ClampMagnitude(rb.velocity, maxSpeed);
-
-        //Counteract sliding and sloppy movement
-        CounterMovement();
 
         //Apply forces to move player
         rb.AddForce(new Vector3(movement.x, 0, movement.y) * speed * Time.deltaTime);

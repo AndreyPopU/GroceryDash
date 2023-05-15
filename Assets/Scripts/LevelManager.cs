@@ -8,6 +8,7 @@ public class LevelManager : MonoBehaviour
 
     public List<Player> players;
     public Transform[] spawnPositions;
+    public Transform center;
     public bool listsBound;
 
     private void Awake() => instance = this;
@@ -32,6 +33,8 @@ public class LevelManager : MonoBehaviour
             players[i].transform.rotation = Quaternion.identity;
             players[i].gfx.transform.rotation = Quaternion.identity;
         }
+
+        CameraManager.instance.transform.position = center.position + CameraManager.instance.offset;
     }
 
     private void StartRound()

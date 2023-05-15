@@ -79,6 +79,7 @@ public class Checkout : MonoBehaviour
         {
             Basket basket = scanningProduct.basket;
             basket.StartCoroutine(basket.ActivateLevel(basket.products.Count, false));
+            basket.productIcons[basket.products.Count].StartCoroutine(basket.FadeIcon(basket.productIcons[basket.products.Count].GetComponent<CanvasGroup>(), 0));
         }
 
         YieldInstruction waitForFixedUpdate = new WaitForFixedUpdate();

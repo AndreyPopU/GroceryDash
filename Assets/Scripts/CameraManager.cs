@@ -14,7 +14,7 @@ public class CameraManager : MonoBehaviour
     public float minZoom, maxZoom;
     public Vector3 offset;
 
-    private Vector3 centerPoint;
+    [HideInInspector] public Vector3 centerPoint;
     private float greatestDistance;
     private Vector3 velocity;
     private Bounds bounds;

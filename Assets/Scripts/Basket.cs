@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UIElements.Experimental;
 using UnityEngine.UI;
+using Unity.VisualScripting;
 
 public class Basket : MonoBehaviour
 {
@@ -20,11 +21,20 @@ public class Basket : MonoBehaviour
     public Player player;
     public Player lastOwner;
 
+    private Transform canvas;
+
     void Start()
     {
         if (transform.parent != null) stackParent = transform.parent.GetComponent<BasketStack>();
         rb = GetComponent<Rigidbody>();
         mass = rb.mass;
+        canvas = productIcons[0].transform.parent;
+    }
+
+    public void Update()
+    {
+        // Canvas always face camera
+        canvas.eulerAngles = new Vector3(canvas.eulerAngles.x, 0, canvas.eulerAngles.z);
     }
 
     public void AddProduct(Product product)
@@ -32,6 +42,9 @@ public class Basket : MonoBehaviour
         products.Add(product);
 
         // Asign canvas image product icon
+        Image icon = productIcons[products.Count - 1];
+        icon.transform.GetChild(1).GetComponent<Image>().sprite = Resources.Load<Sprite>(product.productName + "Icon");
+        icon.StartCoroutine(FadeIcon(icon.GetComponent<CanvasGroup>(), 1));
 
         // Keep the product
         product.owner = player;
@@ -42,6 +55,28 @@ public class Basket : MonoBehaviour
         rb.mass = mass;
 
         StartCoroutine(ActivateLevel(products.Count - 1, true));
+    }
+
+    public IEnumerator FadeIcon(CanvasGroup group, int desire)
+    {
+        if (group.alpha < desire)
+        {
+            while (group.alpha < desire)
+            {
+                group.alpha += 2 * Time.deltaTime;
+                yield return null;
+            }
+        }
+        else if (group.alpha > desire)
+        {
+            while (group.alpha > desire)
+            {
+                group.alpha -= 2 * Time.deltaTime;
+                yield return null;
+            }
+        }
+
+        group.alpha = desire;
     }
 
     public IEnumerator ActivateLevel(int index, bool active)
@@ -97,6 +132,7 @@ public class Basket : MonoBehaviour
             {
                 checkout.scanningProduct = products[0];
                 products.RemoveAt(0);
+
                 checkout.Scan();
             }
         }

@@ -75,7 +75,7 @@ public class GameManager : MonoBehaviour
                 }
             }
         }
-        else if (gameMode == GameMode.Race || gameMode == GameMode.Elimination) // Completely shared list
+        else if (gameMode == GameMode.Time || gameMode == GameMode.Elimination) // Completely shared list
         {
             foreach (Player player in players) // Bind every player to one shopping list
             {
@@ -96,7 +96,11 @@ public class GameManager : MonoBehaviour
     {
         roundStarted = start;
 
-        for (int i = 0; i < players.Count; i++) players[i].canMove = start;
+        for (int i = 0; i < players.Count; i++)
+        {
+            players[i].canMove = start;
+            players[i].canDash = start;
+        }
 
         if (start) GenerateShoppingList();
         else StartCoroutine(EndGame());
@@ -245,7 +249,6 @@ public class GameManager : MonoBehaviour
                 shoppingList2.offset -= 50;
             }
         }
-        
     }
 
     public void GenerateShoppingList(Player[] players) // Teams

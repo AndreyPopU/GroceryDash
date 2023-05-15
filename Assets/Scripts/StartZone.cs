@@ -33,7 +33,13 @@ public class StartZone : MonoBehaviour
                     // Start Game
                     FadePanel.instance.Fade(1);
                     foreach (Player player in FindObjectsOfType<Player>())
+                    {
                         player.canMove = false;
+                        player.canDash = false;
+                        player.rb.velocity = Vector3.zero;
+                    }
+
+                    FindObjectOfType<SlidingDoor>().inRange.Clear();
 
                     Invoke("ChangeScene", 1.5f);
                     entered = true;

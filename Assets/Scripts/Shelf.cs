@@ -14,7 +14,7 @@ public class Shelf : MonoBehaviour
 
     private void Start()
     {
-        productImage.sprite = Resources.Load<Sprite>(product.name + "Icon");
+        productImage.sprite = Resources.Load<Sprite>(product.productName + "Icon");
         group = productImage.transform.parent.GetComponent<CanvasGroup>();
     }
 
