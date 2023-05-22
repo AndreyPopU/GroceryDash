@@ -5,6 +5,7 @@ using System.Linq;
 using TMPro;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.SceneManagement;
 using UnityEngine.Windows;
 
 public class GameManager : MonoBehaviour
@@ -182,23 +183,11 @@ public class GameManager : MonoBehaviour
             yield return new WaitForSeconds(2);
 
             StartCoroutine(ScaleText(resultText.transform, 0));
+            FadePanel.instance.Fade(1);
 
             yield return new WaitForSeconds(1);
 
-            // Reset player Positions
-            LevelManager.instance.PreparePlayers();
-
-            // Set up timer
-            timer.countdownText.transform.localScale = Vector3.zero;
-            timer.countdownText.gameObject.SetActive(true);
-            StartCoroutine(ScaleText(timer.countdownText.transform, 1));
-            timer.currentTime = 3;
-            timer.enabled = true;
-            LevelManager.instance.ResetRoom();
-
-            yield return new WaitForSeconds(3);
-
-            // (Timer starts next round)
+            SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
             rounds--;
         }
     }
@@ -219,6 +208,9 @@ public class GameManager : MonoBehaviour
 
             // Team 1
             shoppingList1.shoppingItems.Add("Water", 1);
+            shoppingList1.shoppingItems.Add("Cheese", 1);
+            shoppingList1.shoppingItems.Add("Crab", 1);
+            shoppingList1.shoppingItems.Add("Fish", 2); 
 
             // Team 2
             shoppingList2.shoppingItems.Add("Water", 1);

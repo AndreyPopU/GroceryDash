@@ -5,6 +5,8 @@ using TMPro;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using static UnityEngine.GraphicsBuffer;
+using UnityEngine.SceneManagement;
 using static UnityEngine.InputSystem.InputAction;
 
 public class Player : MonoBehaviour
@@ -273,6 +275,7 @@ public class Player : MonoBehaviour
             holdBasket.rb.isKinematic = false;
             holdBasket.coreCollider.enabled = true;
             closestBasket = holdBasket;
+            SceneManager.MoveGameObjectToScene(holdBasket.gameObject, SceneManager.GetActiveScene());
             holdBasket = null;
         }
 
@@ -302,6 +305,8 @@ public class Player : MonoBehaviour
         holdBasket.lastOwner = holdBasket.player;
         holdBasket.player = null;
         basketCollider.enabled = false;
+        pickUpCollider.enabled = false;
+        SceneManager.MoveGameObjectToScene(holdBasket.gameObject, SceneManager.GetActiveScene());
         holdBasket = null;
         SlowDown(false);
     }
@@ -338,6 +343,7 @@ public class Player : MonoBehaviour
             holdProduct.transform.SetParent(null);
             holdProduct.rb.isKinematic = false;
             holdProduct.owner = null;
+            SceneManager.MoveGameObjectToScene(holdProduct.gameObject, SceneManager.GetActiveScene());
             holdProduct = null;
         }
     }
@@ -354,6 +360,7 @@ public class Player : MonoBehaviour
         // Deal with ownership
         holdProduct.lastOwner = holdProduct.owner;
         holdProduct.owner = null;
+        SceneManager.MoveGameObjectToScene(holdProduct.gameObject, SceneManager.GetActiveScene());
         holdProduct = null;
     }
 

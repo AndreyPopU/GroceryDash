@@ -36,5 +36,4 @@ public class GameMode : MonoBehaviour
         modeText.text = "Gamemode \n" + GameManager.instance.gameMode.ToString();
         descriptionText.text = modeDescriptions[index];
     }
-
 }

@@ -7,7 +7,7 @@ PhysicMaterial:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_Name: BasketMat
-  dynamicFriction: 0.6
+  dynamicFriction: 1.2
   staticFriction: 0
   bounciness: 0
   frictionCombine: 0

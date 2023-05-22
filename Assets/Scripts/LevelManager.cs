@@ -29,6 +29,14 @@ public class LevelManager : MonoBehaviour
 
         FadePanel.instance.Fade(0);
         Invoke("StartRound", .5f);
+
+        // Set up timer
+        Timer timer = FindObjectOfType<Timer>();
+        timer.countdownText.transform.localScale = Vector3.zero;
+        timer.countdownText.gameObject.SetActive(true);
+        StartCoroutine(GameManager.instance.ScaleText(timer.countdownText.transform, 1));
+        timer.currentTime = 3;
+        timer.enabled = true;
     }
 
     public void PreparePlayers()
