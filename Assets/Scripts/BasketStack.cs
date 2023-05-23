@@ -13,6 +13,17 @@ public class BasketStack : MonoBehaviour
         foreach (Basket basket in GetComponentsInChildren<Basket>()) baskets.Push(basket);
     }
 
+    public void AddBasket(Basket basket)
+    {
+        // Position new basket correctly
+        basket.transform.parent = transform;
+        basket.coreCollider.enabled = false;
+        basket.transform.localPosition = Vector3.zero + Vector3.up * 0.4f * baskets.Count;
+        basket.transform.localRotation = Quaternion.identity;
+        basket.rb.isKinematic = true;
+        baskets.Push(basket);
+    }
+
     public void ResetStack()
     {
         // Clear List
@@ -20,7 +31,6 @@ public class BasketStack : MonoBehaviour
 
         // Return baskets to their parent stack
         Stack<Basket> temp = new Stack<Basket>();
-
 
         foreach (Basket basket in FindObjectsOfType<Basket>())
         {

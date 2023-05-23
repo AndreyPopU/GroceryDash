@@ -239,13 +239,21 @@ public class Player : MonoBehaviour
 
     public void PickUpBasket(bool pickUp)
     {
+        if (closestBasket != null && !closestBasket.canPickUp) return;
+
         // Slow Down player
         SlowDown(pickUp);
 
         if (pickUp)
         {
             // If basket was part of stack - remove it 
-            if (closestBasket.stackParent != null) closestBasket.stackParent.baskets.Pop();
+            if (closestBasket.stackParent != null)
+            {
+                closestBasket.stackParent.baskets.Pop();
+                if (closestBasket.stackParent.baskets.Count == 0)
+                    closestBasket.stackParent.GetComponent<BoxCollider>().enabled = false;
+                closestBasket.stackParent = null;
+            }
 
             // Anchor basket in player's hands
             closestBasket.transform.SetParent(holdParent);

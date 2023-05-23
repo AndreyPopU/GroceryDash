@@ -17,6 +17,8 @@ public class StartZone : MonoBehaviour
     void Start()
     {
         startCollider = GetComponent<BoxCollider>();
+
+        playerCountText.text = playerCount + "/" + GameManager.instance.playerCount;
     }
 
     void Update()

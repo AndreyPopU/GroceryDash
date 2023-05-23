@@ -1,10 +1,10 @@
-using Mono.Reflection;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.AI;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 public class Checkout : MonoBehaviour
@@ -20,6 +20,10 @@ public class Checkout : MonoBehaviour
     public Material openMat, closedMat;
     public GameObject cashier;
     public Transform checkoutPoint, exitPoint;
+
+    [Header("Basket")]
+    public Basket basket;
+    public BasketStack stack;
 
     [Header("UI")]
     public Canvas canvas;
@@ -110,18 +114,23 @@ public class Checkout : MonoBehaviour
 
         // Decide on outcome
 
-        // If the owner of the product needs to buy said product and it's not yet completed, then do that
-        if (scanningProduct.lastOwner.shoppingList.shoppingItems.ContainsKey(scanningProduct.productName) &&
-            scanningProduct.lastOwner.shoppingList.shoppingItems[scanningProduct.productName] > 0)
+        // If main menu just give positive outcome
+        if (SceneManager.GetActiveScene().buildIndex == 0) feedbackImage.sprite = correctIcon;
+        else // Actually decide
         {
-            feedbackImage.sprite = correctIcon;
-            scanningProduct.lastOwner.shoppingList.Buy(scanningProduct.productName);
+            // If the owner of the product needs to buy said product and it's not yet completed, then do that
+            if (scanningProduct.lastOwner.shoppingList.shoppingItems.ContainsKey(scanningProduct.productName) &&
+                scanningProduct.lastOwner.shoppingList.shoppingItems[scanningProduct.productName] > 0)
+            {
+                feedbackImage.sprite = correctIcon;
+                scanningProduct.lastOwner.shoppingList.Buy(scanningProduct.productName);
+            }
+            else
+            // If the owner of the product needs has the item in the shopping list but has already bought enough
+            // or doesn't have the item at all, display incorrectly
+            if (!scanningProduct.lastOwner.shoppingList.shoppingItems.ContainsKey(scanningProduct.productName) ||
+                scanningProduct.lastOwner.shoppingList.shoppingItems[scanningProduct.productName] <= 0) feedbackImage.sprite = incorrectIcon;
         }
-        else
-        // If the owner of the product needs has the item in the shopping list but has already bought enough
-        // or doesn't have the item at all, display incorrectly
-        if (!scanningProduct.lastOwner.shoppingList.shoppingItems.ContainsKey(scanningProduct.productName) ||
-            scanningProduct.lastOwner.shoppingList.shoppingItems[scanningProduct.productName] <= 0) feedbackImage.sprite = incorrectIcon;
 
         feedbackImage.gameObject.SetActive(true);
 
@@ -130,6 +139,15 @@ public class Checkout : MonoBehaviour
         scanningProduct = null;
         scanning = false;
 
+        // Remove basket from checkout and add it to a stack of baskets
+        if (basket != null && basket.products.Count == 0)
+        {
+            stack.AddBasket(basket);
+            basket.canPickUp = true;
+            basket = null;
+        }
+
+        // If not self checkout, count scans before cashier break
         if (!self)
         {
             scans--;

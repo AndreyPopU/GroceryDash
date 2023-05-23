@@ -157,38 +157,57 @@ public class GameManager : MonoBehaviour
         StartCoroutine(ScaleText(resultText.transform, 1));
 
         // Players drop items
+        //foreach (Player player in players)
+        //{
+        //    if (player.holdBasket != null) player.PickUpBasket(false);
+        //    if (player.holdProduct != null) player.PickUpProduct(false);
+        //}
+        
+        rounds--;
+
+        // Clear Shopping lists
         foreach (Player player in players)
         {
-            if (player.holdBasket != null) player.PickUpBasket(false);
-            if (player.holdProduct != null) player.PickUpProduct(false);
+            foreach (ShoppingItem item in player.shoppingList.items)
+                Destroy(item.gameObject);
+
+            player.shoppingList.shoppingItems.Clear();
+            player.shoppingList.items.Clear();
+            player.shoppingList.offset = 100;
+            player.canMove = false;
         }
 
-        if (rounds > 0)
+        // Stop game
+        roundStarted = false;
+
+        yield return new WaitForSeconds(2);
+
+        StartCoroutine(ScaleText(resultText.transform, 0));
+        FadePanel.instance.Fade(1);
+
+        yield return new WaitForSeconds(1);
+
+        // If there are still rounds to be played reload the level
+        if (rounds > 0) SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+        else
         {
-            // Clear Shopping lists
+            // Return to main menu
+            shoppingList1.gameObject.SetActive(false);
+            shoppingList2.gameObject.SetActive(false);
+
+            SceneManager.LoadScene(0);
+
             foreach (Player player in players)
             {
-                foreach (ShoppingItem item in player.shoppingList.items)
-                    Destroy(item.gameObject);
-
-                player.shoppingList.shoppingItems.Clear();
-                player.shoppingList.items.Clear();
-                player.shoppingList.offset = 100;
-                player.canMove = false;
+                player.transform.position = transform.GetChild(player.index).position;
+                player.transform.rotation = Quaternion.identity;
+                player.gfx.transform.rotation = Quaternion.identity;
+                player.canMove = true;
+                player.canDash = true;
+                player.rb.velocity = Vector3.zero;
             }
 
-            // Stop game
-            roundStarted = false;
-
-            yield return new WaitForSeconds(2);
-
-            StartCoroutine(ScaleText(resultText.transform, 0));
-            FadePanel.instance.Fade(1);
-
-            yield return new WaitForSeconds(1);
-
-            SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
-            rounds--;
+            FadePanel.instance.Fade(0);
         }
     }
 

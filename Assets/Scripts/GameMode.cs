@@ -10,11 +10,24 @@ public class GameMode : MonoBehaviour
 
     public TextMeshProUGUI modeText;
     public TextMeshProUGUI descriptionText;
-    public string[] modeDescriptions;
 
+    private string[] modeDescriptions;
     private int index;
 
     private void Awake() => instance = this;
+
+    private void Start()
+    {
+        modeDescriptions = new string[]
+        {
+            "The first team to complete their shopping list wins. \n Best of 3.",
+            "Ramping difficulty game mode where players that fail to complete their shopping list get eliminated.",
+            "Players share one shopping list to complete but not the purchases. First to complete the shopping list wins. \n 3 Rounds.",
+            "Players shop individually and share a shopping list. Get points by buying an item that is still on the shopping list. \n 3 Shopping Lists to complete."
+        };
+
+        descriptionText.text = modeDescriptions[index];
+    }
 
     public void ChangeMode()
     {

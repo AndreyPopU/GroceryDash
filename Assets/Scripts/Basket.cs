@@ -22,6 +22,7 @@ public class Basket : MonoBehaviour
     public BoxCollider coreCollider;
     public Player player;
     public Player lastOwner;
+    public bool canPickUp = true;
 
     private Transform canvas;
 
@@ -129,7 +130,19 @@ public class Basket : MonoBehaviour
     {
         if (other.TryGetComponent(out Checkout checkout))
         {
-            if (products.Count == 0) return;
+            if (player != null || products.Count == 0) return;
+
+            // Anchor
+            if (checkout.basket == null)
+            {
+                rb.velocity = Vector3.zero;
+                transform.SetParent(checkout.transform);
+                if (!checkout.self) transform.position = checkout.scanPosition.position -Vector3.forward * 2;
+                else transform.position = checkout.scanPosition.position + Vector3.forward * 1.5f + Vector3.right * -.3f;
+                transform.rotation = Quaternion.identity;
+                canPickUp = false;
+                checkout.basket = this;
+            }
 
             // Start scanning items
             if (!checkout.scanning && checkout.scanningProduct == null)
