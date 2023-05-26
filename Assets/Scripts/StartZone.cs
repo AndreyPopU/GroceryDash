@@ -5,6 +5,7 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
+using static UnityEditor.Experimental.GraphView.GraphView;
 
 public class StartZone : MonoBehaviour
 {
@@ -32,6 +33,13 @@ public class StartZone : MonoBehaviour
             {
                 if (!entered)
                 {
+                    // Players drop items
+                    foreach (Player player in GameManager.instance.players)
+                    {
+                        if (player.holdBasket != null) player.PickUpBasket(false);
+                        if (player.holdProduct != null) player.PickUpProduct(false);
+                    }
+
                     // Start Game
                     FadePanel.instance.Fade(1);
                     foreach (Player player in FindObjectsOfType<Player>())

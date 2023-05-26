@@ -31,6 +31,7 @@ public class GameMode : MonoBehaviour
 
     public void ChangeMode()
     {
+        return;
         index++;
 
         // Protect from out of bounds

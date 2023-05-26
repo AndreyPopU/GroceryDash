@@ -1,9 +1,11 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using Unity.Services.Analytics;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.AI;
+using UnityEngine.Analytics;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
@@ -84,6 +86,7 @@ public class Checkout : MonoBehaviour
             Basket basket = scanningProduct.basket;
             basket.StartCoroutine(basket.ActivateLevel(basket.products.Count, false));
             basket.productIcons[basket.products.Count].StartCoroutine(basket.FadeIcon(basket.productIcons[basket.products.Count].GetComponent<CanvasGroup>(), 0));
+            if (basket.lastOwner.holdBasket == null) basket.lastOwner.SlowDown(false);
         }
 
         YieldInstruction waitForFixedUpdate = new WaitForFixedUpdate();
@@ -138,6 +141,20 @@ public class Checkout : MonoBehaviour
         Destroy(scanningProduct.gameObject);
         scanningProduct = null;
         scanning = false;
+
+        GameManager.instance.scans++;
+
+        #if ENABLE_CLOUD_SERVICES_ANALYTICS
+            Analytics.CustomEvent("Scans", new Dictionary<string, object>
+            {
+                { "scans", GameManager.instance.scans },
+            });
+
+        AnalyticsService.Instance.CustomData("Scans", new Dictionary<string, object>
+            {
+                { "scans", GameManager.instance.scans },
+            });
+#endif
 
         // Remove basket from checkout and add it to a stack of baskets
         if (basket != null && basket.products.Count == 0)

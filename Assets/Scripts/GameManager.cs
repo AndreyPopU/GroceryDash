@@ -3,6 +3,8 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using TMPro;
+using Unity.Services.Core;
+using Unity.Services.Core.Environments;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.SceneManagement;
@@ -13,6 +15,13 @@ public class GameManager : MonoBehaviour
     public static GameManager instance;
 
     public enum GameMode { Round, Elimination, Time, Race }
+
+    [Header("Analytics")]
+    public int basketsUsed;
+    public int productsUsed;
+    public int listTime;
+    public int scans;
+    public int dashes;
 
     [Header("GameMode")]
     public GameMode gameMode;
@@ -25,6 +34,7 @@ public class GameManager : MonoBehaviour
     public bool roundStarted = true;
     public bool gameStarted = false;
     public bool paused;
+    public GameObject pausePanel;
 
     [Header("UI")]
     public ShoppingList shoppingList1;
@@ -36,6 +46,14 @@ public class GameManager : MonoBehaviour
     {
         if (instance == null) instance = this;
         else Destroy(gameObject);
+
+        if (!Application.isEditor) // Initialize environment "release"
+        {
+            var options = new InitializationOptions();
+            options.SetEnvironmentName("release");
+            UnityServices.InitializeAsync(options);
+        }
+        else UnityServices.InitializeAsync(); // Initialize default environment "production"
 
         DontDestroyOnLoad(gameObject);
     }
@@ -110,15 +128,16 @@ public class GameManager : MonoBehaviour
     public void PauseGame()
     {
         paused = !paused;
+        pausePanel.SetActive(paused);
 
-        if (paused)
-        {
-            Time.timeScale = 0;
-        }
-        else
-        {
-            Time.timeScale = 1;
-        }
+        //if (paused) Time.timeScale = 0;
+        //else Time.timeScale = 1;
+    }
+
+    public void BackToMain()
+    {
+        rounds = 0;
+        EndGame();
     }
 
     public IEnumerator ScaleText(Transform text, int desire)
@@ -157,12 +176,12 @@ public class GameManager : MonoBehaviour
         StartCoroutine(ScaleText(resultText.transform, 1));
 
         // Players drop items
-        //foreach (Player player in players)
-        //{
-        //    if (player.holdBasket != null) player.PickUpBasket(false);
-        //    if (player.holdProduct != null) player.PickUpProduct(false);
-        //}
-        
+        foreach (Player player in players)
+        {
+            if (player.holdBasket != null) player.PickUpBasket(false);
+            if (player.holdProduct != null) player.PickUpProduct(false);
+        }
+
         rounds--;
 
         // Clear Shopping lists
@@ -229,10 +248,13 @@ public class GameManager : MonoBehaviour
             shoppingList1.shoppingItems.Add("Water", 1);
             shoppingList1.shoppingItems.Add("Cheese", 1);
             shoppingList1.shoppingItems.Add("Crab", 1);
-            shoppingList1.shoppingItems.Add("Fish", 2); 
+            shoppingList1.shoppingItems.Add("Fish", 2);
 
             // Team 2
             shoppingList2.shoppingItems.Add("Water", 1);
+            shoppingList2.shoppingItems.Add("Cheese", 1);
+            shoppingList2.shoppingItems.Add("Crab", 1);
+            shoppingList2.shoppingItems.Add("Fish", 2);
         }
         else if (gameMode == GameMode.Race || gameMode == GameMode.Elimination) // Completely shared list
         {

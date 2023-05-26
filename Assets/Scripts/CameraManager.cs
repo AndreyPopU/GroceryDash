@@ -20,7 +20,6 @@ public class CameraManager : MonoBehaviour
     private Bounds bounds;
     private float zoom;
     private Camera cam;
-    private float maxY = 20;
     private float currentY;
     private float currentZ;
 

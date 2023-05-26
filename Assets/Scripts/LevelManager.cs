@@ -2,7 +2,9 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using Unity.Services.Analytics;
 using UnityEngine;
+using UnityEngine.Analytics;
 using UnityEngine.UIElements;
 
 public class LevelManager : MonoBehaviour
@@ -37,6 +39,18 @@ public class LevelManager : MonoBehaviour
         StartCoroutine(GameManager.instance.ScaleText(timer.countdownText.transform, 1));
         timer.currentTime = 3;
         timer.enabled = true;
+
+        #if ENABLE_CLOUD_SERVICES_ANALYTICS
+            Analytics.CustomEvent("LobbyPlayers", new Dictionary<string, object>
+            {
+                { "playerCount", GameManager.instance.players.Count },
+            });
+
+        AnalyticsService.Instance.CustomData("LobbyPlayers", new Dictionary<string, object>
+            {
+                { "playerCount", GameManager.instance.players.Count },
+            });
+#endif
     }
 
     public void PreparePlayers()

@@ -1,8 +1,10 @@
 using System.Collections;
 using System.Collections.Generic;
 using TMPro;
+using Unity.Services.Analytics;
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.Analytics;
 
 public class ShoppingList : MonoBehaviour
 {
@@ -38,6 +40,20 @@ public class ShoppingList : MonoBehaviour
                     if (pair.Value > 0) return;
                 }
             }
+
+            GameManager.instance.listTime = (int)FindObjectOfType<Timer>().currentTime;
+
+            #if ENABLE_CLOUD_SERVICES_ANALYTICS
+                Analytics.CustomEvent("ListTime", new Dictionary<string, object>
+                {
+                    { "listTime", GameManager.instance.listTime },
+                });
+
+            AnalyticsService.Instance.CustomData("ListTime", new Dictionary<string, object>
+                {
+                    { "listTime", GameManager.instance.listTime },
+                });
+#endif
 
             GameManager.instance.StartRound(false);
         }

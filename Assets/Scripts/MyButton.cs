@@ -19,14 +19,14 @@ public class MyButton : MonoBehaviour, IPointerClickHandler, IPointerEnterHandle
         while (transform.localScale.x < clickScale.x - .03f && mouseOver)
         {
             transform.localScale = Vector3.Lerp(transform.localScale, clickScale, .5f);
-            yield return new WaitForSeconds(.02f);
+            yield return null;
         }
         transform.localScale = clickScale;
 
         while (transform.localScale.x > exitScale.x + .02f && mouseOver)
         {
             transform.localScale = Vector3.Lerp(transform.localScale, exitScale, .5f);
-            yield return new WaitForSeconds(.02f);
+            yield return null;
         }
         transform.localScale = exitScale;
     }
@@ -36,7 +36,7 @@ public class MyButton : MonoBehaviour, IPointerClickHandler, IPointerEnterHandle
         while (transform.localScale.x < enterScale.x - .02f && mouseOver)
         {
             transform.localScale = Vector3.Lerp(transform.localScale, enterScale, .5f);
-            yield return new WaitForSeconds(.02f);
+            yield return null;
         }
         transform.localScale = enterScale;
     }
@@ -46,7 +46,7 @@ public class MyButton : MonoBehaviour, IPointerClickHandler, IPointerEnterHandle
         while (transform.localScale.x > exitScale.x + .02f && !mouseOver)
         {
             transform.localScale = Vector3.Lerp(transform.localScale, exitScale, .5f);
-            yield return new WaitForSeconds(.02f);
+            yield return null;
         }
         transform.localScale = exitScale;
     }
@@ -62,6 +62,8 @@ public class MyButton : MonoBehaviour, IPointerClickHandler, IPointerEnterHandle
         mouseOver = true;
         transform.localScale = exitScale;
         StartCoroutine(Enter());
+
+        print("Pointer over button");
     }
 
     public void OnPointerExit(PointerEventData eventData)

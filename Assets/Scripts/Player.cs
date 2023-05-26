@@ -8,6 +8,10 @@ using UnityEngine.InputSystem;
 using static UnityEngine.GraphicsBuffer;
 using UnityEngine.SceneManagement;
 using static UnityEngine.InputSystem.InputAction;
+using UnityEngine.Analytics;
+using System.Security.Cryptography;
+using Unity.Services.Analytics;
+using Unity.Services.Core;
 
 public class Player : MonoBehaviour
 {
@@ -51,7 +55,6 @@ public class Player : MonoBehaviour
     public float dashCD = 1;
     public ParticleSystem dashEffect;
     private float baseDashCD;
-    private float threshold = .01f;
     public bool dashing;
 
     [Header("Bumped")]
@@ -147,6 +150,23 @@ public class Player : MonoBehaviour
         dashEffect.Play();
         dashing = true;
         dashCD = baseDashCD;
+
+        GameManager.instance.dashes++;
+
+        #if ENABLE_CLOUD_SERVICES_ANALYTICS
+
+            Analytics.CustomEvent("Dash", new Dictionary<string, object>
+            {
+                { "dash", GameManager.instance.dashes },
+            });
+
+            AnalyticsService.Instance.CustomData("Dash", new Dictionary<string, object>
+            {
+                { "dash", GameManager.instance.dashes },
+            });
+
+        #endif
+
         StartCoroutine(DashCO(direction));
     }
 
@@ -275,10 +295,26 @@ public class Player : MonoBehaviour
 
             // Slow Down player
             maxSpeed = 5.5f - holdBasket.rb.mass;
+
+            GameManager.instance.basketsUsed++;
+
+            #if ENABLE_CLOUD_SERVICES_ANALYTICS
+                        Analytics.CustomEvent("BasketUsed", new Dictionary<string, object>
+                    {
+                        { "baskedUsed", GameManager.instance.basketsUsed },
+                    });
+
+            AnalyticsService.Instance.CustomData("BasketUsed", new Dictionary<string, object>
+                    {
+                        { "baskedUsed", GameManager.instance.basketsUsed },
+                    });
+
+#endif
         }
         else
         {
             holdBasket.transform.SetParent(null);
+            holdBasket.lastOwner = holdBasket.player;
             holdBasket.player = null;
             holdBasket.rb.isKinematic = false;
             holdBasket.coreCollider.enabled = true;
@@ -344,6 +380,22 @@ public class Player : MonoBehaviour
             // Assign ownership
             holdProduct.owner = this;
             holdProduct.lastOwner = this;
+
+            GameManager.instance.productsUsed++;
+
+            #if ENABLE_CLOUD_SERVICES_ANALYTICS
+
+                Analytics.CustomEvent("ProductUsed", new Dictionary<string, object>
+                {
+                    { "productUsed", GameManager.instance.productsUsed },
+                });
+
+                AnalyticsService.Instance.CustomData("ProductUsed", new Dictionary<string, object>
+                {
+                    { "productUsed", GameManager.instance.productsUsed },
+                });
+
+            #endif
         }
         else
         {
@@ -409,21 +461,8 @@ public class Player : MonoBehaviour
         rb.velocity = Vector3.zero;
         rb.AddForce(direction * force * Time.deltaTime, ForceMode.Impulse);
 
-        if (holdProduct != null) // Drop product
-        {
-            holdProduct.transform.SetParent(null);
-            holdProduct.rb.isKinematic = false;
-            holdProduct.owner = null;
-            holdProduct = null;
-        }
-        else if (holdBasket != null)
-        {
-            holdBasket.transform.SetParent(null);
-            holdBasket.rb.isKinematic = false;
-            holdBasket.player = null;
-            basketCollider.enabled = false;
-            holdBasket = null;
-        }
+        if (holdProduct != null) PickUpProduct(false);
+        else if (holdBasket != null) PickUpBasket(false);
 
         bumpDuration = .2f;
     }
