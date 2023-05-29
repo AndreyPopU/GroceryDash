@@ -14,6 +14,7 @@ public class LevelManager : MonoBehaviour
     public List<Player> players;
     public Transform[] spawnPositions;
     public Transform center;
+    public Transform exitPoint;
     public bool listsBound;
 
     private Basket[] baskets;
@@ -43,16 +44,16 @@ public class LevelManager : MonoBehaviour
         #if ENABLE_CLOUD_SERVICES_ANALYTICS
             Analytics.CustomEvent("LobbyPlayers", new Dictionary<string, object>
             {
-                { "playerCount", GameManager.instance.players.Count },
+                { "PlayersPerLobby", GameManager.instance.players.Count },
             });
 
         AnalyticsService.Instance.CustomData("LobbyPlayers", new Dictionary<string, object>
             {
-                { "playerCount", GameManager.instance.players.Count },
+                { "PlayersPerLobby", GameManager.instance.players.Count },
             });
 #endif
     }
-
+     
     public void PreparePlayers()
     {
         for (int i = 0; i < players.Count; i++)
@@ -60,6 +61,7 @@ public class LevelManager : MonoBehaviour
             players[i].transform.position = spawnPositions[i].position;
             players[i].transform.rotation = Quaternion.identity;
             players[i].gfx.transform.rotation = Quaternion.identity;
+            players[i].productsInRange.Clear();
         }
 
         CameraManager.instance.transform.position = center.position + CameraManager.instance.offset;

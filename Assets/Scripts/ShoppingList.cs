@@ -41,17 +41,15 @@ public class ShoppingList : MonoBehaviour
                 }
             }
 
-            GameManager.instance.listTime = (int)FindObjectOfType<Timer>().currentTime;
-
             #if ENABLE_CLOUD_SERVICES_ANALYTICS
-                Analytics.CustomEvent("ListTime", new Dictionary<string, object>
+                Analytics.CustomEvent("ListCompleted", new Dictionary<string, object>
                 {
-                    { "listTime", GameManager.instance.listTime },
+                    { "listCompleted", true },
                 });
 
-            AnalyticsService.Instance.CustomData("ListTime", new Dictionary<string, object>
+            AnalyticsService.Instance.CustomData("ListCompleted", new Dictionary<string, object>
                 {
-                    { "listTime", GameManager.instance.listTime },
+                    { "listCompleted", true },
                 });
 #endif
 

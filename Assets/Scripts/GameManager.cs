@@ -19,9 +19,10 @@ public class GameManager : MonoBehaviour
     [Header("Analytics")]
     public int basketsUsed;
     public int productsUsed;
-    public int listTime;
+    public bool listCompleted;
     public int scans;
     public int dashes;
+    public int bumps;
 
     [Header("GameMode")]
     public GameMode gameMode;
@@ -180,6 +181,7 @@ public class GameManager : MonoBehaviour
         {
             if (player.holdBasket != null) player.PickUpBasket(false);
             if (player.holdProduct != null) player.PickUpProduct(false);
+            player.SlowDown(false);
         }
 
         rounds--;
@@ -213,6 +215,7 @@ public class GameManager : MonoBehaviour
             // Return to main menu
             shoppingList1.gameObject.SetActive(false);
             shoppingList2.gameObject.SetActive(false);
+            rounds = 3;
 
             SceneManager.LoadScene(0);
 
@@ -224,6 +227,7 @@ public class GameManager : MonoBehaviour
                 player.canMove = true;
                 player.canDash = true;
                 player.rb.velocity = Vector3.zero;
+                player.SlowDown(false);
             }
 
             FadePanel.instance.Fade(0);

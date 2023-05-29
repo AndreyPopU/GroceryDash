@@ -16,11 +16,13 @@ public class BasketStack : MonoBehaviour
     public void AddBasket(Basket basket)
     {
         // Position new basket correctly
+        GetComponent<BoxCollider>().enabled = true;
         basket.transform.parent = transform;
         basket.coreCollider.enabled = false;
         basket.transform.localPosition = Vector3.zero + Vector3.up * 0.4f * baskets.Count;
         basket.transform.localRotation = Quaternion.identity;
         basket.rb.isKinematic = true;
+        basket.stackParent = this;
         baskets.Push(basket);
     }
 

@@ -442,7 +442,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 76c392e42b5098c458856cdf6ecaaaa1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_FirstSelected: {fileID: 0}
+  m_FirstSelected: {fileID: 1036823199}
   m_sendNavigationEvents: 1
   m_DragThreshold: 10
 --- !u!4 &89346107
@@ -476,17 +476,17 @@ MonoBehaviour:
   m_MoveRepeatDelay: 0.5
   m_MoveRepeatRate: 0.1
   m_XRTrackingOrigin: {fileID: 0}
-  m_ActionsAsset: {fileID: -944628639613478452, guid: ca9f5fa95ffab41fb9a615ab714db018, type: 3}
-  m_PointAction: {fileID: -1654692200621890270, guid: ca9f5fa95ffab41fb9a615ab714db018, type: 3}
-  m_MoveAction: {fileID: -8784545083839296357, guid: ca9f5fa95ffab41fb9a615ab714db018, type: 3}
-  m_SubmitAction: {fileID: 392368643174621059, guid: ca9f5fa95ffab41fb9a615ab714db018, type: 3}
-  m_CancelAction: {fileID: 7727032971491509709, guid: ca9f5fa95ffab41fb9a615ab714db018, type: 3}
-  m_LeftClickAction: {fileID: 3001919216989983466, guid: ca9f5fa95ffab41fb9a615ab714db018, type: 3}
-  m_MiddleClickAction: {fileID: -2185481485913320682, guid: ca9f5fa95ffab41fb9a615ab714db018, type: 3}
-  m_RightClickAction: {fileID: -4090225696740746782, guid: ca9f5fa95ffab41fb9a615ab714db018, type: 3}
-  m_ScrollWheelAction: {fileID: 6240969308177333660, guid: ca9f5fa95ffab41fb9a615ab714db018, type: 3}
-  m_TrackedDevicePositionAction: {fileID: 6564999863303420839, guid: ca9f5fa95ffab41fb9a615ab714db018, type: 3}
-  m_TrackedDeviceOrientationAction: {fileID: 7970375526676320489, guid: ca9f5fa95ffab41fb9a615ab714db018, type: 3}
+  m_ActionsAsset: {fileID: -944628639613478452, guid: 32074eb98d41eee4ba78a2ca1f174d3b, type: 3}
+  m_PointAction: {fileID: 6975014593645722698, guid: 32074eb98d41eee4ba78a2ca1f174d3b, type: 3}
+  m_MoveAction: {fileID: -6526613378619263501, guid: 32074eb98d41eee4ba78a2ca1f174d3b, type: 3}
+  m_SubmitAction: {fileID: 144012660774809514, guid: 32074eb98d41eee4ba78a2ca1f174d3b, type: 3}
+  m_CancelAction: {fileID: -7540732501628932859, guid: 32074eb98d41eee4ba78a2ca1f174d3b, type: 3}
+  m_LeftClickAction: {fileID: 1987398978338096895, guid: 32074eb98d41eee4ba78a2ca1f174d3b, type: 3}
+  m_MiddleClickAction: {fileID: -2490714085666798029, guid: 32074eb98d41eee4ba78a2ca1f174d3b, type: 3}
+  m_RightClickAction: {fileID: -5252615839403434922, guid: 32074eb98d41eee4ba78a2ca1f174d3b, type: 3}
+  m_ScrollWheelAction: {fileID: -2689712968710901897, guid: 32074eb98d41eee4ba78a2ca1f174d3b, type: 3}
+  m_TrackedDevicePositionAction: {fileID: -3537996160114492474, guid: 32074eb98d41eee4ba78a2ca1f174d3b, type: 3}
+  m_TrackedDeviceOrientationAction: {fileID: -7892663540708131179, guid: 32074eb98d41eee4ba78a2ca1f174d3b, type: 3}
   m_DeselectOnBackgroundClick: 1
   m_PointerBehavior: 0
   m_CursorLockBehavior: 0
@@ -1736,7 +1736,7 @@ RectTransform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 630678010}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 2.44}
+  m_LocalPosition: {x: 0, y: 0, z: 2.31}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -3155,6 +3155,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 70c828b20525ec049b4934a41bed402f, type: 3}
+--- !u!1 &1036823199 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 523653822992009755, guid: 5414be86607ec76448396770124e22e0, type: 3}
+  m_PrefabInstance: {fileID: 321739617}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1070253116
 GameObject:
   m_ObjectHideFlags: 0
@@ -3654,7 +3659,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1156159218}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -3.75, y: -0.25, z: 42.75}
+  m_LocalPosition: {x: -3.75, y: -0.25, z: 42.65}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -4693,7 +4698,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1563903654}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 1.25, y: -0.25, z: 42.75}
+  m_LocalPosition: {x: 1.25, y: -0.25, z: 42.65}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:

@@ -12,6 +12,7 @@ using UnityEngine.Analytics;
 using System.Security.Cryptography;
 using Unity.Services.Analytics;
 using Unity.Services.Core;
+using UnityEngine.InputSystem.UI;
 
 public class Player : MonoBehaviour
 {
@@ -77,6 +78,10 @@ public class Player : MonoBehaviour
         controls = new PlayerControls();
         gfx = transform.GetChild(0);
         gfx.GetComponent<MeshRenderer>().material.color = color;
+
+        PlayerInput input = GetComponent<PlayerInput>();
+        input.uiInputModule = FindObjectOfType<InputSystemUIInputModule>();
+        input.camera = CameraManager.instance.GetComponent<Camera>();
     }
 
     void Start()
@@ -215,6 +220,11 @@ public class Player : MonoBehaviour
 
     private void Grab()
     {
+        if (productsInRange.Count > 0)
+            for (int i = 0; i < productsInRange.Count; i++)
+                if (productsInRange[i] == null)
+                    productsInRange.RemoveAt(i);
+
         // Change Mode
         if (gamemode) GameMode.instance.ChangeMode();
 
@@ -261,9 +271,6 @@ public class Player : MonoBehaviour
     {
         if (closestBasket != null && !closestBasket.canPickUp) return;
 
-        // Slow Down player
-        SlowDown(pickUp);
-
         if (pickUp)
         {
             // If basket was part of stack - remove it 
@@ -299,17 +306,17 @@ public class Player : MonoBehaviour
             GameManager.instance.basketsUsed++;
 
             #if ENABLE_CLOUD_SERVICES_ANALYTICS
-                        Analytics.CustomEvent("BasketUsed", new Dictionary<string, object>
-                    {
-                        { "baskedUsed", GameManager.instance.basketsUsed },
-                    });
+            Analytics.CustomEvent("BasketUsed", new Dictionary<string, object>
+            {
+                { "basketUsed", GameManager.instance.basketsUsed },
+            });
 
             AnalyticsService.Instance.CustomData("BasketUsed", new Dictionary<string, object>
-                    {
-                        { "baskedUsed", GameManager.instance.basketsUsed },
-                    });
+            {
+                { "basketUsed", GameManager.instance.basketsUsed },
+            });
 
-#endif
+            #endif
         }
         else
         {
@@ -333,6 +340,9 @@ public class Player : MonoBehaviour
         }
         basketCollider.enabled = pickUp;
         pickUpCollider.enabled = pickUp;
+
+        // Slow Down player
+        SlowDown(pickUp);
     }
 
     public void LaunchBasket(Vector3 direction)
@@ -457,6 +467,20 @@ public class Player : MonoBehaviour
     public void Bump(Vector3 direction, float force)
     {
         if (bumpDuration > 0) return;
+
+        GameManager.instance.bumps++;
+
+#if ENABLE_CLOUD_SERVICES_ANALYTICS
+        Analytics.CustomEvent("Bumps", new Dictionary<string, object>
+        {
+            { "bumps", GameManager.instance.bumps },
+        });
+
+        AnalyticsService.Instance.CustomData("Bumps", new Dictionary<string, object>
+        {
+            { "bumps", GameManager.instance.bumps },
+        });
+#endif
 
         rb.velocity = Vector3.zero;
         rb.AddForce(direction * force * Time.deltaTime, ForceMode.Impulse);

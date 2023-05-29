@@ -14,7 +14,7 @@ public class Basket : MonoBehaviour
     public Vector3 holdOffset;
     public Vector3 center;
     public int capacity = 5;
-    [HideInInspector] public BasketStack stackParent;
+     public BasketStack stackParent;
     [HideInInspector] public Rigidbody rb;
     [HideInInspector] public float mass;
     [HideInInspector] public Vector3 startPosition;
@@ -137,8 +137,8 @@ public class Basket : MonoBehaviour
             {
                 rb.velocity = Vector3.zero;
                 transform.SetParent(checkout.transform);
-                if (!checkout.self) transform.position = checkout.scanPosition.position -Vector3.forward * 2;
-                else transform.position = checkout.scanPosition.position + Vector3.forward * 1.5f + Vector3.right * -.3f;
+                if (!checkout.self) transform.position = checkout.scanPosition.position + checkout.transform.right * 1.5f;
+                else transform.position = checkout.scanPosition.position + checkout.transform.right * -1.3f;
                 transform.rotation = Quaternion.identity;
                 canPickUp = false;
                 checkout.basket = this;

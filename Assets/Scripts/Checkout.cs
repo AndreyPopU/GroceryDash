@@ -21,7 +21,7 @@ public class Checkout : MonoBehaviour
     public bool self;
     public Material openMat, closedMat;
     public GameObject cashier;
-    public Transform checkoutPoint, exitPoint;
+    public Transform checkoutPoint;
 
     [Header("Basket")]
     public Basket basket;
@@ -185,11 +185,10 @@ public class Checkout : MonoBehaviour
     void Open(bool _open)
     {
         if (_open) scans = 10;
-        else workCD = 15;
+        else workCD = 30; 
         open = _open;
-        cashier.SetActive(_open);
         lights.material = _open ? openMat : closedMat;
-        Vector3 destination = _open ? checkoutPoint.position : exitPoint.position;
+        Vector3 destination = _open ? checkoutPoint.position : LevelManager.instance.exitPoint.position;
         cashier.GetComponent<NavMeshAgent>().SetDestination(destination);
     }
 }

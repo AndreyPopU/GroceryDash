@@ -64,7 +64,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: -6478536213147159724, guid: 07a376b0bf7081f4e83cbf24122c965b, type: 3}
+  - {fileID: 2100000, guid: 164b1903612ebd742908053ae0f2f562, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -98,9 +98,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 84a65415b9fd52941a2c098813f5e0ee, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  canPickUp: 1
   productName: Cheese
-  player: {fileID: 0}
+  owner: {fileID: 0}
+  lastOwner: {fileID: 0}
   rb: {fileID: 0}
+  basket: {fileID: 0}
 --- !u!65 &3824641727198180166
 BoxCollider:
   m_ObjectHideFlags: 0
