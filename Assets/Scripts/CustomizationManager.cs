@@ -1,6 +1,9 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.InputSystem;
+using UnityEngine.InputSystem.DualShock;
+using UnityEngine.Windows;
 
 public class CustomizationManager : MonoBehaviour
 {
@@ -29,5 +32,8 @@ public class CustomizationManager : MonoBehaviour
         // Change player color
         player.color = colors[colorIndex];
         player.gfx.GetComponent<MeshRenderer>().material.color = player.color;
+
+        // Set Controller Color to player color
+        player.EnableController(true);
     }
 }

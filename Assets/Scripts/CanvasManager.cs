@@ -6,7 +6,15 @@ using UnityEngine.SceneManagement;
 
 public class CanvasManager : MonoBehaviour
 {
+    public static CanvasManager instance;
+
+    public MyButton selectedButton;
     public GameObject[] players;
+
+    private void Awake()
+    {
+        instance = this;
+    }
 
     void Start()
     {

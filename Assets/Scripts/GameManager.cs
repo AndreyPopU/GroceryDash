@@ -5,8 +5,11 @@ using System.Linq;
 using TMPro;
 using Unity.Services.Core;
 using Unity.Services.Core.Environments;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.InputSystem.DualShock;
+using UnityEngine.InputSystem.UI;
 using UnityEngine.SceneManagement;
 using UnityEngine.Windows;
 
@@ -75,6 +78,9 @@ public class GameManager : MonoBehaviour
 
         // Add to camera follow targets
         CameraManager.instance.targets.Add(player.transform);
+
+        // Set Controller Color to player color
+        player.EnableController(true);
     }
 
     public void BindShoppingList()
@@ -139,6 +145,16 @@ public class GameManager : MonoBehaviour
     {
         rounds = 0;
         EndGame();
+    }
+
+    public void Quit()
+    {
+        Application.Quit();
+    }
+
+    private void Update()
+    {
+        Camera.main.ViewportToScreenPoint(UnityEngine.Input.mousePosition);
     }
 
     public IEnumerator ScaleText(Transform text, int desire)

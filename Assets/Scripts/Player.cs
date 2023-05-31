@@ -13,6 +13,8 @@ using System.Security.Cryptography;
 using Unity.Services.Analytics;
 using Unity.Services.Core;
 using UnityEngine.InputSystem.UI;
+using UnityEngine.InputSystem.DualShock;
+using UnityEngine.Windows;
 
 public class Player : MonoBehaviour
 {
@@ -110,6 +112,48 @@ public class Player : MonoBehaviour
     private void Update()
     {
         if (bumpDuration > 0) bumpDuration -= Time.deltaTime;
+    }
+
+    public void EnableController(bool enabled)
+    {
+        var device = GetComponent<PlayerInput>().devices[0];
+
+        if (device.GetType().ToString() == "UnityEngine.InputSystem.DualShock.DualShock4GamepadHID")
+        {
+            DualShockGamepad ds4 = (DualShockGamepad)device;
+            
+            if (enabled) ds4.SetLightBarColor(color);
+            else ds4.ResetHaptics();
+        }
+    }
+
+    public void DisableController()
+    {
+        var device = GetComponent<PlayerInput>().devices[0];
+
+        if (device.GetType().ToString() == "UnityEngine.InputSystem.DualShock.DualShock4GamepadHID")
+        {
+            DualShockGamepad ds4 = (DualShockGamepad)device;
+            ds4.ResetHaptics();
+        }
+    }
+
+    public void Rumble() => StartCoroutine(RumbleCo(.6f, 1, .15f));
+
+    public IEnumerator RumbleCo(float low, float high, float duration)
+    {
+        // Set Controller Color to player color
+        var device = GetComponent<PlayerInput>().devices[0];
+
+        if (device.GetType().ToString() == "UnityEngine.InputSystem.DualShock.DualShock4GamepadHID")
+        {
+            DualShockGamepad ds4 = (DualShockGamepad)device;
+            ds4.SetMotorSpeeds(low, high);
+
+            yield return new WaitForSeconds(duration);
+
+            ds4.SetMotorSpeeds(0, 0);
+        }
     }
 
     private void Movement()
@@ -216,6 +260,9 @@ public class Player : MonoBehaviour
     {
         foreach (Shelf shelf in FindObjectsOfType<Shelf>())
             shelf.ShowProduct();
+
+        foreach (Checkout checkout in FindObjectsOfType<Checkout>())
+            checkout.ShowIcon();
     }
 
     private void Grab()
@@ -489,6 +536,8 @@ public class Player : MonoBehaviour
         else if (holdBasket != null) PickUpBasket(false);
 
         bumpDuration = .2f;
+
+        Rumble();
     }
 
     #region Events
@@ -508,6 +557,7 @@ public class Player : MonoBehaviour
         disconnected.transform.position -= Vector3.up * (70 * index);
         GameManager.instance.StartCoroutine(GameManager.instance.ScaleText(disconnected.transform, 1));
         Destroy(disconnected, 3);
+
     }
 
     public void ReconnectPlayer(PlayerInput input)
@@ -524,6 +574,7 @@ public class Player : MonoBehaviour
         reconnected.GetComponent<TextMeshProUGUI>().text = nickname + index + " Reconnected!";
         reconnected.transform.position -= Vector3.up * (70 * index);
         GameManager.instance.StartCoroutine(GameManager.instance.ScaleText(reconnected.transform, 1));
+        Invoke("ReconnectController", .2f);
         Destroy(reconnected, 3);
     }
 
@@ -582,6 +633,16 @@ public class Player : MonoBehaviour
                 PickUpProduct(product);
             }
         }
+    }
+
+    void ReconnectController() // Invoked
+    {
+        EnableController(true);
+    }
+
+    public void OnApplicationQuit()
+    {
+        EnableController(false);
     }
 
     public void OnEnable()

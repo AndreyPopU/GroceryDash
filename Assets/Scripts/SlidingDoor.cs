@@ -2,6 +2,8 @@ using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel.Design;
 using UnityEngine;
+using UnityEngine.UI;
+using UnityEngine.AI;
 
 public class SlidingDoor : MonoBehaviour
 {
@@ -10,11 +12,9 @@ public class SlidingDoor : MonoBehaviour
 
     private Animator animator;
 
-    private IEnumerator Start()
+    private void Start()
     {
         animator = GetComponentInParent<Animator>();
-        yield return new WaitForSeconds(1);
-        inRange.Clear();
     }
 
     void Update()
@@ -25,12 +25,11 @@ public class SlidingDoor : MonoBehaviour
         if (inRange.Count  <= 0 && open) open = false;
 
         animator.SetBool("open", open);
-
     }
 
     private void OnTriggerEnter(Collider other)
     {
-        if (!inRange.Contains(other.transform)) inRange.Add(other.transform);
+        if (!inRange.Contains(other.transform) && (other.GetComponent<Player>() || other.GetComponent<NavMeshAgent>())) inRange.Add(other.transform);
     }
 
     private void OnTriggerExit(Collider other)

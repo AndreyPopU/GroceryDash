@@ -13,11 +13,11 @@ public class Ceiling : MonoBehaviour
     private IEnumerator Start()
     {
         mat = GetComponent<MeshRenderer>().material;
-        yield return new WaitForSeconds(1);
+        yield return null;
         inRange.Clear();
     }
 
-    void Update()
+        void Update()
     {
         // Animate
         if (inRange.Count > 0 && !invisible) invisible = true;
@@ -31,7 +31,7 @@ public class Ceiling : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        if (!inRange.Contains(other.transform)) inRange.Add(other.transform);
+        if (!inRange.Contains(other.transform) && other.GetComponent<Player>()) inRange.Add(other.transform);
     }
 
     private void OnTriggerExit(Collider other)

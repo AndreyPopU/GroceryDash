@@ -32,12 +32,15 @@ public class Checkout : MonoBehaviour
     public Slider circularSlider;
     public Image feedbackImage;
     public Sprite correctIcon, incorrectIcon;
+    public Image checkoutImage;
+    public CanvasGroup group;
 
     private Coroutine runningCoroutine;
     private MeshRenderer lights;
 
     private void Start()
     {
+        checkoutImage.sprite = self ? Resources.Load<Sprite>("SelfCheckoutIcon") : Resources.Load<Sprite>("CheckoutIcon");
         lights = GetComponentInChildren<MeshRenderer>();
         lights.material = openMat;
     }
@@ -51,6 +54,36 @@ public class Checkout : MonoBehaviour
             if (workCD > 0 && scans <= 0) workCD -= Time.deltaTime;
             else if (!open) Open(true);
         }
+    }
+
+    public void ShowIcon()
+    {
+        if (runningCoroutine != null) StopCoroutine(runningCoroutine);
+        runningCoroutine = StartCoroutine(ShowIconCO());
+    }
+
+    public IEnumerator ShowIconCO()
+    {
+        YieldInstruction instruction = new WaitForFixedUpdate();
+
+        checkoutImage.transform.parent.gameObject.SetActive(true);
+
+        while (group.alpha < 1)
+        {
+            group.alpha += .1f;
+            yield return instruction;
+        }
+
+        yield return new WaitForSeconds(3);
+
+        while (group.alpha > 0)
+        {
+            group.alpha -= .1f;
+            yield return instruction;
+        }
+
+        checkoutImage.transform.parent.gameObject.SetActive(false);
+        runningCoroutine = null;
     }
 
     private void ChangeColor()
