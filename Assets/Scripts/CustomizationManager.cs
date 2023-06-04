@@ -10,6 +10,7 @@ public class CustomizationManager : MonoBehaviour
     public static CustomizationManager instance;
 
     public Color[] colors;
+    public string[] colorNames;
     public int colorIndex;
 
     public Player player;
@@ -17,7 +18,7 @@ public class CustomizationManager : MonoBehaviour
 
     private void Awake()
     {
-        instance = this;
+        if (instance == null) instance = this;
         animator = GetComponent<Animator>();
     }
 
@@ -31,6 +32,7 @@ public class CustomizationManager : MonoBehaviour
 
         // Change player color
         player.color = colors[colorIndex];
+        player.colorName = colorNames[colorIndex];
         player.gfx.GetComponent<MeshRenderer>().material.color = player.color;
 
         // Set Controller Color to player color

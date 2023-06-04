@@ -5,6 +5,7 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
+using static UnityEditor.Experimental.GraphView.GraphView;
 
 public class StartZone : MonoBehaviour
 {
@@ -32,6 +33,12 @@ public class StartZone : MonoBehaviour
             {
                 if (!entered)
                 {
+                    CanvasManager.instance.canPause = false;
+
+                    // Disable join spots
+                    for (int i = 0; i < GameManager.instance.joinCanvas.Count; i++)
+                        GameManager.instance.joinCanvas[i].SetActive(false);
+
                     // Players drop items
                     foreach (Player player in GameManager.instance.players)
                     {

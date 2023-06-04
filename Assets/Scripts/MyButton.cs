@@ -17,10 +17,7 @@ public class MyButton : MonoBehaviour, IPointerClickHandler, IPointerEnterHandle
     Vector3 enterScale = new Vector2(1.1f, 1.1f);
     Vector3 exitScale = new Vector2(1f, 1f);
 
-    void Start()
-    {
-        button = GetComponent<Button>();
-    }
+    void Awake() => button = GetComponent<Button>();
 
     IEnumerator Click()
     {
@@ -43,7 +40,7 @@ public class MyButton : MonoBehaviour, IPointerClickHandler, IPointerEnterHandle
 
     IEnumerator Enter()
     {
-        button.Select();
+        if (button != null) button.Select();
 
         // Pop Up
         while (transform.localScale.x < enterScale.x - .02f && mouseOver)
@@ -66,7 +63,8 @@ public class MyButton : MonoBehaviour, IPointerClickHandler, IPointerEnterHandle
 
     public void OnSelect(BaseEventData eventData)
     {
-        if (CanvasManager.instance.selectedButton != null) CanvasManager.instance.selectedButton.StartCoroutine(Exit());
+        if (CanvasManager.instance.selectedButton != null && CanvasManager.instance.selectedButton.gameObject.activeInHierarchy)
+            CanvasManager.instance.selectedButton.StartCoroutine(CanvasManager.instance.selectedButton.Exit());
 
         CanvasManager.instance.selectedButton = this;
         if (runningCoroutine != null) StopCoroutine(runningCoroutine);
@@ -93,8 +91,12 @@ public class MyButton : MonoBehaviour, IPointerClickHandler, IPointerEnterHandle
     {
         mouseOver = false;
         transform.localScale = enterScale;
-        if (runningCoroutine != null) StopCoroutine(runningCoroutine);
-        runningCoroutine = StartCoroutine(Exit());
+
+        if (CanvasManager.instance.selectedButton != this)
+        {
+            if (runningCoroutine != null) StopCoroutine(runningCoroutine);
+            runningCoroutine = StartCoroutine(Exit());
+        }
     }
 
     public void GrantPriority(PlayerInput input) // To Whom?

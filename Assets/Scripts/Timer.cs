@@ -14,17 +14,16 @@ public class Timer : MonoBehaviour
     {
         if (currentTime <= 0.04f)
         {
+            // When round hasn't started and countdown hits 0 - start
             if (!roundText.gameObject.activeInHierarchy)
             {
                 roundText.gameObject.SetActive(true);
                 countdownText.gameObject.SetActive(false);
-                currentTime = 180;
+                currentTime = 90;
                 GameManager.instance.StartRound(true);
+                CanvasManager.instance.canPause = true;
             }
-            else
-            {
-                GameManager.instance.StartRound(false);
-            }
+            else GameManager.instance.StartRound(false);
         }
         else currentTime -= 1 * Time.deltaTime;
 

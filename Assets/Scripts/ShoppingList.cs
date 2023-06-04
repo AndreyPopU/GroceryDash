@@ -10,6 +10,8 @@ public class ShoppingList : MonoBehaviour
 {
     public Dictionary<string, int> shoppingItems = new Dictionary<string, int>();
     public List<ShoppingItem> items = new List<ShoppingItem>();
+    public List<Player> owners;
+    public string team;
     public Transform contents;
     public GameObject itemPrefab;
     public int offset = 100;
@@ -17,43 +19,54 @@ public class ShoppingList : MonoBehaviour
 
     public void Buy(string productName)
     {
-        if (shared)
-        {
+        // Reduce shopping item amount
+        shoppingItems[productName]--;
 
+        // Check for every item in the shopping list
+        for (int i = 0; i < items.Count; i++)
+        {
+            // When item name matches with product bought
+            if (items[i].text.text.Contains(productName))
+            {
+                // Update item's text on the shopping list
+                items[i].SetText(shoppingItems[productName], productName);
+                break;
+            }
         }
-        else
+
+        for (int i = 0; i < GameManager.instance.players.Count; i++)
         {
-            shoppingItems[productName]--;
-            for (int i = 0; i < items.Count; i++)
+            // If shopping list still contains items with an amount more than 0 (shopping list is not completed) return;
+            foreach (KeyValuePair<string, int> pair in shoppingItems)
             {
-                if (items[i].text.text.Contains(productName))
+                if (pair.Value > 0)
                 {
-                    items[i].SetText(shoppingItems[productName], productName);
-                    break;
+                    print(pair.Key + " value " + pair.Value + " is more than 0");
+                    return;
                 }
             }
+        }
 
-            for (int i = 0; i < GameManager.instance.players.Count; i++)
-            {
-                foreach (KeyValuePair<string, int> pair in GameManager.instance.players[i].shoppingList.shoppingItems)
-                {
-                    if (pair.Value > 0) return;
-                }
-            }
-
-            #if ENABLE_CLOUD_SERVICES_ANALYTICS
-                Analytics.CustomEvent("ListCompleted", new Dictionary<string, object>
+#if ENABLE_CLOUD_SERVICES_ANALYTICS
+        Analytics.CustomEvent("ListCompleted", new Dictionary<string, object>
                 {
                     { "listCompleted", true },
                 });
 
-            AnalyticsService.Instance.CustomData("ListCompleted", new Dictionary<string, object>
+        AnalyticsService.Instance.CustomData("ListCompleted", new Dictionary<string, object>
                 {
                     { "listCompleted", true },
                 });
 #endif
 
-            GameManager.instance.StartRound(false);
-        }
+        // Award players with a point 
+        foreach (Player owner in owners)
+            owner.score++;
+
+        // Assign Winners
+        GameManager.instance.winners.AddRange(owners);
+
+        // End Round
+        GameManager.instance.StartRound(false);
     }
 }

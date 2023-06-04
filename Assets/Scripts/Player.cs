@@ -18,10 +18,16 @@ using UnityEngine.Windows;
 
 public class Player : MonoBehaviour
 {
+    [Header("Essential Stats")]
     public int index;
     public string nickname;
     public Color color;
+    public string colorName;
     public Player teammate;
+    public int score;
+    public bool connected;
+    public float timeOut = 15;
+
     [Header("Player stats")]
     [SerializeField] private float speed = 1000;
     [SerializeField] private float counterMovement = 250;
@@ -48,8 +54,6 @@ public class Player : MonoBehaviour
     [Header("Basket")]
     public Basket holdBasket;
     public Basket closestBasket;
-    public BoxCollider basketCollider;
-    public BoxCollider pickUpCollider;
 
     [Header("Dash")]
     public bool canDash = true;
@@ -112,6 +116,12 @@ public class Player : MonoBehaviour
     private void Update()
     {
         if (bumpDuration > 0) bumpDuration -= Time.deltaTime;
+
+        if (!connected)
+        {
+            if (timeOut > 0) timeOut -= Time.deltaTime;
+            else GameManager.instance.DisconnectPlayer(this);
+        }
     }
 
     public void EnableController(bool enabled)
@@ -186,15 +196,21 @@ public class Player : MonoBehaviour
 
     public void OnHold(CallbackContext context) => context.action.performed += _ => holding = !holding;
 
-    public void OnPause(CallbackContext context) => context.action.performed += _ => GameManager.instance.PauseGame();
+    public void OnPause(CallbackContext context) => context.action.performed += _ => CanvasManager.instance.PauseGame();
 
     #endregion
 
     private void Dash(Vector3 direction)
     {
+        if (CanvasManager.instance.paused)
+        {
+            CanvasManager.instance.GoBack();
+            return;
+        }
+
         // If input is neutral return
-        if (direction.x == 0 && direction.z == 0 || (GameManager.instance.gameStarted && !GameManager.instance.roundStarted)
-            || dashing || dashCD > 0 || !canDash) return;
+        if (direction.x == 0 && direction.z == 0 || dashing || dashCD > 0 || !canDash ||
+            (GameManager.instance.gameStarted && !GameManager.instance.roundStarted && SceneManager.GetActiveScene().buildIndex > 0)) return;
         
         dashEffect.Play();
         dashing = true;
@@ -258,11 +274,8 @@ public class Player : MonoBehaviour
 
     private void Display()
     {
-        foreach (Shelf shelf in FindObjectsOfType<Shelf>())
-            shelf.ShowProduct();
-
-        foreach (Checkout checkout in FindObjectsOfType<Checkout>())
-            checkout.ShowIcon();
+        foreach (Display display in FindObjectsOfType<Display>())
+            display.ShowIcon();
     }
 
     private void Grab()
@@ -331,7 +344,7 @@ public class Player : MonoBehaviour
 
             // Anchor basket in player's hands
             closestBasket.transform.SetParent(holdParent);
-            closestBasket.transform.localPosition = closestBasket.holdOffset;
+            closestBasket.transform.localPosition = Vector3.zero;
             closestBasket.transform.localEulerAngles = Vector3.up * -90;
             closestBasket.player = this;
             closestBasket.rb.isKinematic = true;
@@ -367,26 +380,19 @@ public class Player : MonoBehaviour
         }
         else
         {
-            holdBasket.transform.SetParent(null);
-            holdBasket.lastOwner = holdBasket.player;
-            holdBasket.player = null;
-            holdBasket.rb.isKinematic = false;
-            holdBasket.coreCollider.enabled = true;
-            closestBasket = holdBasket;
-            SceneManager.MoveGameObjectToScene(holdBasket.gameObject, SceneManager.GetActiveScene());
-            holdBasket = null;
-        }
+            LaunchBasket(gfx.forward);
+            
+            // Release on head
 
-        // Enable & adjust colliders
-        if (holdBasket != null)
-        {
-            basketCollider.center = holdBasket.center;
-            basketCollider.size = new Vector3(holdBasket.coreCollider.size.z, holdBasket.coreCollider.size.y, holdBasket.coreCollider.size.x);
-            pickUpCollider.center = holdBasket.center;
-            pickUpCollider.size = basketCollider.size + Vector3.one * 1.5f;
+            //holdBasket.transform.SetParent(null);
+            //holdBasket.lastOwner = holdBasket.player;
+            //holdBasket.player = null;
+            //holdBasket.rb.isKinematic = false;
+            //holdBasket.coreCollider.enabled = true;
+            //closestBasket = holdBasket;
+            //SceneManager.MoveGameObjectToScene(holdBasket.gameObject, SceneManager.GetActiveScene());
+            //holdBasket = null;
         }
-        basketCollider.enabled = pickUp;
-        pickUpCollider.enabled = pickUp;
 
         // Slow Down player
         SlowDown(pickUp);
@@ -405,8 +411,6 @@ public class Player : MonoBehaviour
         // Deal with ownership
         holdBasket.lastOwner = holdBasket.player;
         holdBasket.player = null;
-        basketCollider.enabled = false;
-        pickUpCollider.enabled = false;
         SceneManager.MoveGameObjectToScene(holdBasket.gameObject, SceneManager.GetActiveScene());
         holdBasket = null;
         SlowDown(false);
@@ -537,7 +541,7 @@ public class Player : MonoBehaviour
 
         bumpDuration = .2f;
 
-        Rumble();
+        if (connected) Rumble();
     }
 
     #region Events
@@ -550,6 +554,9 @@ public class Player : MonoBehaviour
         GameObject reconnected = GameObject.Find("Reconnected" + index.ToString());
         if (reconnected != null) Destroy(reconnected);
 
+        timeOut = 15;
+        connected = false;
+
         // Set Color and Name to match the player
         disconnected.gameObject.name = "Disconnected" + index.ToString();
         disconnected.GetComponent<TextMeshProUGUI>().color = color;
@@ -557,7 +564,6 @@ public class Player : MonoBehaviour
         disconnected.transform.position -= Vector3.up * (70 * index);
         GameManager.instance.StartCoroutine(GameManager.instance.ScaleText(disconnected.transform, 1));
         Destroy(disconnected, 3);
-
     }
 
     public void ReconnectPlayer(PlayerInput input)
@@ -568,6 +574,7 @@ public class Player : MonoBehaviour
         GameObject disconnected = GameObject.Find("Disconnected" + index.ToString());
         if (disconnected != null) Destroy(disconnected);
 
+        connected = true;
         // Set Color and Name to match the player
         reconnected.gameObject.name = "Reconnected" + index.ToString();
         reconnected.GetComponent<TextMeshProUGUI>().color = color;

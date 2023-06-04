@@ -31,21 +31,21 @@ public class GameManager : MonoBehaviour
     public GameMode gameMode;
     public int rounds = 3;
     public TextMeshProUGUI resultText;
+    public TextMeshProUGUI scoreText;
 
     [Header("Players")]
     public int playerCount;
     public List<Player> players;
+    public List<Player> winners;
     public bool roundStarted = true;
     public bool gameStarted = false;
-    public bool paused;
-    public GameObject pausePanel;
 
     [Header("UI")]
     public ShoppingList shoppingList1;
     public ShoppingList shoppingList2;
-    public GameObject[] canvasJoin;
     public GameObject disconnectedTextPrefab;
-    
+    public List<GameObject> joinCanvas;
+
     private void Awake()
     {
         if (instance == null) instance = this;
@@ -64,16 +64,21 @@ public class GameManager : MonoBehaviour
 
     public void SpawnPlayer(PlayerInput input)
     {
+        // Return if not in Main Menu
+        if (SceneManager.GetActiveScene().buildIndex != 0) return;
+
         // Spawn player at spawnpoint, update start zone player number and disable join spot
         input.transform.position = transform.GetChild(input.playerIndex).position;
         playerCount++;
         StartZone zone = FindObjectOfType<StartZone>();
         zone.playerCountText.text = zone.playerCount + "/" + playerCount;
-        canvasJoin[input.playerIndex].SetActive(false);
+        joinCanvas[input.playerIndex].SetActive(false);
 
         // Assign random color and add to list of players
+        int randomColor = UnityEngine.Random.Range(0, 8);
         Player player = input.GetComponent<Player>();
-        player.color = CustomizationManager.instance.colors[UnityEngine.Random.Range(0, 8)];
+        player.color = CustomizationManager.instance.colors[randomColor];
+        player.colorName = CustomizationManager.instance.colorNames[randomColor];
         players.Add(player);
 
         // Add to camera follow targets
@@ -81,6 +86,19 @@ public class GameManager : MonoBehaviour
 
         // Set Controller Color to player color
         player.EnableController(true);
+    }
+
+    public void DisconnectPlayer(Player player)
+    {
+        // Enable join canvas if in Main Menu
+        if (SceneManager.GetActiveScene().buildIndex == 0)
+        {
+            joinCanvas[player.index].gameObject.SetActive(true);
+        }
+
+        CameraManager.instance.targets.Remove(player.transform);
+        players.Remove(player);
+        Destroy(player.gameObject);
     }
 
     public void BindShoppingList()
@@ -92,11 +110,13 @@ public class GameManager : MonoBehaviour
                 if (i == 0)
                 {
                     players[i].shoppingList = shoppingList1;
+                    shoppingList1.owners.Add(players[i]);
                     shoppingList1.gameObject.SetActive(true);
                 }
                 else
                 {
                     players[i].shoppingList = shoppingList2;
+                    shoppingList2.owners.Add(players[i]);
                     shoppingList2.gameObject.SetActive(true);
                 }
             }
@@ -129,27 +149,7 @@ public class GameManager : MonoBehaviour
         }
 
         if (start) StartGame();
-        else StartCoroutine(EndGame());
-    }
-
-    public void PauseGame()
-    {
-        paused = !paused;
-        pausePanel.SetActive(paused);
-
-        //if (paused) Time.timeScale = 0;
-        //else Time.timeScale = 1;
-    }
-
-    public void BackToMain()
-    {
-        rounds = 0;
-        EndGame();
-    }
-
-    public void Quit()
-    {
-        Application.Quit();
+        else StartCoroutine(EndGame(false));
     }
 
     private void Update()
@@ -181,16 +181,45 @@ public class GameManager : MonoBehaviour
         text.localScale = Vector3.one * desire;
     }
 
-    private IEnumerator EndGame() // Invoked
+    public IEnumerator EndGame(bool playerInvoked)
     {
+        if (!playerInvoked)
+        {
+            resultText.gameObject.SetActive(true);
+            resultText.transform.localScale = Vector3.zero;
+        }
+        else FadePanel.instance.Fade(1);
+
+        CanvasManager.instance.canPause = false;
+
         Timer timer = GetComponent<Timer>();
         timer.enabled = false;
-        resultText.gameObject.SetActive(true);
-        resultText.transform.localScale = Vector3.zero;
         timer.roundText.gameObject.SetActive(false);
+
+        // Display winners
+        if (winners.Count > 0 && !playerInvoked)
+        {
+            Player winner = winners[0];
+
+            if (winners.Count > 1)
+            {
+                scoreText.color = Color.white;
+                scoreText.text = winner.shoppingList.team + " Wins!";
+            }
+            else
+            {
+                scoreText.color = winners[0].color;
+                scoreText.text = winner.colorName + " Wins!";
+            }
+        }
+
         yield return null;
-        resultText.text = "Round " + (4 - rounds) + " Ended!";
-        StartCoroutine(ScaleText(resultText.transform, 1));
+
+        if (!playerInvoked)
+        {
+            resultText.text = "Round " + (4 - rounds) + " Ended!";
+            StartCoroutine(ScaleText(resultText.transform, 1));
+        }
 
         // Players drop items
         foreach (Player player in players)
@@ -205,8 +234,8 @@ public class GameManager : MonoBehaviour
         // Clear Shopping lists
         foreach (Player player in players)
         {
-            foreach (ShoppingItem item in player.shoppingList.items)
-                Destroy(item.gameObject);
+                foreach (ShoppingItem item in player.shoppingList.items)
+                    Destroy(item.gameObject);
 
             player.shoppingList.shoppingItems.Clear();
             player.shoppingList.items.Clear();
@@ -217,13 +246,18 @@ public class GameManager : MonoBehaviour
         // Stop game
         roundStarted = false;
 
-        yield return new WaitForSeconds(2);
-
-        StartCoroutine(ScaleText(resultText.transform, 0));
-        FadePanel.instance.Fade(1);
-
         yield return new WaitForSeconds(1);
 
+        if (!playerInvoked)
+        {
+            yield return new WaitForSeconds(1);
+
+            StartCoroutine(ScaleText(resultText.transform, 0));
+            FadePanel.instance.Fade(1);
+
+            yield return new WaitForSeconds(1);
+        }
+            
         // If there are still rounds to be played reload the level
         if (rounds > 0) SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
         else
@@ -243,17 +277,22 @@ public class GameManager : MonoBehaviour
                 player.canMove = true;
                 player.canDash = true;
                 player.rb.velocity = Vector3.zero;
-                player.SlowDown(false);
+                player.score = 0;
             }
 
+            UpdateJoinSpots();
             FadePanel.instance.Fade(0);
         }
+        CanvasManager.instance.canPause = true;
     }
 
     public void StartGame() // Individual
     {
         // Bind player to shopping list
         if (!LevelManager.instance.listsBound) BindShoppingList();
+
+        // Reset winners
+        winners.Clear();
 
         // Clear Items
         shoppingList1.shoppingItems.Clear();
@@ -265,10 +304,10 @@ public class GameManager : MonoBehaviour
             // Randomize products in both teams' shopping lists
 
             // Team 1
-            shoppingList1.shoppingItems.Add("Water", 1);
-            shoppingList1.shoppingItems.Add("Cheese", 1);
-            shoppingList1.shoppingItems.Add("Crab", 1);
-            shoppingList1.shoppingItems.Add("Fish", 2);
+            shoppingList1.shoppingItems.Add("Apple", 1);
+            //shoppingList1.shoppingItems.Add("Cheese", 1);
+            //shoppingList1.shoppingItems.Add("Crab", 1);
+            //shoppingList1.shoppingItems.Add("Fish", 2);
 
             // Team 2
             shoppingList2.shoppingItems.Add("Water", 1);
@@ -317,5 +356,14 @@ public class GameManager : MonoBehaviour
         // What do we do in case of 3 players
 
         // Assign player.teammate
+    }  
+
+    public void UpdateJoinSpots()
+    {
+        for (int i = 0; i < joinCanvas.Count; i++)
+            joinCanvas[i].SetActive(true);
+
+        for (int i = 0; i < players.Count; i++)
+            joinCanvas[i].SetActive(false);
     }
 }

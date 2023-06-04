@@ -19,7 +19,10 @@ public class LevelManager : MonoBehaviour
 
     private Basket[] baskets;
 
-    private void Awake() => instance = this;
+    private void Awake()
+    {
+        if (instance == null) instance = this;
+    }
 
     void Start()
     {

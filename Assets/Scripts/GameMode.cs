@@ -14,7 +14,10 @@ public class GameMode : MonoBehaviour
     private string[] modeDescriptions;
     private int index;
 
-    private void Awake() => instance = this;
+    private void Awake()
+    {
+        if (instance == null) instance = this;
+    }
 
     private void Start()
     {
