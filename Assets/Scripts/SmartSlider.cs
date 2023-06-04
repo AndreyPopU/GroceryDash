@@ -1,9 +1,11 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Audio;
 
 public class SmartSlider : MonoBehaviour
 {
+    public AudioMixer mixer;
     public int index;
     public int value;
     public int valuePerSegment;
@@ -18,7 +20,8 @@ public class SmartSlider : MonoBehaviour
         // Update value and segments
         if (desire < 0) segments[index].SetActive(false);
         index += desire;
-        value = index * valuePerSegment + valuePerSegment;
+        value = index * valuePerSegment + valuePerSegment - 80;
+        mixer.SetFloat("volume", value);
         if (desire > 0) segments[index].SetActive(true);
 
         // Update the slider segments

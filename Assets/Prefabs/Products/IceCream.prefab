@@ -99,7 +99,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   canPickUp: 1
-  productName: IceCream
+  productName: Ice Cream
   owner: {fileID: 0}
   lastOwner: {fileID: 0}
   rb: {fileID: 0}

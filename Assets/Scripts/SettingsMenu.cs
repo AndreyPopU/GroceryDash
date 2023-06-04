@@ -17,7 +17,7 @@ public class SettingsMenu : MonoBehaviour
 
     private bool isFullscreen;
 
-    void Start()
+    private void Start()
     {
         Screen.fullScreen = isFullscreen;
         LoadSettings();
@@ -46,11 +46,13 @@ public class SettingsMenu : MonoBehaviour
 
     public void LoadSettings()
     {
+        // Quality
         if (PlayerPrefs.HasKey(SaveLoadManager.qualityString)) qualityDropdown.UpdateCurrentOption(PlayerPrefs.GetInt(SaveLoadManager.qualityString));
         else qualityDropdown.UpdateCurrentOption(0);
         qualityDropdown.RefreshShownValue();
         SetQuality();
 
+        // Resolution
         FindResolution(PlayerPrefs.HasKey(SaveLoadManager.resolutionString));
 
         // Load Sound Value
@@ -58,6 +60,7 @@ public class SettingsMenu : MonoBehaviour
         {
             soundSlider.index = PlayerPrefs.GetInt(SaveLoadManager.soundString);
             soundSlider.ChangeValue(0);
+            
         }
 
         // Load Music Value
@@ -67,6 +70,7 @@ public class SettingsMenu : MonoBehaviour
             musicSlider.ChangeValue(0);
         }
 
+        // Fullscreen
         if (PlayerPrefs.HasKey(SaveLoadManager.fullscreenString)) isFullscreen = SaveLoadManager.IntToBool(PlayerPrefs.GetInt(SaveLoadManager.fullscreenString));
         else isFullscreen = Screen.fullScreen;
         Fullscreen();

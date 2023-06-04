@@ -6,7 +6,8 @@ public class FadePanel : MonoBehaviour
 {
     public static FadePanel instance;
 
-    private CanvasGroup group;
+    [HideInInspector]
+    public CanvasGroup group;
 
     private void Awake()
     {

@@ -39,11 +39,7 @@ public class ShoppingList : MonoBehaviour
             // If shopping list still contains items with an amount more than 0 (shopping list is not completed) return;
             foreach (KeyValuePair<string, int> pair in shoppingItems)
             {
-                if (pair.Value > 0)
-                {
-                    print(pair.Key + " value " + pair.Value + " is more than 0");
-                    return;
-                }
+                if (pair.Value > 0) return;
             }
         }
 
@@ -61,7 +57,10 @@ public class ShoppingList : MonoBehaviour
 
         // Award players with a point 
         foreach (Player owner in owners)
+        {
+            print("Awarding one point to player " + owner.gameObject.name);
             owner.score++;
+        }
 
         // Assign Winners
         GameManager.instance.winners.AddRange(owners);

@@ -36,12 +36,14 @@ public class Checkout : MonoBehaviour
 
     private Coroutine runningCoroutine;
     private MeshRenderer lights;
+    private AudioSource audioSource;
 
     private void Start()
     {
         checkoutImage.sprite = self ? Resources.Load<Sprite>("SelfCheckoutIcon") : Resources.Load<Sprite>("CheckoutIcon");
         lights = GetComponentInChildren<MeshRenderer>();
         lights.material = openMat;
+        audioSource = GetComponent<AudioSource>();
     }
 
     private void Update()
@@ -137,6 +139,7 @@ public class Checkout : MonoBehaviour
                 scanningProduct.lastOwner.shoppingList.shoppingItems[scanningProduct.productName] <= 0) feedbackImage.sprite = incorrectIcon;
         }
 
+        audioSource.Play();
         feedbackImage.gameObject.SetActive(true);
 
         // Finalize

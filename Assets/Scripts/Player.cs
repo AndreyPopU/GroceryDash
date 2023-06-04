@@ -47,6 +47,7 @@ public class Player : MonoBehaviour
     public ShoppingList shoppingList;
     public Product holdProduct;
     public Transform holdParent;
+    public Transform basketHoldParent;
 
     [Header("Hold onto items")]
     public Player closestPlayer;
@@ -64,6 +65,12 @@ public class Player : MonoBehaviour
     private float baseDashCD;
     public bool dashing;
 
+    [Header("Audio")]
+    public AudioClip pickUpClip;
+    public AudioClip throwClip;
+    public AudioClip dashClip;
+    public AudioClip bumpClip;
+
     [Header("Bumped")]
     public float bumpForce;
     private float bumpDuration;
@@ -78,6 +85,8 @@ public class Player : MonoBehaviour
     [HideInInspector] public Transform gfx;
     private float baseRotateSpeed;
     private PlayerControls controls;
+    private PlayerInput input;
+    private AudioSource audioSource;
 
     private void Awake()
     {
@@ -85,13 +94,14 @@ public class Player : MonoBehaviour
         gfx = transform.GetChild(0);
         gfx.GetComponent<MeshRenderer>().material.color = color;
 
-        PlayerInput input = GetComponent<PlayerInput>();
+        input = GetComponent<PlayerInput>();
         input.uiInputModule = FindObjectOfType<InputSystemUIInputModule>();
         input.camera = CameraManager.instance.GetComponent<Camera>();
     }
 
     void Start()
     {
+        audioSource = GetComponent<AudioSource>();
         DontDestroyOnLoad(gameObject);
         rb = GetComponent<Rigidbody>();
         baseRotateSpeed = rotateSpeed;
@@ -196,7 +206,7 @@ public class Player : MonoBehaviour
 
     public void OnHold(CallbackContext context) => context.action.performed += _ => holding = !holding;
 
-    public void OnPause(CallbackContext context) => context.action.performed += _ => CanvasManager.instance.PauseGame();
+    public void OnPause(CallbackContext context) => context.action.performed += _ => CanvasManager.instance.PauseGame(input);
 
     #endregion
 
@@ -211,7 +221,9 @@ public class Player : MonoBehaviour
         // If input is neutral return
         if (direction.x == 0 && direction.z == 0 || dashing || dashCD > 0 || !canDash ||
             (GameManager.instance.gameStarted && !GameManager.instance.roundStarted && SceneManager.GetActiveScene().buildIndex > 0)) return;
-        
+
+        audioSource.clip = dashClip;
+        audioSource.Play();
         dashEffect.Play();
         dashing = true;
         dashCD = baseDashCD;
@@ -333,6 +345,9 @@ public class Player : MonoBehaviour
 
         if (pickUp)
         {
+            audioSource.clip = pickUpClip;
+            audioSource.Play();
+
             // If basket was part of stack - remove it 
             if (closestBasket.stackParent != null)
             {
@@ -343,7 +358,7 @@ public class Player : MonoBehaviour
             }
 
             // Anchor basket in player's hands
-            closestBasket.transform.SetParent(holdParent);
+            closestBasket.transform.SetParent(basketHoldParent);
             closestBasket.transform.localPosition = Vector3.zero;
             closestBasket.transform.localEulerAngles = Vector3.up * -90;
             closestBasket.player = this;
@@ -400,6 +415,9 @@ public class Player : MonoBehaviour
 
     public void LaunchBasket(Vector3 direction)
     {
+        audioSource.clip = throwClip;
+        audioSource.Play();
+
         // Separate from player physics and enable it's own
         holdBasket.transform.SetParent(null);
         holdBasket.coreCollider.enabled = true;
@@ -420,6 +438,9 @@ public class Player : MonoBehaviour
     {
         if (pickUp)
         {
+            audioSource.clip = pickUpClip;
+            audioSource.Play();
+
             if (holdBasket != null) // If player carries a basket drop products there
             {
                 // Check capacity
@@ -460,6 +481,9 @@ public class Player : MonoBehaviour
         }
         else
         {
+            audioSource.clip = throwClip;
+            audioSource.Play();
+
             // Separate from player and enable physics
             holdProduct.transform.SetParent(null);
             holdProduct.rb.isKinematic = false;
@@ -477,6 +501,8 @@ public class Player : MonoBehaviour
 
         // Launch
         holdProduct.rb.AddForce(direction * throwForce, ForceMode.Impulse);
+        audioSource.clip = throwClip;
+        audioSource.Play();
 
         // Deal with ownership
         holdProduct.lastOwner = holdProduct.owner;
@@ -533,6 +559,8 @@ public class Player : MonoBehaviour
         });
 #endif
 
+        audioSource.clip = bumpClip;
+        audioSource.Play();
         rb.velocity = Vector3.zero;
         rb.AddForce(direction * force * Time.deltaTime, ForceMode.Impulse);
 

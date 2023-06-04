@@ -15,6 +15,8 @@ using UnityEngine.Windows;
 
 public class GameManager : MonoBehaviour
 {
+    public InputAction joinAction;
+
     public static GameManager instance;
 
     public enum GameMode { Round, Elimination, Time, Race }
@@ -45,6 +47,12 @@ public class GameManager : MonoBehaviour
     public ShoppingList shoppingList2;
     public GameObject disconnectedTextPrefab;
     public List<GameObject> joinCanvas;
+    public GameObject resultPanel;
+    public TextMeshProUGUI scoreResultText;
+    public GameObject returnToMain;
+    public Color inkColor;
+
+    private PlayerInputManager inputManager;
 
     private void Awake()
     {
@@ -60,6 +68,11 @@ public class GameManager : MonoBehaviour
         else UnityServices.InitializeAsync(); // Initialize default environment "production"
 
         DontDestroyOnLoad(gameObject);
+
+        // Deal with input
+        inputManager = FindObjectOfType<PlayerInputManager>();
+        joinAction.Enable();
+        joinAction.performed += context => JoinAction(context);
     }
 
     public void SpawnPlayer(PlayerInput input)
@@ -75,10 +88,12 @@ public class GameManager : MonoBehaviour
         joinCanvas[input.playerIndex].SetActive(false);
 
         // Assign random color and add to list of players
-        int randomColor = UnityEngine.Random.Range(0, 8);
+        int randomColor = UnityEngine.Random.Range(0, CustomizationManager.instance.colors.Count);
         Player player = input.GetComponent<Player>();
+        player.index = input.playerIndex;
         player.color = CustomizationManager.instance.colors[randomColor];
         player.colorName = CustomizationManager.instance.colorNames[randomColor];
+        CustomizationManager.instance.colors.RemoveAt(randomColor);
         players.Add(player);
 
         // Add to camera follow targets
@@ -103,6 +118,9 @@ public class GameManager : MonoBehaviour
 
     public void BindShoppingList()
     {
+        shoppingList1.owners.Clear();
+        shoppingList2.owners.Clear();
+
         if (gameMode == GameMode.Round) // Teammode
         {
             for (int i = 0; i < players.Count; i++)
@@ -183,15 +201,7 @@ public class GameManager : MonoBehaviour
 
     public IEnumerator EndGame(bool playerInvoked)
     {
-        if (!playerInvoked)
-        {
-            resultText.gameObject.SetActive(true);
-            resultText.transform.localScale = Vector3.zero;
-        }
-        else FadePanel.instance.Fade(1);
-
         CanvasManager.instance.canPause = false;
-
         Timer timer = GetComponent<Timer>();
         timer.enabled = false;
         timer.roundText.gameObject.SetActive(false);
@@ -199,9 +209,12 @@ public class GameManager : MonoBehaviour
         // Display winners
         if (winners.Count > 0 && !playerInvoked)
         {
+            resultText.gameObject.SetActive(true);
+            resultText.transform.localScale = Vector3.zero;
+
             Player winner = winners[0];
 
-            if (winners.Count > 1)
+            if (gameMode == GameMode.Round)
             {
                 scoreText.color = Color.white;
                 scoreText.text = winner.shoppingList.team + " Wins!";
@@ -220,6 +233,7 @@ public class GameManager : MonoBehaviour
             resultText.text = "Round " + (4 - rounds) + " Ended!";
             StartCoroutine(ScaleText(resultText.transform, 1));
         }
+        else FadePanel.instance.Fade(1);
 
         // Players drop items
         foreach (Player player in players)
@@ -253,37 +267,80 @@ public class GameManager : MonoBehaviour
             yield return new WaitForSeconds(1);
 
             StartCoroutine(ScaleText(resultText.transform, 0));
-            FadePanel.instance.Fade(1);
 
-            yield return new WaitForSeconds(1);
+            yield return new WaitForSeconds(1.5f);
         }
-            
+
         // If there are still rounds to be played reload the level
-        if (rounds > 0) SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+        if (rounds > 0)
+        {
+            SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+            CanvasManager.instance.canPause = true;
+        }
         else
         {
-            // Return to main menu
             shoppingList1.gameObject.SetActive(false);
             shoppingList2.gameObject.SetActive(false);
             rounds = 3;
+            CanvasManager.instance.ChangeFocus(returnToMain);
 
-            SceneManager.LoadScene(0);
+            // Display Results
+            resultPanel.SetActive(true);
 
-            foreach (Player player in players)
+            if (gameMode == GameMode.Round)
             {
-                player.transform.position = transform.GetChild(player.index).position;
-                player.transform.rotation = Quaternion.identity;
-                player.gfx.transform.rotation = Quaternion.identity;
-                player.canMove = true;
-                player.canDash = true;
-                player.rb.velocity = Vector3.zero;
-                player.score = 0;
-            }
+                // Winner is the team with most points
+                int team1Total = 0; 
+                int team2Total = 0;
 
-            UpdateJoinSpots();
-            FadePanel.instance.Fade(0);
+                foreach (Player player in players)
+                {
+                    if (player.shoppingList.team.Contains("1")) team1Total += player.score; 
+                    else team2Total += player.score;
+                }
+
+                scoreResultText.color = inkColor;
+                if (team1Total == team2Total) scoreResultText.text = "Tie!";
+                else if (team1Total > team2Total) scoreResultText.text = "Team 1 Wins!";
+                else scoreResultText.text = "Team 2 Wins!";
+            }
+            else
+            {
+                //foreach (Player player in players)
+                //{
+                //    scoreText.color = winners[0].color;
+                //    scoreText.text = winner.colorName + " Wins!";
+                //}
+            }
         }
-        CanvasManager.instance.canPause = true;
+        
+    }
+
+    public void ReturnToMain()
+    {
+        // Return to main menu
+        FadePanel.instance.Fade(1);
+
+        Invoke("ReturnForReal", 1.5f);
+    }
+
+    void ReturnForReal() // Invoked
+    {
+        SceneManager.LoadScene(0);
+
+        foreach (Player player in players)
+        {
+            player.transform.position = transform.GetChild(player.index).position;
+            player.transform.rotation = Quaternion.identity;
+            player.gfx.transform.rotation = Quaternion.identity;
+            player.canMove = true;
+            player.canDash = true;
+            player.rb.velocity = Vector3.zero;
+            player.score = 0;
+        }
+
+        UpdateJoinSpots();
+        FadePanel.instance.Fade(0);
     }
 
     public void StartGame() // Individual
@@ -302,18 +359,56 @@ public class GameManager : MonoBehaviour
         if (gameMode == GameMode.Round) // Teammode
         {
             // Randomize products in both teams' shopping lists
+            int random = UnityEngine.Random.Range(0, 3);
 
-            // Team 1
-            shoppingList1.shoppingItems.Add("Apple", 1);
-            //shoppingList1.shoppingItems.Add("Cheese", 1);
-            //shoppingList1.shoppingItems.Add("Crab", 1);
-            //shoppingList1.shoppingItems.Add("Fish", 2);
+            //shoppingList1.shoppingItems.Add("Apple", 1);
+            //shoppingList2.shoppingItems.Add("Apple", 1);
 
-            // Team 2
-            shoppingList2.shoppingItems.Add("Water", 1);
-            shoppingList2.shoppingItems.Add("Cheese", 1);
-            shoppingList2.shoppingItems.Add("Crab", 1);
-            shoppingList2.shoppingItems.Add("Fish", 2);
+            switch (random)
+            {
+                case 0:
+                    // Team 1
+                    shoppingList1.shoppingItems.Add("Water", 1);
+                    shoppingList1.shoppingItems.Add("Cheese", 1);
+                    shoppingList1.shoppingItems.Add("Crab", 1);
+                    shoppingList1.shoppingItems.Add("Fish", 2);
+
+                    // Team 2
+                    shoppingList2.shoppingItems.Add("Water", 1);
+                    shoppingList2.shoppingItems.Add("Cheese", 1);
+                    shoppingList2.shoppingItems.Add("Crab", 1);
+                    shoppingList2.shoppingItems.Add("Fish", 2);
+                    break;
+                case 1:
+                    // Team 1
+                    shoppingList1.shoppingItems.Add("Mussel", 1);
+                    shoppingList1.shoppingItems.Add("Milk", 2);
+                    shoppingList1.shoppingItems.Add("Cupcake", 3);
+                    shoppingList1.shoppingItems.Add("Waffle", 2);
+
+                    // Team 2
+                    shoppingList2.shoppingItems.Add("Mussel", 1);
+                    shoppingList2.shoppingItems.Add("Milk", 2);
+                    shoppingList2.shoppingItems.Add("Cupcake", 3);
+                    shoppingList2.shoppingItems.Add("Waffle", 2);
+                    break;
+                case 2:
+
+                    // Team 1
+                    shoppingList1.shoppingItems.Add("Bread", 1);
+                    shoppingList1.shoppingItems.Add("Lollipop", 1);
+                    shoppingList1.shoppingItems.Add("Shrimp", 2);
+                    shoppingList1.shoppingItems.Add("Croissant", 1);
+                    shoppingList1.shoppingItems.Add("IceCream", 2);
+
+                    // Team 2
+                    shoppingList2.shoppingItems.Add("Bread", 1);
+                    shoppingList2.shoppingItems.Add("Lollipop", 1);
+                    shoppingList2.shoppingItems.Add("Shrimp", 2);
+                    shoppingList2.shoppingItems.Add("Croissant", 1);
+                    shoppingList2.shoppingItems.Add("Ice Cream", 2);
+                    break;
+            }
         }
         else if (gameMode == GameMode.Race || gameMode == GameMode.Elimination) // Completely shared list
         {
@@ -365,5 +460,12 @@ public class GameManager : MonoBehaviour
 
         for (int i = 0; i < players.Count; i++)
             joinCanvas[i].SetActive(false);
+    }
+
+    public void JoinAction(InputAction.CallbackContext context)
+    {
+        if (SceneManager.GetActiveScene().buildIndex > 0) return;
+
+        inputManager.JoinPlayerFromActionIfNotAlreadyJoined(context);
     }
 }

@@ -63,6 +63,8 @@ public class MyButton : MonoBehaviour, IPointerClickHandler, IPointerEnterHandle
 
     public void OnSelect(BaseEventData eventData)
     {
+        if (mouseOver) return;
+
         if (CanvasManager.instance.selectedButton != null && CanvasManager.instance.selectedButton.gameObject.activeInHierarchy)
             CanvasManager.instance.selectedButton.StartCoroutine(CanvasManager.instance.selectedButton.Exit());
 

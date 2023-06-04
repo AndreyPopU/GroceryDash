@@ -149,9 +149,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   disableOnClick: 0
   mouseOver: 0
-  clickScale: {x: 1.4, y: 1.4, z: 1}
-  enterScale: {x: 1.2, y: 1.2, z: 1}
-  exitScale: {x: 1, y: 1, z: 1}
 --- !u!1 &1769295016567708900
 GameObject:
   m_ObjectHideFlags: 0
@@ -1198,9 +1195,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9b827368747992649a936ce4768c0e40, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  mixer: {fileID: 0}
   index: 5
   value: -40
-  valuePerSegment: -8
+  valuePerSegment: 8
   segments:
   - {fileID: 2857851181921749636}
   - {fileID: 6506760824431877534}
@@ -1407,9 +1405,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   disableOnClick: 0
   mouseOver: 0
-  clickScale: {x: 1.4, y: 1.4, z: 1}
-  enterScale: {x: 1.2, y: 1.2, z: 1}
-  exitScale: {x: 1, y: 1, z: 1}
 --- !u!1 &8796305439992555607
 GameObject:
   m_ObjectHideFlags: 0

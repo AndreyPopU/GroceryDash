@@ -9,7 +9,7 @@ public class CustomizationManager : MonoBehaviour
 {
     public static CustomizationManager instance;
 
-    public Color[] colors;
+    public List<Color> colors;
     public string[] colorNames;
     public int colorIndex;
 
@@ -27,13 +27,17 @@ public class CustomizationManager : MonoBehaviour
         colorIndex++;
 
         // Protect from out of bounds
-        if (colorIndex < 0) colorIndex = colors.Length;
-        else if (colorIndex >= colors.Length) colorIndex = 0;
+        if (colorIndex < 0) colorIndex = colors.Count;
+        else if (colorIndex >= colors.Count) colorIndex = 0;
+
+        // Add previous color of player to available colors
+        colors.Insert(colorIndex, player.color);
 
         // Change player color
-        player.color = colors[colorIndex];
-        player.colorName = colorNames[colorIndex];
+        player.color = colors[colorIndex + 1];
+        player.colorName = colorNames[colorIndex + 1];
         player.gfx.GetComponent<MeshRenderer>().material.color = player.color;
+        colors.RemoveAt(colorIndex + 1);
 
         // Set Controller Color to player color
         player.EnableController(true);
