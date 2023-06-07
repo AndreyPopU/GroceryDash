@@ -12,6 +12,7 @@ using UnityEngine.InputSystem.DualShock;
 using UnityEngine.InputSystem.UI;
 using UnityEngine.SceneManagement;
 using UnityEngine.Windows;
+using static Unity.VisualScripting.Member;
 
 public class GameManager : MonoBehaviour
 {
@@ -50,6 +51,7 @@ public class GameManager : MonoBehaviour
     public GameObject resultPanel;
     public TextMeshProUGUI scoreResultText;
     public GameObject returnToMain;
+    public GameObject logo;
     public Color inkColor;
 
     private PlayerInputManager inputManager;
@@ -123,17 +125,21 @@ public class GameManager : MonoBehaviour
 
         if (gameMode == GameMode.Round) // Teammode
         {
+            players.Shuffle();
+
             for (int i = 0; i < players.Count; i++)
             {
-                if (i == 0)
+                if (i % 2 == 0) // Even - go to team 1
                 {
                     players[i].shoppingList = shoppingList1;
+                    players[i].teamText.text = "Team 1";
                     shoppingList1.owners.Add(players[i]);
                     shoppingList1.gameObject.SetActive(true);
                 }
-                else
+                else // Odd - go to team 2
                 {
                     players[i].shoppingList = shoppingList2;
+                    players[i].teamText.text = "Team 2";
                     shoppingList2.owners.Add(players[i]);
                     shoppingList2.gameObject.SetActive(true);
                 }
@@ -201,29 +207,39 @@ public class GameManager : MonoBehaviour
 
     public IEnumerator EndGame(bool playerInvoked)
     {
+        if (CanvasManager.instance.paused) CanvasManager.instance.PauseGame();
         CanvasManager.instance.canPause = false;
         Timer timer = GetComponent<Timer>();
         timer.enabled = false;
         timer.roundText.gameObject.SetActive(false);
 
         // Display winners
-        if (winners.Count > 0 && !playerInvoked)
+        if (!playerInvoked)
         {
             resultText.gameObject.SetActive(true);
             resultText.transform.localScale = Vector3.zero;
 
-            Player winner = winners[0];
-
-            if (gameMode == GameMode.Round)
+            if (winners.Count > 0)
             {
-                scoreText.color = Color.white;
-                scoreText.text = winner.shoppingList.team + " Wins!";
+                Player winner = winners[0];
+
+                if (gameMode == GameMode.Round)
+                {
+                    scoreText.color = Color.white;
+                    scoreText.text = winner.shoppingList.team + " Wins!";
+                }
+                else
+                {
+                    scoreText.color = winners[0].color;
+                    scoreText.text = winner.colorName + " Wins!";
+                }
             }
             else
             {
-                scoreText.color = winners[0].color;
-                scoreText.text = winner.colorName + " Wins!";
+                scoreText.color = Color.white;
+                scoreText.text = "Tie!";
             }
+            
         }
 
         yield return null;
@@ -238,8 +254,16 @@ public class GameManager : MonoBehaviour
         // Players drop items
         foreach (Player player in players)
         {
-            if (player.holdBasket != null) player.PickUpBasket(false);
-            if (player.holdProduct != null) player.PickUpProduct(false);
+            if (player.holdBasket != null)
+            {
+                player.holdBasket.canPickUp = false;
+                player.LaunchProduct(player.gfx.forward);
+            }
+            if (player.holdProduct != null)
+            {
+                player.holdProduct.canPickUp = false;
+                player.LaunchProduct(player.gfx.forward);
+            }
             player.SlowDown(false);
         }
 
@@ -287,33 +311,32 @@ public class GameManager : MonoBehaviour
             // Display Results
             resultPanel.SetActive(true);
 
-            if (gameMode == GameMode.Round)
+            // Give UI priority to the player with Keyboard&Mouse
+            foreach (Player player in players)
             {
-                // Winner is the team with most points
-                int team1Total = 0; 
-                int team2Total = 0;
-
-                foreach (Player player in players)
+                var device = player.input.devices[0];
+                if (device.name == "Keyboard")
                 {
-                    if (player.shoppingList.team.Contains("1")) team1Total += player.score; 
-                    else team2Total += player.score;
+                    FindObjectOfType<InputSystemUIInputModule>().actionsAsset = player.input.actions;
+                    break;
                 }
-
-                scoreResultText.color = inkColor;
-                if (team1Total == team2Total) scoreResultText.text = "Tie!";
-                else if (team1Total > team2Total) scoreResultText.text = "Team 1 Wins!";
-                else scoreResultText.text = "Team 2 Wins!";
             }
-            else
-            {
-                //foreach (Player player in players)
-                //{
-                //    scoreText.color = winners[0].color;
-                //    scoreText.text = winner.colorName + " Wins!";
-                //}
-            }
-        }
         
+            // Winner is the team with most points
+            int team1Total = 0; 
+            int team2Total = 0;
+
+            foreach (Player player in players)
+            {
+                if (player.shoppingList.team.Contains("1")) team1Total += player.score; 
+                else team2Total += player.score;
+            }
+
+            scoreResultText.color = inkColor;
+            if (team1Total == team2Total) scoreResultText.text = "Tie!";
+            else if (team1Total > team2Total) scoreResultText.text = "Team 1 Wins!";
+            else scoreResultText.text = "Team 2 Wins!";
+        }
     }
 
     public void ReturnToMain()
@@ -327,6 +350,7 @@ public class GameManager : MonoBehaviour
     void ReturnForReal() // Invoked
     {
         SceneManager.LoadScene(0);
+        resultPanel.SetActive(false);
 
         foreach (Player player in players)
         {
@@ -355,6 +379,8 @@ public class GameManager : MonoBehaviour
         shoppingList1.shoppingItems.Clear();
         shoppingList2.shoppingItems.Clear();
 
+        Dictionary<string, int> shoppingItems = new Dictionary<string, int>();
+
         // Assign products to buy based on GameMode
         if (gameMode == GameMode.Round) // Teammode
         {
@@ -367,60 +393,27 @@ public class GameManager : MonoBehaviour
             switch (random)
             {
                 case 0:
-                    // Team 1
-                    shoppingList1.shoppingItems.Add("Water", 1);
-                    shoppingList1.shoppingItems.Add("Cheese", 1);
-                    shoppingList1.shoppingItems.Add("Crab", 1);
-                    shoppingList1.shoppingItems.Add("Fish", 2);
-
-                    // Team 2
-                    shoppingList2.shoppingItems.Add("Water", 1);
-                    shoppingList2.shoppingItems.Add("Cheese", 1);
-                    shoppingList2.shoppingItems.Add("Crab", 1);
-                    shoppingList2.shoppingItems.Add("Fish", 2);
+                    shoppingItems.Add("Water", 1);
+                    shoppingItems.Add("Cheese", 1);
+                    shoppingItems.Add("Fish", 2);
                     break;
                 case 1:
-                    // Team 1
-                    shoppingList1.shoppingItems.Add("Mussel", 1);
-                    shoppingList1.shoppingItems.Add("Milk", 2);
-                    shoppingList1.shoppingItems.Add("Cupcake", 3);
-                    shoppingList1.shoppingItems.Add("Waffle", 2);
-
-                    // Team 2
-                    shoppingList2.shoppingItems.Add("Mussel", 1);
-                    shoppingList2.shoppingItems.Add("Milk", 2);
-                    shoppingList2.shoppingItems.Add("Cupcake", 3);
-                    shoppingList2.shoppingItems.Add("Waffle", 2);
+                    shoppingItems.Add("Mussel", 1);
+                    shoppingItems.Add("Cupcake", 1);
+                    shoppingItems.Add("Waffle", 2);
                     break;
                 case 2:
 
-                    // Team 1
-                    shoppingList1.shoppingItems.Add("Bread", 1);
-                    shoppingList1.shoppingItems.Add("Lollipop", 1);
-                    shoppingList1.shoppingItems.Add("Shrimp", 2);
-                    shoppingList1.shoppingItems.Add("Croissant", 1);
-                    shoppingList1.shoppingItems.Add("IceCream", 2);
-
-                    // Team 2
-                    shoppingList2.shoppingItems.Add("Bread", 1);
-                    shoppingList2.shoppingItems.Add("Lollipop", 1);
-                    shoppingList2.shoppingItems.Add("Shrimp", 2);
-                    shoppingList2.shoppingItems.Add("Croissant", 1);
-                    shoppingList2.shoppingItems.Add("Ice Cream", 2);
+                    shoppingItems.Add("Bread", 2);
+                    shoppingItems.Add("Lollipop", 1);
+                    shoppingItems.Add("Croissant", 2);
                     break;
             }
         }
-        else if (gameMode == GameMode.Race || gameMode == GameMode.Elimination) // Completely shared list
-        {
-            // Randomize products
-            shoppingList1.shoppingItems.Add("Cheese", 1);
-            shoppingList1.shoppingItems.Add("Crab", 1);
-            shoppingList1.shoppingItems.Add("Fish", 2);
-        }
-        else if (gameMode == GameMode.Race) // Shared list
-        {
 
-        }
+        // Shuffle
+        shoppingList1.shoppingItems = shoppingItems.Shuffle();
+        shoppingList2.shoppingItems = shoppingItems.Shuffle();
 
         // Add items to shopping list UI
         foreach (KeyValuePair<string, int> pair in shoppingList1.shoppingItems)
@@ -465,6 +458,8 @@ public class GameManager : MonoBehaviour
     public void JoinAction(InputAction.CallbackContext context)
     {
         if (SceneManager.GetActiveScene().buildIndex > 0) return;
+
+        if (logo != null && logo.activeInHierarchy) logo.SetActive(false);
 
         inputManager.JoinPlayerFromActionIfNotAlreadyJoined(context);
     }

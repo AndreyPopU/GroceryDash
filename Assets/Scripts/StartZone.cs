@@ -5,15 +5,16 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
-using static UnityEditor.Experimental.GraphView.GraphView;
 
 public class StartZone : MonoBehaviour
 {
     public int playerCount;
+    public TextMeshProUGUI startText;
     public TextMeshProUGUI playerCountText;
     public Slider progressSlider;
     public BoxCollider startCollider;
     public bool entered;
+    public bool canStart;
 
     void Start()
     {
@@ -24,7 +25,7 @@ public class StartZone : MonoBehaviour
 
     void Update()
     {
-        if (GameManager.instance.playerCount == 0) return;
+        if (GameManager.instance.playerCount == 0 || !canStart) return;
 
         if (playerCount == GameManager.instance.playerCount)
         {
@@ -33,7 +34,10 @@ public class StartZone : MonoBehaviour
             {
                 if (!entered)
                 {
+                    if (CanvasManager.instance.paused) CanvasManager.instance.PauseGame();
                     CanvasManager.instance.canPause = false;
+
+                    if (!Tutorial.instance.tutorialCompleted) Tutorial.instance.EndTutorial();
 
                     // Disable join spots
                     for (int i = 0; i < GameManager.instance.joinCanvas.Count; i++)

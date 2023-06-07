@@ -8,7 +8,6 @@ using UnityEngine.SceneManagement;
 public class SettingsMenu : MonoBehaviour
 {
     public SmartDropdown resolutionDropdown;
-    public SmartDropdown qualityDropdown;
     public SmartSlider soundSlider;
     public SmartSlider musicSlider;
     public GameObject settingsMenu;
@@ -47,10 +46,10 @@ public class SettingsMenu : MonoBehaviour
     public void LoadSettings()
     {
         // Quality
-        if (PlayerPrefs.HasKey(SaveLoadManager.qualityString)) qualityDropdown.UpdateCurrentOption(PlayerPrefs.GetInt(SaveLoadManager.qualityString));
-        else qualityDropdown.UpdateCurrentOption(0);
-        qualityDropdown.RefreshShownValue();
-        SetQuality();
+        //if (PlayerPrefs.HasKey(SaveLoadManager.qualityString)) qualityDropdown.UpdateCurrentOption(PlayerPrefs.GetInt(SaveLoadManager.qualityString));
+        //else qualityDropdown.UpdateCurrentOption(0);
+        //qualityDropdown.RefreshShownValue();
+        //SetQuality();
 
         // Resolution
         FindResolution(PlayerPrefs.HasKey(SaveLoadManager.resolutionString));
@@ -73,19 +72,19 @@ public class SettingsMenu : MonoBehaviour
         // Fullscreen
         if (PlayerPrefs.HasKey(SaveLoadManager.fullscreenString)) isFullscreen = SaveLoadManager.IntToBool(PlayerPrefs.GetInt(SaveLoadManager.fullscreenString));
         else isFullscreen = Screen.fullScreen;
-        Fullscreen();
+        Screen.fullScreen = isFullscreen;
     }
 
     public void SaveSettings()
     {
         SetResolution();
-        SetQuality();
+        //SetQuality();
         Screen.fullScreen = isFullscreen;
-        SaveLoadManager.SaveSettings(soundSlider.index, musicSlider.index, SaveLoadManager.BoolToInt(isFullscreen), resolutionDropdown.index, qualityDropdown.index);
+        SaveLoadManager.SaveSettings(soundSlider.index, musicSlider.index, SaveLoadManager.BoolToInt(isFullscreen), resolutionDropdown.index);
     }
 
     // Quality
-    public void SetQuality() => QualitySettings.SetQualityLevel(qualityDropdown.index);
+    //public void SetQuality() => QualitySettings.SetQualityLevel(qualityDropdown.index);
 
     // Resolution
     public void SetResolution()

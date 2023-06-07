@@ -7,6 +7,7 @@ using UnityEngine.UI;
 public class ShoppingItem : MonoBehaviour
 {
     [HideInInspector] public TextMeshProUGUI text;
+    public Image icon;
     private Toggle toggle;
 
     private void Awake()
@@ -17,6 +18,8 @@ public class ShoppingItem : MonoBehaviour
 
     public void SetText(int value, string key)
     {
+        icon.sprite = Resources.Load<Sprite>(key + "Icon");
+
         if (value > 0) text.text = value + " " + key;
         else
         {

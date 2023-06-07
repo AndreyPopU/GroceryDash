@@ -177,4 +177,14 @@ public class Basket : MonoBehaviour
             }
         }
     }
+
+    private void OnCollisionEnter(Collision collision)
+    {
+        // If trail active - disable
+        if (GetComponentInChildren<ParticleSystem>())
+        {
+            GetComponentInChildren<ParticleSystem>().Stop();
+            Destroy(GetComponentInChildren<ParticleSystem>().gameObject, 2);
+        }
+    }
 }

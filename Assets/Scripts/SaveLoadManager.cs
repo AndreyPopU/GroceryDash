@@ -18,9 +18,9 @@ public static class SaveLoadManager
     public static string fullscreenString = "fullscreen";
 
     // Resolution, quality, sound, fullscreen
-    public static void SaveSettings(int _sound, int _music, int _fullscreen, int _resolution, int _quality)
+    public static void SaveSettings(int _sound, int _music, int _fullscreen, int _resolution)
     {
-        PlayerPrefs.SetInt(qualityString, _quality);
+        //PlayerPrefs.SetInt(qualityString, _quality);
         PlayerPrefs.SetInt(resolutionString, _resolution);
         PlayerPrefs.SetInt(soundString, _sound);
         PlayerPrefs.SetInt(musicString, _music);

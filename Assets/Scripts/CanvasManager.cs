@@ -36,10 +36,13 @@ public class CanvasManager : MonoBehaviour
         {
             ChangeFocus(buttonsInOrder[0]);
             LockPauseButtons(false);
+            Time.timeScale = 0;
         }
-        else panelsInOrder[1].SetActive(false);
-        //if (paused) Time.timeScale = 0;
-        //else Time.timeScale = 1;
+        else
+        {
+            Time.timeScale = 1;
+            panelsInOrder[1].SetActive(false);
+        }
     }
 
     public void PauseGame(PlayerInput input)
@@ -75,6 +78,7 @@ public class CanvasManager : MonoBehaviour
         while (paused) GoBack();
         GameManager.instance.rounds = 0;
         GameManager.instance.StartCoroutine(GameManager.instance.EndGame(true));
+        GameManager.instance.ReturnToMain();
     }
 
     public void Quit()

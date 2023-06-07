@@ -20,6 +20,14 @@ public class CustomizationManager : MonoBehaviour
     {
         if (instance == null) instance = this;
         animator = GetComponent<Animator>();
+
+        foreach (Player player in GameManager.instance.players)
+        {
+            colors.Remove(player.color);
+            player.teamText.text = "";
+        }
+
+        CanvasManager.instance.canPause = true;
     }
 
     public void ChangeColor()

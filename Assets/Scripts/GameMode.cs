@@ -34,23 +34,22 @@ public class GameMode : MonoBehaviour
 
     public void ChangeMode()
     {
-        return;
-        index++;
+        //index++;
 
-        // Protect from out of bounds
-        if (index > 3) index = 0;
+        //// Protect from out of bounds
+        //if (index > 3) index = 0;
 
-        // Change Game Mode
-        switch (index)
-        {
-            case 0: GameManager.instance.gameMode = GameManager.GameMode.Round; break;
-            case 1: GameManager.instance.gameMode = GameManager.GameMode.Elimination; break;
-            case 2: GameManager.instance.gameMode = GameManager.GameMode.Race; break;
-            case 3: GameManager.instance.gameMode = GameManager.GameMode.Time; break;
-        }
+        //// Change Game Mode
+        //switch (index)
+        //{
+        //    case 0: GameManager.instance.gameMode = GameManager.GameMode.Round; break;
+        //    case 1: GameManager.instance.gameMode = GameManager.GameMode.Elimination; break;
+        //    case 2: GameManager.instance.gameMode = GameManager.GameMode.Race; break;
+        //    case 3: GameManager.instance.gameMode = GameManager.GameMode.Time; break;
+        //}
 
-        // Visual Change
-        modeText.text = "Gamemode \n" + GameManager.instance.gameMode.ToString();
-        descriptionText.text = modeDescriptions[index];
+        //// Visual Change
+        //modeText.text = "Gamemode \n" + GameManager.instance.gameMode.ToString();
+        //descriptionText.text = modeDescriptions[index];
     }
 }

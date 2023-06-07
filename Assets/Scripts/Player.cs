@@ -15,6 +15,7 @@ using Unity.Services.Core;
 using UnityEngine.InputSystem.UI;
 using UnityEngine.InputSystem.DualShock;
 using UnityEngine.Windows;
+using UnityEngine.UI;
 
 public class Player : MonoBehaviour
 {
@@ -66,9 +67,9 @@ public class Player : MonoBehaviour
     public bool dashing;
 
     [Header("Audio")]
+    public AudioClip[] dashClips;
     public AudioClip pickUpClip;
     public AudioClip throwClip;
-    public AudioClip dashClip;
     public AudioClip bumpClip;
 
     [Header("Bumped")]
@@ -79,15 +80,24 @@ public class Player : MonoBehaviour
     public bool customize;
     public bool gamemode;
 
+    [Header("Other")]
+    public ParticleSystem milkEffect;
+    public ParticleSystem bumpEffect;
+    public GameObject trailPrefab;
+    public TextMeshProUGUI teamText;
+    public bool inMilk;
+    public int team;
+    public LayerMask dropMask;
+
     private Vector2 movement;
     private Vector3 dashDirection;
     [HideInInspector] public Rigidbody rb;
     [HideInInspector] public Transform gfx;
     private float baseRotateSpeed;
     private PlayerControls controls;
-    private PlayerInput input;
+    [HideInInspector] public PlayerInput input;
     private AudioSource audioSource;
-
+    
     private void Awake()
     {
         controls = new PlayerControls();
@@ -178,6 +188,9 @@ public class Player : MonoBehaviour
 
     private void Movement()
     {
+        if (movement.magnitude > .1f && inMilk && !milkEffect.isPlaying) milkEffect.Play();
+        else if ((movement.magnitude < .1f || !inMilk) && milkEffect.isPlaying) milkEffect.Stop();
+
         // Cap speed
         if (rb.velocity.magnitude > maxSpeed) rb.velocity = Vector3.ClampMagnitude(rb.velocity, maxSpeed);
 
@@ -222,7 +235,10 @@ public class Player : MonoBehaviour
         if (direction.x == 0 && direction.z == 0 || dashing || dashCD > 0 || !canDash ||
             (GameManager.instance.gameStarted && !GameManager.instance.roundStarted && SceneManager.GetActiveScene().buildIndex > 0)) return;
 
-        audioSource.clip = dashClip;
+        if (!Tutorial.instance.tutorialCompleted && Tutorial.instance.index == 5) Tutorial.instance.NextTask();
+
+        int random = UnityEngine.Random.Range(0, dashClips.Length);
+        audioSource.clip = dashClips[random];
         audioSource.Play();
         dashEffect.Play();
         dashing = true;
@@ -292,6 +308,16 @@ public class Player : MonoBehaviour
 
     private void Grab()
     {
+        if (GameManager.instance.resultPanel.activeInHierarchy)
+        {
+            var device = GetComponent<PlayerInput>().devices[0];
+
+            if (device.name.ToString() == "Keyboard") return;
+
+            GameManager.instance.returnToMain.GetComponent<Button>().interactable = false;
+            GameManager.instance.ReturnToMain();
+        }
+
         if (productsInRange.Count > 0)
             for (int i = 0; i < productsInRange.Count; i++)
                 if (productsInRange[i] == null)
@@ -326,15 +352,10 @@ public class Player : MonoBehaviour
         if (GameManager.instance.gameStarted && !GameManager.instance.roundStarted) return;
 
         if (holdProduct != null) // Drop product
-        {
             PickUpProduct(false);
-            return;
-        }
         else if (productsInRange.Count > 0) // Pick up product
-        {
             PickUpProduct(true);
-            return;
-        }
+
     }
     
     #region Grab Functions
@@ -345,6 +366,8 @@ public class Player : MonoBehaviour
 
         if (pickUp)
         {
+            if (!Tutorial.instance.tutorialCompleted && Tutorial.instance.index == 1) Tutorial.instance.NextTask();
+
             audioSource.clip = pickUpClip;
             audioSource.Play();
 
@@ -376,7 +399,9 @@ public class Player : MonoBehaviour
             closestBasket = null;
 
             // Slow Down player
-            maxSpeed = 5.5f - holdBasket.rb.mass;
+            maxSpeed = 4.5f; //  - holdBasket.rb.mass;
+            rotateSpeed = slowRotateSpeed;
+            canDash = false;
 
             GameManager.instance.basketsUsed++;
 
@@ -395,26 +420,30 @@ public class Player : MonoBehaviour
         }
         else
         {
-            LaunchBasket(gfx.forward);
-            
             // Release on head
 
-            //holdBasket.transform.SetParent(null);
-            //holdBasket.lastOwner = holdBasket.player;
-            //holdBasket.player = null;
-            //holdBasket.rb.isKinematic = false;
-            //holdBasket.coreCollider.enabled = true;
-            //closestBasket = holdBasket;
-            //SceneManager.MoveGameObjectToScene(holdBasket.gameObject, SceneManager.GetActiveScene());
-            //holdBasket = null;
-        }
+            // Prevent from dropping out of bounds
+            RaycastHit hit;
+            if (Physics.Raycast(transform.position, gfx.transform.forward, out hit, 2, dropMask))
+                return;
 
-        // Slow Down player
-        SlowDown(pickUp);
+            holdBasket.transform.SetParent(null);
+            holdBasket.transform.position += gfx.forward * 2;
+            holdBasket.lastOwner = holdBasket.player;
+            holdBasket.player = null;
+            holdBasket.rb.isKinematic = false;
+            holdBasket.coreCollider.enabled = true;
+            closestBasket = holdBasket;
+            SlowDown(false);
+            SceneManager.MoveGameObjectToScene(holdBasket.gameObject, SceneManager.GetActiveScene());
+            holdBasket = null;
+        }
     }
 
     public void LaunchBasket(Vector3 direction)
     {
+        if (!Tutorial.instance.tutorialCompleted && Tutorial.instance.index == 2) Tutorial.instance.NextTask();
+
         audioSource.clip = throwClip;
         audioSource.Play();
 
@@ -422,6 +451,11 @@ public class Player : MonoBehaviour
         holdBasket.transform.SetParent(null);
         holdBasket.coreCollider.enabled = true;
         holdBasket.rb.isKinematic = false;
+
+        // Add trail
+        GameObject trail = Instantiate(trailPrefab, Vector3.zero, Quaternion.identity, holdBasket.transform);
+        trail.transform.SetParent(holdBasket.transform);
+        trail.transform.localPosition = Vector3.zero;
 
         // Launch
         holdBasket.rb.AddForce(direction * throwForce * 1.5f, ForceMode.Impulse);
@@ -438,6 +472,8 @@ public class Player : MonoBehaviour
     {
         if (pickUp)
         {
+            if (!Tutorial.instance.tutorialCompleted && Tutorial.instance.index == 0) Tutorial.instance.NextTask();
+
             audioSource.clip = pickUpClip;
             audioSource.Play();
 
@@ -447,7 +483,6 @@ public class Player : MonoBehaviour
                 if (holdBasket.products.Count >= holdBasket.capacity) return;
 
                 holdBasket.AddProduct(GetProduct());
-                maxSpeed = 5.5f - holdBasket.rb.mass;
                 return;
             }
             
@@ -495,9 +530,16 @@ public class Player : MonoBehaviour
 
     public void LaunchProduct(Vector3 direction)
     {
+        if (!Tutorial.instance.tutorialCompleted && Tutorial.instance.index == 2) Tutorial.instance.NextTask();
+
         // Separate from player and enable own physics
         holdProduct.transform.SetParent(null);
         holdProduct.rb.isKinematic = false;
+
+        // Add trail
+        GameObject trail = Instantiate(trailPrefab, Vector3.zero, Quaternion.identity, holdProduct.transform);
+        trail.transform.SetParent(holdProduct.transform);
+        trail.transform.localPosition = Vector3.zero;
 
         // Launch
         holdProduct.rb.AddForce(direction * throwForce, ForceMode.Impulse);
@@ -539,11 +581,40 @@ public class Player : MonoBehaviour
         else return closestProduct; // Else pick up off the floor
     }
 
+    //public void PriorityPickUp()
+    //{
+    //    if (holdBasket != null || holdProduct != null) return;
+
+    //    // Shoot out raycast
+    //    RaycastHit hit;
+
+    //    if (Physics.Raycast(transform.position, gfx.transform.forward, out hit, 5))
+    //    {
+    //        Debug.DrawRay(transform.position, transform.TransformDirection(Vector3.forward) * hit.distance, Color.yellow);
+
+    //        print(hit.transform.name);
+
+    //        if (hit.transform.GetComponent<Product>())
+    //        {
+    //            holdProduct = hit.transform.GetComponent<Product>();
+    //            PickUpProduct(true, true);
+    //        }
+    //        else if (hit.transform.GetComponent<Shelf>())
+    //        {
+    //            holdProduct = Instantiate(hit.transform.GetComponent<Shelf>().product.gameObject, Vector3.zero, Quaternion.identity).GetComponent<Product>();
+    //            PickUpProduct(true, true);
+    //        }
+    //        else if (hit.transform.GetComponent<Basket>()) closestBasket = hit.transform.GetComponent<Basket>();
+    //    }
+    //}
+
     #endregion
 
     public void Bump(Vector3 direction, float force)
     {
         if (bumpDuration > 0) return;
+
+        if (!Tutorial.instance.tutorialCompleted && Tutorial.instance.index == 6) Tutorial.instance.NextTask();
 
         GameManager.instance.bumps++;
 
@@ -561,6 +632,7 @@ public class Player : MonoBehaviour
 
         audioSource.clip = bumpClip;
         audioSource.Play();
+        bumpEffect.Play();
         rb.velocity = Vector3.zero;
         rb.AddForce(direction * force * Time.deltaTime, ForceMode.Impulse);
 
@@ -662,7 +734,7 @@ public class Player : MonoBehaviour
 
         if (collision.collider.TryGetComponent(out Product product))
         {
-            if (product.rb.velocity.magnitude > 2.5f)
+            if (product.rb.velocity.magnitude > 2.5f && GameManager.instance.roundStarted)
             {
                 product.rb.velocity = Vector3.zero;
                 PickUpProduct(product);

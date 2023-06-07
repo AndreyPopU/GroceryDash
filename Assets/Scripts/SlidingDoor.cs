@@ -29,7 +29,11 @@ public class SlidingDoor : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        if (!inRange.Contains(other.transform) && (other.GetComponent<Player>() || other.GetComponent<NavMeshAgent>())) inRange.Add(other.transform);
+        if (!inRange.Contains(other.transform) && (other.GetComponent<Player>() || other.GetComponent<NavMeshAgent>()))
+        {
+            if (!Tutorial.instance.tutorialCompleted) Tutorial.instance.StartTutorial();
+            inRange.Add(other.transform);
+        }
     }
 
     private void OnTriggerExit(Collider other)

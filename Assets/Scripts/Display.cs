@@ -12,11 +12,13 @@ public class Display : MonoBehaviour
     private void Start()
     {
         image = transform.GetChild(0).GetComponent<Image>();
-        group = image.GetComponent<CanvasGroup>();
+        if (image != null) group = image.GetComponent<CanvasGroup>();
     }
 
     public void ShowIcon()
     {
+        if (!Tutorial.instance.tutorialCompleted && Tutorial.instance.index == 4) Tutorial.instance.NextTask();
+
         if (runningCoroutine != null) StopCoroutine(runningCoroutine);
         runningCoroutine = StartCoroutine(ShowIconCO());
     }
@@ -25,7 +27,7 @@ public class Display : MonoBehaviour
     {
         YieldInstruction instruction = new WaitForFixedUpdate();
 
-        image.gameObject.SetActive(true);
+        if (image!= null) image.gameObject.SetActive(true);
 
         while (group.alpha < 1)
         {
@@ -41,7 +43,7 @@ public class Display : MonoBehaviour
             yield return instruction;
         }
 
-        image.gameObject.SetActive(false);
+        if (image != null) image.gameObject.SetActive(false);
         runningCoroutine = null;
     }
 }

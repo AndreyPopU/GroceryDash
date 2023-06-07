@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using Unity.Services.Analytics;
 using Unity.VisualScripting;
 using UnityEngine;
-using UnityEngine.AI;
 using UnityEngine.Analytics;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
@@ -14,14 +13,12 @@ public class Checkout : MonoBehaviour
     public Product scanningProduct;
     public Transform scanPosition;
     public bool scanning;
-    public int scans;
-    public float workCD;
-    public bool cooldown;
+    public bool scanCD;
     public bool open = true;
     public bool self;
     public Material openMat, closedMat;
-    public GameObject cashier;
     public Transform checkoutPoint;
+    public ParticleSystem confetti;
 
     [Header("Basket")]
     public Basket basket;
@@ -49,20 +46,6 @@ public class Checkout : MonoBehaviour
     private void Update()
     {
         if (scanningProduct != null && !scanning) Scan();
-
-        if (!self)
-        {
-            if (workCD > 0 && scans <= 0) workCD -= Time.deltaTime;
-            else if (!open) Open(true);
-        }
-    }
-
-    private void ChangeColor()
-    {
-        open = !open;
-
-        if (open) lights.material = openMat;
-        else lights.material = closedMat;
     }
 
     private void OnTriggerStay(Collider other)
@@ -75,10 +58,10 @@ public class Checkout : MonoBehaviour
 
     public void Scan()
     {
-        if (cooldown || workCD > 0) return;
+        if (scanCD) return;
 
         scanning = true;
-        cooldown = true;
+        scanCD = true;
         if (runningCoroutine != null) StopCoroutine(runningCoroutine);
         runningCoroutine = StartCoroutine(ScanCO());
     }
@@ -122,13 +105,19 @@ public class Checkout : MonoBehaviour
         // Decide on outcome
 
         // If main menu just give positive outcome
-        if (SceneManager.GetActiveScene().buildIndex == 0) feedbackImage.sprite = correctIcon;
+        if (SceneManager.GetActiveScene().buildIndex == 0)
+        {
+            if (!Tutorial.instance.tutorialCompleted && Tutorial.instance.index == 3) Tutorial.instance.NextTask();
+            confetti.Play();
+            feedbackImage.sprite = correctIcon;
+        }
         else // Actually decide
         {
             // If the owner of the product needs to buy said product and it's not yet completed, then do that
             if (scanningProduct.lastOwner.shoppingList.shoppingItems.ContainsKey(scanningProduct.productName) &&
                 scanningProduct.lastOwner.shoppingList.shoppingItems[scanningProduct.productName] > 0)
             {
+                confetti.Play();
                 feedbackImage.sprite = correctIcon;
                 scanningProduct.lastOwner.shoppingList.Buy(scanningProduct.productName);
             }
@@ -169,31 +158,14 @@ public class Checkout : MonoBehaviour
             basket = null;
         }
 
-        // If not self checkout, count scans before cashier break
-        if (!self)
-        {
-            scans--;
-            if (scans <= 0) Open(false);
-        }
-
         // Wait some time for players to recognize, can be interrupted by another purchase
         yield return new WaitForSeconds(.5f);
-        cooldown = false;
+        scanCD = false;
 
         // Then wait some more
         yield return new WaitForSeconds(1f);
 
         canvas.gameObject.SetActive(false);
         runningCoroutine = null;
-    }
-
-    void Open(bool _open)
-    {
-        if (_open) scans = 10;
-        else workCD = 30; 
-        open = _open;
-        lights.material = _open ? openMat : closedMat;
-        Vector3 destination = _open ? checkoutPoint.position : LevelManager.instance.exitPoint.position;
-        cashier.GetComponent<NavMeshAgent>().SetDestination(destination);
     }
 }

@@ -1,3 +1,4 @@
+using JetBrains.Annotations;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -17,11 +18,21 @@ public class LevelManager : MonoBehaviour
     public Transform exitPoint;
     public bool listsBound;
 
+    [Header("Spilling Milk")]
+    public GameObject spilledMilk;
+    public List<Transform> spillPositions;
+    private int spills;
+    private float spillCD = 15;
+    
+
     private Basket[] baskets;
 
     private void Awake()
     {
         if (instance == null) instance = this;
+
+        Destroy(transform.GetChild(7).gameObject, 3);
+        Destroy(transform.GetChild(6).gameObject, 3);
     }
 
     void Start()
@@ -56,7 +67,28 @@ public class LevelManager : MonoBehaviour
             });
 #endif
     }
-     
+
+    private void Update()
+    {
+        if (spills < 2)
+        {
+            if (spillCD > 0) spillCD -= Time.deltaTime;
+            else
+            {
+                SpawnMilk();
+                spills++;
+                spillCD = 30;
+            }
+        }
+    }
+
+    public void SpawnMilk()
+    {
+        int random = UnityEngine.Random.Range(0, spillPositions.Count);
+        Instantiate(spilledMilk, spillPositions[random].position, spilledMilk.transform.rotation);
+        spillPositions.RemoveAt(random);
+    }
+
     public void PreparePlayers()
     {
         for (int i = 0; i < players.Count; i++)

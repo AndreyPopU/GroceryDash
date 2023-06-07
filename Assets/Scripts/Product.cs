@@ -68,4 +68,14 @@ public class Product : MonoBehaviour
             if (pick.player.productsInRange.Contains(this)) pick.player.productsInRange.Remove(this);
         }
     }
+
+    private void OnCollisionEnter(Collision collision)
+    {
+        // If trail active - disable
+        if (GetComponentInChildren<ParticleSystem>())
+        {
+            GetComponentInChildren<ParticleSystem>().Stop();
+            Destroy(GetComponentInChildren<ParticleSystem>().gameObject, 2);
+        }
+    }
 }

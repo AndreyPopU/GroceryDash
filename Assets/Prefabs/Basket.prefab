@@ -1359,7 +1359,7 @@ MeshRenderer:
   m_RendererPriority: 0
   m_Materials:
   - {fileID: -2813467912831258332, guid: f40f18f31badd7a45ac69f0553b074c1, type: 3}
-  - {fileID: -6629797300637803691, guid: f40f18f31badd7a45ac69f0553b074c1, type: 3}
+  - {fileID: 2100000, guid: c573a0376099e1f488ba163a3b2bfe42, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -1425,6 +1425,7 @@ MonoBehaviour:
   coreCollider: {fileID: 9057173673558014094}
   player: {fileID: 0}
   lastOwner: {fileID: 0}
+  canPickUp: 1
 --- !u!65 &9057173673558014094
 BoxCollider:
   m_ObjectHideFlags: 0

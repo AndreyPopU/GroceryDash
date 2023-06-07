@@ -561,7 +561,8 @@ Transform:
   m_LocalPosition: {x: -0.00000017881393, y: 2.5, z: 1.7500001}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
-  m_Children: []
+  m_Children:
+  - {fileID: 5716772073900539992}
   m_Father: {fileID: 5860057971964875767}
   m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: -90, z: 0}
@@ -630,6 +631,7 @@ MonoBehaviour:
   closedMat: {fileID: 2100000, guid: 5177fcf4f0c9f5b429532bd01c202bfb, type: 2}
   cashier: {fileID: 0}
   checkoutPoint: {fileID: 0}
+  confetti: {fileID: 5716772073900539993}
   basket: {fileID: 0}
   stack: {fileID: 7027563985898245278}
   canvas: {fileID: 671556489}
@@ -1151,4 +1153,71 @@ MonoBehaviour:
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 8772582883497735842, guid: eb19c83b0bd61874bb2bda4040a8780b, type: 3}
   m_PrefabInstance: {fileID: 3542991798275696345}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1001 &7632930912190130525
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    m_TransformParent: {fileID: 2116566034}
+    m_Modifications:
+    - target: {fileID: 2790986919247866117, guid: ec53e42463d756a4e86e05207005933d, type: 3}
+      propertyPath: m_RootOrder
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2790986919247866117, guid: ec53e42463d756a4e86e05207005933d, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2790986919247866117, guid: ec53e42463d756a4e86e05207005933d, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0.1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2790986919247866117, guid: ec53e42463d756a4e86e05207005933d, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2790986919247866117, guid: ec53e42463d756a4e86e05207005933d, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 0.7071068
+      objectReference: {fileID: 0}
+    - target: {fileID: 2790986919247866117, guid: ec53e42463d756a4e86e05207005933d, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: -0.7071068
+      objectReference: {fileID: 0}
+    - target: {fileID: 2790986919247866117, guid: ec53e42463d756a4e86e05207005933d, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2790986919247866117, guid: ec53e42463d756a4e86e05207005933d, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2790986919247866117, guid: ec53e42463d756a4e86e05207005933d, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: -90
+      objectReference: {fileID: 0}
+    - target: {fileID: 2790986919247866117, guid: ec53e42463d756a4e86e05207005933d, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2790986919247866117, guid: ec53e42463d756a4e86e05207005933d, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2790986919247866118, guid: ec53e42463d756a4e86e05207005933d, type: 3}
+      propertyPath: m_Name
+      value: ConfettiEffect
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: ec53e42463d756a4e86e05207005933d, type: 3}
+--- !u!4 &5716772073900539992 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 2790986919247866117, guid: ec53e42463d756a4e86e05207005933d, type: 3}
+  m_PrefabInstance: {fileID: 7632930912190130525}
+  m_PrefabAsset: {fileID: 0}
+--- !u!198 &5716772073900539993 stripped
+ParticleSystem:
+  m_CorrespondingSourceObject: {fileID: 2790986919247866116, guid: ec53e42463d756a4e86e05207005933d, type: 3}
+  m_PrefabInstance: {fileID: 7632930912190130525}
   m_PrefabAsset: {fileID: 0}
