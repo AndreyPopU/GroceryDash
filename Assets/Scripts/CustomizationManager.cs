@@ -4,30 +4,61 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.InputSystem.DualShock;
 using UnityEngine.Windows;
+using static Unity.VisualScripting.Member;
 
 public class CustomizationManager : MonoBehaviour
 {
     public static CustomizationManager instance;
 
     public List<Color> colors;
+    public List<GameObject> hats;
     public string[] colorNames;
     public int colorIndex;
+    public int hatIndex;
 
     public Player player;
     private Animator animator;
+    private AudioSource source;
 
     private void Awake()
     {
         if (instance == null) instance = this;
         animator = GetComponent<Animator>();
+    }
 
-        foreach (Player player in GameManager.instance.players)
+    private void Start()
+    {
+        source = GetComponent<AudioSource>();
+
+        if (GameManager.instance.players.Count > 0)
         {
-            colors.Remove(player.color);
-            player.teamText.text = "";
+            foreach (Player player in GameManager.instance.players)
+            {
+                colors.Remove(player.color);
+                player.teamText.text = "";
+            }
         }
 
         CanvasManager.instance.canPause = true;
+    }
+
+    public void ChangeHat()
+    {
+        hatIndex++;
+
+        // Protect from out of bounds
+        if (hatIndex >= hats.Count) hatIndex = 0;
+
+        // Add previous hat of player to available hats
+        Destroy(player.hat);
+
+        // Change player hat
+
+        // Remove previous hat
+        GameObject hat = Instantiate(hats[hatIndex], player.hatPosition.position, Quaternion.identity);
+        hat.transform.SetParent(player.hatPosition);
+        hat.transform.localRotation = Quaternion.identity;
+        player.hat = hat;
     }
 
     public void ChangeColor()
@@ -44,10 +75,15 @@ public class CustomizationManager : MonoBehaviour
         // Change player color
         player.color = colors[colorIndex + 1];
         player.colorName = colorNames[colorIndex + 1];
-        player.gfx.GetComponent<MeshRenderer>().material.color = player.color;
+        player.SetColor();
         colors.RemoveAt(colorIndex + 1);
 
         // Set Controller Color to player color
         player.EnableController(true);
+    }
+    public void PlaySound(AudioClip sound)
+    {
+        source.clip = sound;
+        source.Play();
     }
 }

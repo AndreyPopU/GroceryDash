@@ -53,6 +53,7 @@ public class GameManager : MonoBehaviour
     public GameObject returnToMain;
     public GameObject logo;
     public Color inkColor;
+    public Player keyboardPlayer;
 
     private PlayerInputManager inputManager;
 
@@ -89,10 +90,17 @@ public class GameManager : MonoBehaviour
         zone.playerCountText.text = zone.playerCount + "/" + playerCount;
         joinCanvas[input.playerIndex].SetActive(false);
 
-        // Assign random color and add to list of players
+        // Assign random color and hat, and add to list of players
+        int randomHat = UnityEngine.Random.Range(0, CustomizationManager.instance.hats.Count);
         int randomColor = UnityEngine.Random.Range(0, CustomizationManager.instance.colors.Count);
         Player player = input.GetComponent<Player>();
         player.index = input.playerIndex;
+        // Hat
+        GameObject hat = Instantiate(CustomizationManager.instance.hats[randomHat], player.hatPosition.position, Quaternion.identity);
+        hat.transform.SetParent(player.hatPosition);
+        hat.transform.localRotation = Quaternion.identity;
+        player.hat = hat;
+        // Color
         player.color = CustomizationManager.instance.colors[randomColor];
         player.colorName = CustomizationManager.instance.colorNames[randomColor];
         CustomizationManager.instance.colors.RemoveAt(randomColor);
@@ -103,6 +111,9 @@ public class GameManager : MonoBehaviour
 
         // Set Controller Color to player color
         player.EnableController(true);
+
+        var device = input.devices[0];
+        if (device.name.ToString() == "Keyboard") keyboardPlayer = player;
     }
 
     public void DisconnectPlayer(Player player)
@@ -125,8 +136,6 @@ public class GameManager : MonoBehaviour
 
         if (gameMode == GameMode.Round) // Teammode
         {
-            players.Shuffle();
-
             for (int i = 0; i < players.Count; i++)
             {
                 if (i % 2 == 0) // Even - go to team 1
@@ -134,6 +143,7 @@ public class GameManager : MonoBehaviour
                     players[i].shoppingList = shoppingList1;
                     players[i].teamText.text = "Team 1";
                     shoppingList1.owners.Add(players[i]);
+                    shoppingList1.ownerIcons[shoppingList1.owners.Count - 1].color = shoppingList1.owners[shoppingList1.owners.Count - 1].color;
                     shoppingList1.gameObject.SetActive(true);
                 }
                 else // Odd - go to team 2
@@ -141,6 +151,7 @@ public class GameManager : MonoBehaviour
                     players[i].shoppingList = shoppingList2;
                     players[i].teamText.text = "Team 2";
                     shoppingList2.owners.Add(players[i]);
+                    shoppingList2.ownerIcons[shoppingList2.owners.Count - 1].color = shoppingList2.owners[shoppingList2.owners.Count - 1].color;
                     shoppingList2.gameObject.SetActive(true);
                 }
             }
@@ -170,6 +181,8 @@ public class GameManager : MonoBehaviour
         {
             players[i].canMove = start;
             players[i].canDash = start;
+            players[i].milkEffect.Stop();
+            players[i].inMilk = false;
         }
 
         if (start) StartGame();
@@ -212,6 +225,7 @@ public class GameManager : MonoBehaviour
         Timer timer = GetComponent<Timer>();
         timer.enabled = false;
         timer.roundText.gameObject.SetActive(false);
+        LevelManager.instance.EndRound();
 
         // Display winners
         if (!playerInvoked)
@@ -257,7 +271,7 @@ public class GameManager : MonoBehaviour
             if (player.holdBasket != null)
             {
                 player.holdBasket.canPickUp = false;
-                player.LaunchProduct(player.gfx.forward);
+                player.LaunchBasket(player.gfx.forward);
             }
             if (player.holdProduct != null)
             {
@@ -298,6 +312,9 @@ public class GameManager : MonoBehaviour
         // If there are still rounds to be played reload the level
         if (rounds > 0)
         {
+            FadePanel.instance.Fade(1);
+            yield return new WaitForSeconds(1.25f);
+
             SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
             CanvasManager.instance.canPause = true;
         }
@@ -385,10 +402,7 @@ public class GameManager : MonoBehaviour
         if (gameMode == GameMode.Round) // Teammode
         {
             // Randomize products in both teams' shopping lists
-            int random = UnityEngine.Random.Range(0, 3);
-
-            //shoppingList1.shoppingItems.Add("Apple", 1);
-            //shoppingList2.shoppingItems.Add("Apple", 1);
+            int random = UnityEngine.Random.Range(0, 5);
 
             switch (random)
             {
@@ -403,10 +417,19 @@ public class GameManager : MonoBehaviour
                     shoppingItems.Add("Waffle", 2);
                     break;
                 case 2:
-
                     shoppingItems.Add("Bread", 2);
                     shoppingItems.Add("Lollipop", 1);
                     shoppingItems.Add("Croissant", 2);
+                    break;
+                case 3:
+                    shoppingItems.Add("Apple", 2);
+                    shoppingItems.Add("Eggs", 1);
+                    shoppingItems.Add("Ice Cream", 2);
+                    break;
+                case 4:
+                    shoppingItems.Add("Milk", 2);
+                    shoppingItems.Add("Yoghurt", 1);
+                    shoppingItems.Add("Shrimp", 2);
                     break;
             }
         }
@@ -422,7 +445,7 @@ public class GameManager : MonoBehaviour
             item.transform.localPosition = new Vector3(0, shoppingList1.offset, 0);
             item.SetText(pair.Value, pair.Key);
             shoppingList1.items.Add(item);
-            shoppingList1.offset -= 50;
+            shoppingList1.offset -= 55;
         }
 
         if (shoppingList2.gameObject.activeInHierarchy) // If second list is active, fill it too
@@ -434,7 +457,7 @@ public class GameManager : MonoBehaviour
                 item.transform.localPosition = new Vector3(0, shoppingList2.offset, 0);
                 item.SetText(pair.Value, pair.Key);
                 shoppingList2.items.Add(item);
-                shoppingList2.offset -= 50;
+                shoppingList2.offset -= 55;
             }
         }
     }

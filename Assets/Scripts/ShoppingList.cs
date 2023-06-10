@@ -5,12 +5,14 @@ using Unity.Services.Analytics;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.Analytics;
+using UnityEngine.UI;
 
 public class ShoppingList : MonoBehaviour
 {
     public Dictionary<string, int> shoppingItems = new Dictionary<string, int>();
     public List<ShoppingItem> items = new List<ShoppingItem>();
     public List<Player> owners;
+    public Image[] ownerIcons;
     public string team;
     public Transform contents;
     public GameObject itemPrefab;

@@ -29,12 +29,14 @@ public class SmartDropdown : MonoBehaviour
 
     public void ChangeValue(int desire)
     {
-        // Protect out of bounds - Cycle instead
-        if (desire > 0 && index == options.Count - 1) index = -1;
-        if (desire < 0 && index == 0) index = options.Count;
-
         // Update value and segments
         index += desire;
+
+        // Protect out of bounds - Cycle instead
+        if (index == options.Count) index = 0;
+        if (index == -1) index = options.Count - 1;
+
+        // Update text
         valueText.text = options[index];
     }
 }

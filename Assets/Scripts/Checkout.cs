@@ -31,6 +31,10 @@ public class Checkout : MonoBehaviour
     public Sprite correctIcon, incorrectIcon;
     public Image checkoutImage;
 
+    [Header("Sound")]
+    public AudioClip correctClip;
+    public AudioClip incorrectClip;
+
     private Coroutine runningCoroutine;
     private MeshRenderer lights;
     private AudioSource audioSource;
@@ -107,8 +111,9 @@ public class Checkout : MonoBehaviour
         // If main menu just give positive outcome
         if (SceneManager.GetActiveScene().buildIndex == 0)
         {
-            if (!Tutorial.instance.tutorialCompleted && Tutorial.instance.index == 3) Tutorial.instance.NextTask();
+            if (Tutorial.instance.tutorialCompleted == 0 && Tutorial.instance.index == 3) Tutorial.instance.NextTask();
             confetti.Play();
+            audioSource.clip = correctClip;
             feedbackImage.sprite = correctIcon;
         }
         else // Actually decide
@@ -118,14 +123,19 @@ public class Checkout : MonoBehaviour
                 scanningProduct.lastOwner.shoppingList.shoppingItems[scanningProduct.productName] > 0)
             {
                 confetti.Play();
+                audioSource.clip = correctClip;
                 feedbackImage.sprite = correctIcon;
                 scanningProduct.lastOwner.shoppingList.Buy(scanningProduct.productName);
             }
             else
             // If the owner of the product needs has the item in the shopping list but has already bought enough
             // or doesn't have the item at all, display incorrectly
-            if (!scanningProduct.lastOwner.shoppingList.shoppingItems.ContainsKey(scanningProduct.productName) ||
-                scanningProduct.lastOwner.shoppingList.shoppingItems[scanningProduct.productName] <= 0) feedbackImage.sprite = incorrectIcon;
+            if (!scanningProduct.lastOwner.shoppingList.shoppingItems.ContainsKey(scanningProduct.productName) || 
+                scanningProduct.lastOwner.shoppingList.shoppingItems[scanningProduct.productName] <= 0)
+            {
+                feedbackImage.sprite = incorrectIcon;
+                audioSource.clip = incorrectClip;
+            }
         }
 
         audioSource.Play();

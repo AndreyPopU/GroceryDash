@@ -11,18 +11,28 @@ public class SlidingDoor : MonoBehaviour
     public bool open;
 
     private Animator animator;
+    private AudioSource source;
 
     private void Start()
     {
         animator = GetComponentInParent<Animator>();
+        source = GetComponent<AudioSource>();
     }
 
     void Update()
     {
         // Animate
-        if (inRange.Count > 0 && !open) open = true;
-        
-        if (inRange.Count  <= 0 && open) open = false;
+        if (inRange.Count > 0 && !open)
+        {
+            open = true;
+            source.Play();
+        }
+
+        if (inRange.Count <= 0 && open)
+        {
+            open = false;
+            source.Play();
+        }
 
         animator.SetBool("open", open);
     }
@@ -31,7 +41,7 @@ public class SlidingDoor : MonoBehaviour
     {
         if (!inRange.Contains(other.transform) && (other.GetComponent<Player>() || other.GetComponent<NavMeshAgent>()))
         {
-            if (!Tutorial.instance.tutorialCompleted) Tutorial.instance.StartTutorial();
+            if (Tutorial.instance.tutorialCompleted == 0) Tutorial.instance.StartTutorial();
             inRange.Add(other.transform);
         }
     }

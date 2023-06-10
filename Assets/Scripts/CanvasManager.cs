@@ -19,10 +19,14 @@ public class CanvasManager : MonoBehaviour
     public bool canPause;
     public bool keyboard;
     public MyButton selectedButton;
+    public MyButton focusedButton;
+    public InputSystemUIInputModule systemUI;
 
     private void Awake()
     {
         if (instance == null) instance = this;
+
+        systemUI = FindObjectOfType<InputSystemUIInputModule>();
     }
 
     public void PauseGame()
@@ -32,17 +36,19 @@ public class CanvasManager : MonoBehaviour
         paused = !paused;
         panelsInOrder[0].SetActive(paused);
 
+        foreach (Player player in GameManager.instance.players)
+        {
+            player.rb.isKinematic = paused;
+            player.canMove = !paused;
+            player.canDash = !paused;
+        }
+
         if (paused)
         {
             ChangeFocus(buttonsInOrder[0]);
             LockPauseButtons(false);
-            Time.timeScale = 0;
         }
-        else
-        {
-            Time.timeScale = 1;
-            panelsInOrder[1].SetActive(false);
-        }
+        else panelsInOrder[1].SetActive(false);
     }
 
     public void PauseGame(PlayerInput input)
@@ -50,7 +56,7 @@ public class CanvasManager : MonoBehaviour
         if (!canPause) return;
 
         // Assign player action scheme to the UI - (grants acces to the UI only to that player)
-        FindObjectOfType<InputSystemUIInputModule>().actionsAsset = input.actions;
+        systemUI.actionsAsset = input.actions;
         var device = input.devices[0];
         if (device.name == "Keyboard") keyboard = true;
         else keyboard = false;

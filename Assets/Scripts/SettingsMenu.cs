@@ -11,16 +11,12 @@ public class SettingsMenu : MonoBehaviour
     public SmartSlider soundSlider;
     public SmartSlider musicSlider;
     public GameObject settingsMenu;
+    public Toggle fullscreenToggle;
 
     Resolution[] resolutions;
+    List<Resolution> relevantResolutions = new List<Resolution>();
 
-    private bool isFullscreen;
-
-    private void Start()
-    {
-        Screen.fullScreen = isFullscreen;
-        LoadSettings();
-    }
+    private void Start() => LoadSettings();
 
     public void FindResolution(bool saved)
     {
@@ -29,11 +25,18 @@ public class SettingsMenu : MonoBehaviour
         List<string> options = new List<string>();
         int currentResolution = 0;
         if (saved) currentResolution = resolutionDropdown.index = PlayerPrefs.GetInt(SaveLoadManager.resolutionString);
+        int i = 0;
 
-        for (int i = 0; i < resolutions.Length; i++)
+        foreach (Resolution resolution in resolutions)
         {
-            options.Add(resolutions[i].width + " x " + resolutions[i].height);
-            if (!saved) { if (resolutions[i].width == Screen.width && resolutions[i].height == Screen.height) currentResolution = i; }
+            // Add only resolutions that match the screen hertz
+            if (resolution.refreshRate == Screen.currentResolution.refreshRate)
+            {
+                options.Add(resolution.width + " x " + resolution.height);
+                relevantResolutions.Add(resolution);
+                if (!saved) { if (resolution.width == Screen.width && resolution.height == Screen.height) currentResolution = i; }
+                i++;
+            }
         }
 
         resolutionDropdown.AddOptions(options);
@@ -59,7 +62,6 @@ public class SettingsMenu : MonoBehaviour
         {
             soundSlider.index = PlayerPrefs.GetInt(SaveLoadManager.soundString);
             soundSlider.ChangeValue(0);
-            
         }
 
         // Load Music Value
@@ -70,17 +72,19 @@ public class SettingsMenu : MonoBehaviour
         }
 
         // Fullscreen
-        if (PlayerPrefs.HasKey(SaveLoadManager.fullscreenString)) isFullscreen = SaveLoadManager.IntToBool(PlayerPrefs.GetInt(SaveLoadManager.fullscreenString));
-        else isFullscreen = Screen.fullScreen;
-        Screen.fullScreen = isFullscreen;
+        if (PlayerPrefs.HasKey(SaveLoadManager.fullscreenString))
+        {
+            fullscreenToggle.isOn = SaveLoadManager.IntToBool(PlayerPrefs.GetInt(SaveLoadManager.fullscreenString));
+            Screen.fullScreen = fullscreenToggle.isOn;
+        }
+        else fullscreenToggle.isOn = Screen.fullScreen;
     }
 
     public void SaveSettings()
     {
         SetResolution();
-        //SetQuality();
-        Screen.fullScreen = isFullscreen;
-        SaveLoadManager.SaveSettings(soundSlider.index, musicSlider.index, SaveLoadManager.BoolToInt(isFullscreen), resolutionDropdown.index);
+        Screen.fullScreen = fullscreenToggle.isOn;
+        SaveLoadManager.SaveSettings(soundSlider.index, musicSlider.index, SaveLoadManager.BoolToInt(fullscreenToggle.isOn), resolutionDropdown.index);
     }
 
     // Quality
@@ -89,10 +93,10 @@ public class SettingsMenu : MonoBehaviour
     // Resolution
     public void SetResolution()
     {
-        Resolution resolution = resolutions[resolutionDropdown.index];
-        Screen.SetResolution(resolution.width, resolution.height, isFullscreen);
+        Resolution resolution = relevantResolutions[resolutionDropdown.index];
+        Screen.SetResolution(resolution.width, resolution.height, Screen.fullScreen);
     }
 
     // Fullscreen
-    public void Fullscreen() => isFullscreen = !isFullscreen;
+    //public void Fullscreen() => isFulscreen = fullscreenToggle.isOn;
 }

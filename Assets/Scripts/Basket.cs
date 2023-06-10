@@ -142,6 +142,7 @@ public class Basket : MonoBehaviour
                 transform.rotation = Quaternion.identity;
                 canPickUp = false;
                 checkout.basket = this;
+                if (lastOwner != null) lastOwner.closestBasket = null;
             }
 
             // Start scanning items

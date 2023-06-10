@@ -17,7 +17,7 @@ public class Display : MonoBehaviour
 
     public void ShowIcon()
     {
-        if (!Tutorial.instance.tutorialCompleted && Tutorial.instance.index == 4) Tutorial.instance.NextTask();
+        if (Tutorial.instance.tutorialCompleted == 0 && Tutorial.instance.index == 4) Tutorial.instance.NextTask();
 
         if (runningCoroutine != null) StopCoroutine(runningCoroutine);
         runningCoroutine = StartCoroutine(ShowIconCO());

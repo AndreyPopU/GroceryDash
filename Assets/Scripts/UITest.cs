@@ -7,37 +7,33 @@ public class UITest : MonoBehaviour
 {
     int UILayer;
 
-    private void Start()
-    {
-        UILayer = LayerMask.NameToLayer("UI");
-    }
+    private void Start() => UILayer = LayerMask.NameToLayer("UI");
 
     private void Update()
     {
-        IsPointerOverUIElement();
+        IsPointerOverUIElement(GetEventSystemRaycastResults());
     }
 
-
     //Returns 'true' if we touched or hovering on Unity UI element.
-    public bool IsPointerOverUIElement()
+    private void IsPointerOverUIElement(List<RaycastResult> eventSystemRaysastResults)
     {
-        return IsPointerOverUIElement(GetEventSystemRaycastResults());
-    }
+        if (GameManager.instance.keyboardPlayer == null) return;
 
-
-    //Returns 'true' if we touched or hovering on Unity UI element.
-    private bool IsPointerOverUIElement(List<RaycastResult> eventSystemRaysastResults)
-    {
         for (int index = 0; index < eventSystemRaysastResults.Count; index++)
         {
-            RaycastResult curRaysastResult = eventSystemRaysastResults[index];
-            if (curRaysastResult.gameObject.layer == UILayer)
+            RaycastResult raycastResult = eventSystemRaysastResults[index];
+            if (raycastResult.gameObject.layer == UILayer)
             {
-                print("Over " + curRaysastResult.gameObject.name);
-                return true;
+                if (raycastResult.gameObject.TryGetComponent(out MyButton button))
+                {
+                    if (!button.mouseOver)
+                    {
+                        CanvasManager.instance.systemUI.actionsAsset = GameManager.instance.keyboardPlayer.input.actions;
+                        button.mouseOver = true;
+                    }
+                }
             }
         }
-        return false;
     }
 
 

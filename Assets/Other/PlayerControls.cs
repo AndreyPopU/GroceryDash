@@ -89,6 +89,15 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""Hat"",
+                    ""type"": ""Button"",
+                    ""id"": ""0b3d7428-c3a4-45cb-b99a-cd201f8ddc60"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
                 }
             ],
             ""bindings"": [
@@ -298,6 +307,28 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""groups"": ""Keyboard"",
                     ""action"": ""Display"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""f2555010-daca-4933-b537-838299703b1a"",
+                    ""path"": ""<Gamepad>/buttonNorth"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""Gamepad"",
+                    ""action"": ""Hat"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""a23716dd-3603-43df-a7eb-05c98678a6a9"",
+                    ""path"": ""<Keyboard>/r"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""Keyboard"",
+                    ""action"": ""Hat"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 }
@@ -859,6 +890,7 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
         m_PlayerMovement_Grab = m_PlayerMovement.FindAction("Grab", throwIfNotFound: true);
         m_PlayerMovement_Pause = m_PlayerMovement.FindAction("Pause", throwIfNotFound: true);
         m_PlayerMovement_Display = m_PlayerMovement.FindAction("Display", throwIfNotFound: true);
+        m_PlayerMovement_Hat = m_PlayerMovement.FindAction("Hat", throwIfNotFound: true);
         // UI
         m_UI = asset.FindActionMap("UI", throwIfNotFound: true);
         m_UI_Navigate = m_UI.FindAction("Navigate", throwIfNotFound: true);
@@ -939,6 +971,7 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
     private readonly InputAction m_PlayerMovement_Grab;
     private readonly InputAction m_PlayerMovement_Pause;
     private readonly InputAction m_PlayerMovement_Display;
+    private readonly InputAction m_PlayerMovement_Hat;
     public struct PlayerMovementActions
     {
         private @PlayerControls m_Wrapper;
@@ -950,6 +983,7 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
         public InputAction @Grab => m_Wrapper.m_PlayerMovement_Grab;
         public InputAction @Pause => m_Wrapper.m_PlayerMovement_Pause;
         public InputAction @Display => m_Wrapper.m_PlayerMovement_Display;
+        public InputAction @Hat => m_Wrapper.m_PlayerMovement_Hat;
         public InputActionMap Get() { return m_Wrapper.m_PlayerMovement; }
         public void Enable() { Get().Enable(); }
         public void Disable() { Get().Disable(); }
@@ -980,6 +1014,9 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
             @Display.started += instance.OnDisplay;
             @Display.performed += instance.OnDisplay;
             @Display.canceled += instance.OnDisplay;
+            @Hat.started += instance.OnHat;
+            @Hat.performed += instance.OnHat;
+            @Hat.canceled += instance.OnHat;
         }
 
         private void UnregisterCallbacks(IPlayerMovementActions instance)
@@ -1005,6 +1042,9 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
             @Display.started -= instance.OnDisplay;
             @Display.performed -= instance.OnDisplay;
             @Display.canceled -= instance.OnDisplay;
+            @Hat.started -= instance.OnHat;
+            @Hat.performed -= instance.OnHat;
+            @Hat.canceled -= instance.OnHat;
         }
 
         public void RemoveCallbacks(IPlayerMovementActions instance)
@@ -1167,6 +1207,7 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
         void OnGrab(InputAction.CallbackContext context);
         void OnPause(InputAction.CallbackContext context);
         void OnDisplay(InputAction.CallbackContext context);
+        void OnHat(InputAction.CallbackContext context);
     }
     public interface IUIActions
     {

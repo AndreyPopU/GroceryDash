@@ -31,7 +31,7 @@ public static class SaveLoadManager
 
     public static bool IntToBool(int convert)
     {
-        if (convert == 1) return true;
+        if (convert > 0.5f) return true;
         return false;
     }
 

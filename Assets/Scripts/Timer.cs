@@ -12,6 +12,8 @@ public class Timer : MonoBehaviour
 
     void Update()
     {
+        if (CanvasManager.instance.paused) return;
+
         if (currentTime <= 0.04f)
         {
             // When round hasn't started and countdown hits 0 - start

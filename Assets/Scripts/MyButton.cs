@@ -83,6 +83,7 @@ public class MyButton : MonoBehaviour, IPointerClickHandler, IPointerEnterHandle
 
     public void OnPointerEnter(PointerEventData eventData)
     {
+        CanvasManager.instance.focusedButton = this;
         mouseOver = true;
         transform.localScale = exitScale;
         if (runningCoroutine != null) StopCoroutine(runningCoroutine);

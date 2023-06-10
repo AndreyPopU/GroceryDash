@@ -16,12 +16,16 @@ using UnityEngine.InputSystem.UI;
 using UnityEngine.InputSystem.DualShock;
 using UnityEngine.Windows;
 using UnityEngine.UI;
+using UnityEngine.InputSystem.Layouts;
+using System.Runtime.ExceptionServices;
 
 public class Player : MonoBehaviour
 {
     [Header("Essential Stats")]
     public int index;
     public string nickname;
+    public Transform hatPosition;
+    public GameObject hat;
     public Color color;
     public string colorName;
     public Player teammate;
@@ -83,26 +87,30 @@ public class Player : MonoBehaviour
     [Header("Other")]
     public ParticleSystem milkEffect;
     public ParticleSystem bumpEffect;
+    public ParticleSystem walkEffect;
+    public MeshRenderer body, handL, handR;
+    public Animator handsAnimator;
     public GameObject trailPrefab;
     public TextMeshProUGUI teamText;
     public bool inMilk;
     public int team;
     public LayerMask dropMask;
 
+    private Animator animator;
     private Vector2 movement;
     private Vector3 dashDirection;
-    [HideInInspector] public Rigidbody rb;
-    [HideInInspector] public Transform gfx;
     private float baseRotateSpeed;
     private PlayerControls controls;
+    [HideInInspector] public Rigidbody rb;
+    public Transform gfx;
     [HideInInspector] public PlayerInput input;
     private AudioSource audioSource;
-    
+
     private void Awake()
     {
         controls = new PlayerControls();
         gfx = transform.GetChild(0);
-        gfx.GetComponent<MeshRenderer>().material.color = color;
+        SetColor();
 
         input = GetComponent<PlayerInput>();
         input.uiInputModule = FindObjectOfType<InputSystemUIInputModule>();
@@ -114,6 +122,7 @@ public class Player : MonoBehaviour
         audioSource = GetComponent<AudioSource>();
         DontDestroyOnLoad(gameObject);
         rb = GetComponent<Rigidbody>();
+        animator = GetComponent<Animator>();
         baseRotateSpeed = rotateSpeed;
         baseDashCD = dashCD;
         dashCD = 0;
@@ -121,7 +130,25 @@ public class Player : MonoBehaviour
 
     void FixedUpdate()
     {
-        if (dashCD > 0) dashCD -= Time.deltaTime;
+        animator.SetFloat("speed", movement.normalized.magnitude, .1f, Time.deltaTime);
+
+        // Walk Effect
+        if (movement.magnitude > .1f && !walkEffect.isPlaying) walkEffect.Play();
+        else if (movement.magnitude < .1f && walkEffect.isPlaying) walkEffect.Stop();
+
+        // Navigate UI
+        if (CanvasManager.instance.paused)
+        {
+            var device = GetComponent<PlayerInput>().devices[0];
+
+            if (device.GetType().ToString() == "UnityEngine.InputSystem.DualShock.DualShock4GamepadHID" && movement.magnitude > 0.1f)
+            {
+                if (CanvasManager.instance.focusedButton != null) CanvasManager.instance.focusedButton.mouseOver = false;
+                CanvasManager.instance.systemUI.actionsAsset = input.actions;
+            }
+        }
+
+        if (dashCD > 0) dashCD -= Time.fixedDeltaTime;
 
         //Counteract sliding and sloppy movement
         CounterMovement();
@@ -211,6 +238,8 @@ public class Player : MonoBehaviour
 
     public void OnDash(CallbackContext context) => context.action.performed += _ => Dash(new Vector3(movement.x, 0, movement.y).normalized);
 
+    public void OnHat(CallbackContext context) => context.action.performed += _ => ChangeHat();
+
     public void OnThrow(CallbackContext context) => context.action.performed += _ => ThrowItem();
 
     public void OnDisplay(CallbackContext context) => context.action.performed += _ => Display();
@@ -223,10 +252,24 @@ public class Player : MonoBehaviour
 
     #endregion
 
+    public void ChangeHat()
+    {
+        if (customize)
+        {
+            // Change hat
+            CustomizationManager.instance.player = this;
+            CustomizationManager.instance.ChangeHat();
+        }
+    }
+
     private void Dash(Vector3 direction)
     {
         if (CanvasManager.instance.paused)
         {
+            var device = GetComponent<PlayerInput>().devices[0];
+
+            if (device.name.ToString() == "Keyboard") return;
+
             CanvasManager.instance.GoBack();
             return;
         }
@@ -235,7 +278,7 @@ public class Player : MonoBehaviour
         if (direction.x == 0 && direction.z == 0 || dashing || dashCD > 0 || !canDash ||
             (GameManager.instance.gameStarted && !GameManager.instance.roundStarted && SceneManager.GetActiveScene().buildIndex > 0)) return;
 
-        if (!Tutorial.instance.tutorialCompleted && Tutorial.instance.index == 5) Tutorial.instance.NextTask();
+        if (Tutorial.instance.tutorialCompleted == 0 && Tutorial.instance.index == 5) Tutorial.instance.NextTask();
 
         int random = UnityEngine.Random.Range(0, dashClips.Length);
         audioSource.clip = dashClips[random];
@@ -362,11 +405,15 @@ public class Player : MonoBehaviour
 
     public void PickUpBasket(bool pickUp)
     {
+        // If there is a basket in range and you can't pick it up
         if (closestBasket != null && !closestBasket.canPickUp) return;
+
+        handsAnimator.SetFloat("product", 0);
+        StartCoroutine(SmoothTransition("basket", SaveLoadManager.BoolToInt(pickUp)));
 
         if (pickUp)
         {
-            if (!Tutorial.instance.tutorialCompleted && Tutorial.instance.index == 1) Tutorial.instance.NextTask();
+            if (Tutorial.instance.tutorialCompleted == 0 && Tutorial.instance.index == 1) Tutorial.instance.NextTask();
 
             audioSource.clip = pickUpClip;
             audioSource.Play();
@@ -434,15 +481,15 @@ public class Player : MonoBehaviour
             holdBasket.rb.isKinematic = false;
             holdBasket.coreCollider.enabled = true;
             closestBasket = holdBasket;
-            SlowDown(false);
             SceneManager.MoveGameObjectToScene(holdBasket.gameObject, SceneManager.GetActiveScene());
             holdBasket = null;
+            SlowDown(false);
         }
     }
 
     public void LaunchBasket(Vector3 direction)
     {
-        if (!Tutorial.instance.tutorialCompleted && Tutorial.instance.index == 2) Tutorial.instance.NextTask();
+        if (Tutorial.instance.tutorialCompleted == 0 && Tutorial.instance.index == 2) Tutorial.instance.NextTask();
 
         audioSource.clip = throwClip;
         audioSource.Play();
@@ -470,9 +517,12 @@ public class Player : MonoBehaviour
 
     public void PickUpProduct(bool pickUp)
     {
+        handsAnimator.SetFloat("basket", 0);
+        StartCoroutine(SmoothTransition("product", SaveLoadManager.BoolToInt(pickUp)));
+
         if (pickUp)
         {
-            if (!Tutorial.instance.tutorialCompleted && Tutorial.instance.index == 0) Tutorial.instance.NextTask();
+            if (Tutorial.instance.tutorialCompleted == 0 && Tutorial.instance.index == 0) Tutorial.instance.NextTask();
 
             audioSource.clip = pickUpClip;
             audioSource.Play();
@@ -530,7 +580,7 @@ public class Player : MonoBehaviour
 
     public void LaunchProduct(Vector3 direction)
     {
-        if (!Tutorial.instance.tutorialCompleted && Tutorial.instance.index == 2) Tutorial.instance.NextTask();
+        if (Tutorial.instance.tutorialCompleted == 0 && Tutorial.instance.index == 2) Tutorial.instance.NextTask();
 
         // Separate from player and enable own physics
         holdProduct.transform.SetParent(null);
@@ -610,11 +660,36 @@ public class Player : MonoBehaviour
 
     #endregion
 
+    public IEnumerator SmoothTransition(string animation, int desire)
+    {
+        float current = 0;
+
+        if (desire > 0)
+        {
+            while(current < desire)
+            {
+                current += .1f;
+                handsAnimator.SetFloat(animation, current);
+                yield return null;
+            }
+        }
+        else if (desire < 1)
+        {
+            current = 1;
+            while (current > desire)
+            {
+                current -= .1f;
+                handsAnimator.SetFloat(animation, current);
+                yield return null;
+            }
+        }
+    }
+
     public void Bump(Vector3 direction, float force)
     {
         if (bumpDuration > 0) return;
 
-        if (!Tutorial.instance.tutorialCompleted && Tutorial.instance.index == 6) Tutorial.instance.NextTask();
+        if (Tutorial.instance.tutorialCompleted == 0 && Tutorial.instance.index == 6) Tutorial.instance.NextTask();
 
         GameManager.instance.bumps++;
 
@@ -686,6 +761,13 @@ public class Player : MonoBehaviour
     }
 
     #endregion
+
+    public void SetColor()
+    {
+        body.material.color = color;
+        handL.material.color = color;
+        handR.material.color = color;
+    }
 
     public void SlowDown(bool slow)
     {

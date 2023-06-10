@@ -4,6 +4,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using Unity.Services.Analytics;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Analytics;
 using UnityEngine.UIElements;
@@ -23,7 +24,10 @@ public class LevelManager : MonoBehaviour
     public List<Transform> spillPositions;
     private int spills;
     private float spillCD = 15;
-    
+
+    [Header("Sound")]
+    public AudioClip endClip;
+    private AudioSource source;
 
     private Basket[] baskets;
 
@@ -37,10 +41,13 @@ public class LevelManager : MonoBehaviour
 
     void Start()
     {
+        source = GetComponent<AudioSource>();
         GameManager.instance.gameStarted = true;
 
         players = GameManager.instance.players;
         baskets = FindObjectsOfType<Basket>();
+
+        if (GameManager.instance.rounds == 3) players.Shuffle();
 
         PreparePlayers();
 
@@ -70,6 +77,8 @@ public class LevelManager : MonoBehaviour
 
     private void Update()
     {
+        if (CanvasManager.instance.paused) return;
+
         if (spills < 2)
         {
             if (spillCD > 0) spillCD -= Time.deltaTime;
@@ -80,6 +89,12 @@ public class LevelManager : MonoBehaviour
                 spillCD = 30;
             }
         }
+    }
+
+    public void EndRound()
+    {
+        source.clip = endClip;
+        source.Play();
     }
 
     public void SpawnMilk()

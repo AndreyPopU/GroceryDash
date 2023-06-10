@@ -5,9 +5,13 @@ using UnityEngine;
 public class Toilet : MonoBehaviour
 {
     public List<Player> playersRange;
+
     private Animator animator;
 
-    void Start() => animator = GetComponentInParent<Animator>();
+    void Start()
+    {
+        animator = GetComponentInParent<Animator>();
+    }
 
     private void OnTriggerEnter(Collider other)
     {
@@ -16,6 +20,7 @@ public class Toilet : MonoBehaviour
             player.customize = false;
             if (!playersRange.Contains(player)) playersRange.Add(player);
             animator.SetBool("open", true);
+            
         }
     }
 

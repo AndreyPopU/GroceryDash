@@ -595,7 +595,7 @@ Transform:
   m_GameObject: {fileID: 6492162071979477325}
   m_LocalRotation: {x: 0, y: 0.7071068, z: 0, w: 0.7071068}
   m_LocalPosition: {x: -18.25, y: -0.5, z: -4.5}
-  m_LocalScale: {x: 0.8, y: 0.8, z: 0.8}
+  m_LocalScale: {x: 0.6, y: 0.6, z: 0.6}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 2255789636882362837}
@@ -622,14 +622,11 @@ MonoBehaviour:
   scanningProduct: {fileID: 0}
   scanPosition: {fileID: 2116566034}
   scanning: 0
-  scans: 10
-  workCD: 0
-  cooldown: 0
+  scanCD: 0
   open: 1
   self: 1
   openMat: {fileID: 2100000, guid: 3a5084de46a51174194dd0f151967d43, type: 2}
   closedMat: {fileID: 2100000, guid: 5177fcf4f0c9f5b429532bd01c202bfb, type: 2}
-  cashier: {fileID: 0}
   checkoutPoint: {fileID: 0}
   confetti: {fileID: 5716772073900539993}
   basket: {fileID: 0}
@@ -640,6 +637,8 @@ MonoBehaviour:
   correctIcon: {fileID: 21300000, guid: 46381af9f9124934db9f53f5a657c305, type: 3}
   incorrectIcon: {fileID: 21300000, guid: 802f1f00ce574ac498057a8010a9887f, type: 3}
   checkoutImage: {fileID: 2221905175395845731}
+  correctClip: {fileID: 8300000, guid: 59b1c8feff2c8eb4eb09bb73e0958e0b, type: 3}
+  incorrectClip: {fileID: 8300000, guid: 4fe029da5a8159c44b7c9e3114dbb49d, type: 3}
 --- !u!65 &5860057971964875765
 BoxCollider:
   m_ObjectHideFlags: 0

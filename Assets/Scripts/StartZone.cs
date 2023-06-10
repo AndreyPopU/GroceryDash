@@ -15,6 +15,7 @@ public class StartZone : MonoBehaviour
     public BoxCollider startCollider;
     public bool entered;
     public bool canStart;
+    public GameObject obvious;
 
     void Start()
     {
@@ -25,6 +26,8 @@ public class StartZone : MonoBehaviour
 
     void Update()
     {
+        obvious.transform.localScale = new Vector3(1 + Mathf.Abs(Mathf.Sin(Time.time * 2) / 10), 1 + Mathf.Abs(Mathf.Sin(Time.time * 2) / 10), 1) * .1f;
+
         if (GameManager.instance.playerCount == 0 || !canStart) return;
 
         if (playerCount == GameManager.instance.playerCount)
@@ -37,7 +40,7 @@ public class StartZone : MonoBehaviour
                     if (CanvasManager.instance.paused) CanvasManager.instance.PauseGame();
                     CanvasManager.instance.canPause = false;
 
-                    if (!Tutorial.instance.tutorialCompleted) Tutorial.instance.EndTutorial();
+                    if (Tutorial.instance.tutorialCompleted == 0) Tutorial.instance.EndTutorial();
 
                     // Disable join spots
                     for (int i = 0; i < GameManager.instance.joinCanvas.Count; i++)
