@@ -5,19 +5,13 @@ using TMPro;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.InputSystem;
-using static UnityEngine.GraphicsBuffer;
 using UnityEngine.SceneManagement;
 using static UnityEngine.InputSystem.InputAction;
 using UnityEngine.Analytics;
-using System.Security.Cryptography;
 using Unity.Services.Analytics;
-using Unity.Services.Core;
 using UnityEngine.InputSystem.UI;
 using UnityEngine.InputSystem.DualShock;
-using UnityEngine.Windows;
 using UnityEngine.UI;
-using UnityEngine.InputSystem.Layouts;
-using System.Runtime.ExceptionServices;
 
 public class Player : MonoBehaviour
 {
@@ -40,6 +34,8 @@ public class Player : MonoBehaviour
     [SerializeField] private float rotateSpeed = .4f;
     [SerializeField] private float slowRotateSpeed = .2f;
     public float throwForce = 10;
+    public float throwTime;
+    public bool chargingThrow;
 
     [Header("Invididual shopping list")]
     public Dictionary<string, int> shoppingItems = new Dictionary<string, int>();
@@ -84,18 +80,21 @@ public class Player : MonoBehaviour
     public bool customize;
     public bool gamemode;
 
-    [Header("Other")]
+    [Header("Particles")]
     public ParticleSystem milkEffect;
     public ParticleSystem bumpEffect;
     public ParticleSystem walkEffect;
-    public MeshRenderer body, handL, handR;
+
+    [Header("Other")]
     public Animator handsAnimator;
+    public MeshRenderer body, handL, handR, throwArrow;
     public GameObject trailPrefab;
     public TextMeshProUGUI teamText;
     public bool inMilk;
     public int team;
     public LayerMask dropMask;
 
+    private Transform arrowHolder;
     private Animator animator;
     private Vector2 movement;
     private Vector3 dashDirection;
@@ -126,15 +125,25 @@ public class Player : MonoBehaviour
         baseRotateSpeed = rotateSpeed;
         baseDashCD = dashCD;
         dashCD = 0;
+        arrowHolder = throwArrow.transform.parent;
     }
 
     void FixedUpdate()
     {
-        animator.SetFloat("speed", movement.normalized.magnitude, .1f, Time.deltaTime);
+        if (canMove)
+        {
+            // Walk Animation
+            animator.SetFloat("speed", movement.normalized.magnitude, .1f, Time.fixedDeltaTime);
 
-        // Walk Effect
-        if (movement.magnitude > .1f && !walkEffect.isPlaying) walkEffect.Play();
-        else if (movement.magnitude < .1f && walkEffect.isPlaying) walkEffect.Stop();
+            // Walk Effect
+            if (movement.magnitude > .1f && !walkEffect.isPlaying) walkEffect.Play();
+            else if (movement.magnitude < .1f && walkEffect.isPlaying) walkEffect.Stop();
+        }
+        else
+        {
+            animator.SetFloat("speed", 0);
+            if (walkEffect.isPlaying) walkEffect.Stop();
+        }
 
         // Navigate UI
         if (CanvasManager.instance.paused)
@@ -162,6 +171,13 @@ public class Player : MonoBehaviour
 
     private void Update()
     {
+        handsAnimator.SetFloat("throw", throwTime);
+
+        if (chargingThrow && throwTime < 1) throwTime += Time.deltaTime * 2;
+        else if (!chargingThrow && throwTime > 0) throwTime -= Time.deltaTime * 8;
+
+        arrowHolder.transform.localScale = new Vector3(1, 1, throwTime);
+
         if (bumpDuration > 0) bumpDuration -= Time.deltaTime;
 
         if (!connected)
@@ -175,6 +191,7 @@ public class Player : MonoBehaviour
     {
         var device = GetComponent<PlayerInput>().devices[0];
 
+        // If player device is controller, update color
         if (device.GetType().ToString() == "UnityEngine.InputSystem.DualShock.DualShock4GamepadHID")
         {
             DualShockGamepad ds4 = (DualShockGamepad)device;
@@ -183,32 +200,22 @@ public class Player : MonoBehaviour
             else ds4.ResetHaptics();
         }
     }
-
-    public void DisableController()
-    {
-        var device = GetComponent<PlayerInput>().devices[0];
-
-        if (device.GetType().ToString() == "UnityEngine.InputSystem.DualShock.DualShock4GamepadHID")
-        {
-            DualShockGamepad ds4 = (DualShockGamepad)device;
-            ds4.ResetHaptics();
-        }
-    }
-
     public void Rumble() => StartCoroutine(RumbleCo(.6f, 1, .15f));
 
     public IEnumerator RumbleCo(float low, float high, float duration)
     {
-        // Set Controller Color to player color
         var device = GetComponent<PlayerInput>().devices[0];
 
+        // If player device is controller
         if (device.GetType().ToString() == "UnityEngine.InputSystem.DualShock.DualShock4GamepadHID")
         {
+            // Start Rumble
             DualShockGamepad ds4 = (DualShockGamepad)device;
             ds4.SetMotorSpeeds(low, high);
 
             yield return new WaitForSeconds(duration);
 
+            // End Rumble
             ds4.SetMotorSpeeds(0, 0);
         }
     }
@@ -240,7 +247,11 @@ public class Player : MonoBehaviour
 
     public void OnHat(CallbackContext context) => context.action.performed += _ => ChangeHat();
 
-    public void OnThrow(CallbackContext context) => context.action.performed += _ => ThrowItem();
+    public void OnThrow(CallbackContext context)
+    {
+        context.action.performed += _ => ChargeThrow();
+        context.action.canceled += _ => ThrowItem();
+    }
 
     public void OnDisplay(CallbackContext context) => context.action.performed += _ => Display();
 
@@ -335,12 +346,30 @@ public class Player : MonoBehaviour
         }
     }
 
+    public void ChargeThrow()
+    {
+        if (holdBasket == null && holdProduct == null) return;
+
+
+        throwTime = 0;
+        chargingThrow = true;
+        handsAnimator.SetBool("chargingThrow", true);
+    }
+
     private void ThrowItem()
     {
         if (GameManager.instance.gameStarted && !GameManager.instance.roundStarted) return;
 
         if (holdProduct != null) LaunchProduct(gfx.forward);
         else if (holdBasket != null) LaunchBasket(gfx.forward);
+
+        handsAnimator.SetFloat("throw", 0);
+        chargingThrow = false;
+        handsAnimator.SetBool("chargingThrow", false);
+
+        // ?
+        if (handsAnimator.GetFloat("basket") > 0) StartCoroutine(SmoothTransition("basket", 0));
+        else if (handsAnimator.GetFloat("product") > 0) StartCoroutine(SmoothTransition("product", 0));
     }
 
     private void Display()
@@ -408,24 +437,31 @@ public class Player : MonoBehaviour
         // If there is a basket in range and you can't pick it up
         if (closestBasket != null && !closestBasket.canPickUp) return;
 
-        handsAnimator.SetFloat("product", 0);
-        StartCoroutine(SmoothTransition("basket", SaveLoadManager.BoolToInt(pickUp)));
-
         if (pickUp)
         {
+            // If Tutorial is not completed and current task is to pick up basket, progress when you pick it up
             if (Tutorial.instance.tutorialCompleted == 0 && Tutorial.instance.index == 1) Tutorial.instance.NextTask();
 
+            // Play sound
             audioSource.clip = pickUpClip;
             audioSource.Play();
 
-            // If basket was part of stack - remove it 
+            // If basket was part of a basket stack - remove it 
             if (closestBasket.stackParent != null)
             {
+                // Pop from queue
                 closestBasket.stackParent.baskets.Pop();
+
+                // If last basket in stack, disable collider
                 if (closestBasket.stackParent.baskets.Count == 0)
                     closestBasket.stackParent.GetComponent<BoxCollider>().enabled = false;
                 closestBasket.stackParent = null;
             }
+
+            // Deal with hand animations
+            handsAnimator.SetFloat("product", 0);
+            handsAnimator.SetFloat("throw", 0);
+            StartCoroutine(SmoothTransition("basket", SaveLoadManager.BoolToInt(pickUp)));
 
             // Anchor basket in player's hands
             closestBasket.transform.SetParent(basketHoldParent);
@@ -435,6 +471,7 @@ public class Player : MonoBehaviour
             closestBasket.rb.isKinematic = true;
             closestBasket.coreCollider.enabled = false;
             holdBasket = closestBasket;
+            holdBasket.DisableTrail();
 
             // Give ownership of every product in the basket to the player who holds it
             foreach (Product product in holdBasket.products)
@@ -446,10 +483,11 @@ public class Player : MonoBehaviour
             closestBasket = null;
 
             // Slow Down player
-            maxSpeed = 4.5f; //  - holdBasket.rb.mass;
+            maxSpeed = 4.5f;
             rotateSpeed = slowRotateSpeed;
             canDash = false;
 
+            // Analytics
             GameManager.instance.basketsUsed++;
 
             #if ENABLE_CLOUD_SERVICES_ANALYTICS
@@ -467,13 +505,15 @@ public class Player : MonoBehaviour
         }
         else
         {
-            // Release on head
-
             // Prevent from dropping out of bounds
             RaycastHit hit;
             if (Physics.Raycast(transform.position, gfx.transform.forward, out hit, 2, dropMask))
                 return;
 
+            // Deal with hand animations
+            StartCoroutine(SmoothTransition("basket", SaveLoadManager.BoolToInt(pickUp)));
+
+            // Drop infront of player
             holdBasket.transform.SetParent(null);
             holdBasket.transform.position += gfx.forward * 2;
             holdBasket.lastOwner = holdBasket.player;
@@ -481,6 +521,8 @@ public class Player : MonoBehaviour
             holdBasket.rb.isKinematic = false;
             holdBasket.coreCollider.enabled = true;
             closestBasket = holdBasket;
+
+            // Remove from DontDestroyOnLoad objects
             SceneManager.MoveGameObjectToScene(holdBasket.gameObject, SceneManager.GetActiveScene());
             holdBasket = null;
             SlowDown(false);
@@ -489,8 +531,10 @@ public class Player : MonoBehaviour
 
     public void LaunchBasket(Vector3 direction)
     {
+        // If Tutorial is not completed and current task is to throw basket, progress when you drop it
         if (Tutorial.instance.tutorialCompleted == 0 && Tutorial.instance.index == 2) Tutorial.instance.NextTask();
 
+        // Play sound
         audioSource.clip = throwClip;
         audioSource.Play();
 
@@ -505,11 +549,18 @@ public class Player : MonoBehaviour
         trail.transform.localPosition = Vector3.zero;
 
         // Launch
-        holdBasket.rb.AddForce(direction * throwForce * 1.5f, ForceMode.Impulse);
-        
+        holdBasket.coreCollider.enabled = true;
+        holdBasket.rb.AddForce(direction * throwForce * 1.5f * throwTime, ForceMode.Impulse);
+
+        // CD to picking up
+        holdBasket.canPickUp = false;
+        holdBasket.pickUpCD = .5f;
+
         // Deal with ownership
         holdBasket.lastOwner = holdBasket.player;
         holdBasket.player = null;
+
+        // Remove from DontDestroyOnLoad objects
         SceneManager.MoveGameObjectToScene(holdBasket.gameObject, SceneManager.GetActiveScene());
         holdBasket = null;
         SlowDown(false);
@@ -517,15 +568,10 @@ public class Player : MonoBehaviour
 
     public void PickUpProduct(bool pickUp)
     {
-        handsAnimator.SetFloat("basket", 0);
-        StartCoroutine(SmoothTransition("product", SaveLoadManager.BoolToInt(pickUp)));
-
         if (pickUp)
         {
+            // If Tutorial is not completed and current task is to pick up product, progress when you pick it up
             if (Tutorial.instance.tutorialCompleted == 0 && Tutorial.instance.index == 0) Tutorial.instance.NextTask();
-
-            audioSource.clip = pickUpClip;
-            audioSource.Play();
 
             if (holdBasket != null) // If player carries a basket drop products there
             {
@@ -538,7 +584,18 @@ public class Player : MonoBehaviour
             
             holdProduct = GetProduct();
 
+            // Play sound
+            audioSource.clip = pickUpClip;
+            audioSource.Play();
+
+            // Deal with hand animations
+            handsAnimator.SetFloat("basket", 0);
+            handsAnimator.SetFloat("throw", 0);
+            StartCoroutine(SmoothTransition("product", SaveLoadManager.BoolToInt(pickUp)));
+
             // Anchor to player's hands
+            holdProduct.DisableTrail();
+            holdProduct.GetComponent<Collider>().enabled = false;
             holdProduct.transform.SetParent(holdParent);
             holdProduct.transform.localPosition = Vector3.zero;
             holdProduct.transform.localEulerAngles = Vector3.zero;
@@ -548,6 +605,7 @@ public class Player : MonoBehaviour
             holdProduct.owner = this;
             holdProduct.lastOwner = this;
 
+            // Analytics
             GameManager.instance.productsUsed++;
 
             #if ENABLE_CLOUD_SERVICES_ANALYTICS
@@ -566,13 +624,20 @@ public class Player : MonoBehaviour
         }
         else
         {
+            // Play sound
             audioSource.clip = throwClip;
             audioSource.Play();
 
+            // Deal with hand Animations
+            StartCoroutine(SmoothTransition("product", SaveLoadManager.BoolToInt(pickUp)));
+
             // Separate from player and enable physics
+            holdProduct.GetComponent<Collider>().enabled = true;
             holdProduct.transform.SetParent(null);
             holdProduct.rb.isKinematic = false;
             holdProduct.owner = null;
+
+            // Remove from DontDestroyOnLoad objects
             SceneManager.MoveGameObjectToScene(holdProduct.gameObject, SceneManager.GetActiveScene());
             holdProduct = null;
         }
@@ -580,6 +645,7 @@ public class Player : MonoBehaviour
 
     public void LaunchProduct(Vector3 direction)
     {
+        // If Tutorial is not completed and current task is to throw product, progress when you throw it
         if (Tutorial.instance.tutorialCompleted == 0 && Tutorial.instance.index == 2) Tutorial.instance.NextTask();
 
         // Separate from player and enable own physics
@@ -592,13 +658,21 @@ public class Player : MonoBehaviour
         trail.transform.localPosition = Vector3.zero;
 
         // Launch
-        holdProduct.rb.AddForce(direction * throwForce, ForceMode.Impulse);
+        holdProduct.thrown = true;
+        holdProduct.GetComponent<Collider>().enabled = true;
+        holdProduct.rb.AddForce(direction * throwForce * throwTime, ForceMode.Impulse);
         audioSource.clip = throwClip;
         audioSource.Play();
+
+        // CD to picking up
+        holdProduct.canPickUp = false;
+        holdProduct.pickUpCD = .5f;
 
         // Deal with ownership
         holdProduct.lastOwner = holdProduct.owner;
         holdProduct.owner = null;
+
+        // Remove from DontDestroyOnLoad objects
         SceneManager.MoveGameObjectToScene(holdProduct.gameObject, SceneManager.GetActiveScene());
         holdProduct = null;
     }
@@ -611,7 +685,7 @@ public class Player : MonoBehaviour
 
         for (int i = 1; i < productsInRange.Count; i++)
         {
-            // If closest product is held by another player or can't be picked up - return
+            // If closest product is held by another player or can't be picked up - skip
             if (productsInRange[0].owner != null || !productsInRange[0].canPickUp) continue;
 
             float distanceBetween = Vector3.Distance(transform.position, productsInRange[i].transform.position);
@@ -732,12 +806,14 @@ public class Player : MonoBehaviour
         timeOut = 15;
         connected = false;
 
-        // Set Color and Name to match the player
+        // Set Color and Name fo "disconnected" text to match the player
         disconnected.gameObject.name = "Disconnected" + index.ToString();
         disconnected.GetComponent<TextMeshProUGUI>().color = color;
         disconnected.GetComponent<TextMeshProUGUI>().text = nickname + index + " Disconnected!";
         disconnected.transform.position -= Vector3.up * (70 * index);
         GameManager.instance.StartCoroutine(GameManager.instance.ScaleText(disconnected.transform, 1));
+
+        // Destroy text in 3 seconds
         Destroy(disconnected, 3);
     }
 
@@ -750,13 +826,17 @@ public class Player : MonoBehaviour
         if (disconnected != null) Destroy(disconnected);
 
         connected = true;
-        // Set Color and Name to match the player
+        // Set Color and Name of "reconnected" text to match the player
         reconnected.gameObject.name = "Reconnected" + index.ToString();
         reconnected.GetComponent<TextMeshProUGUI>().color = color;
         reconnected.GetComponent<TextMeshProUGUI>().text = nickname + index + " Reconnected!";
         reconnected.transform.position -= Vector3.up * (70 * index);
         GameManager.instance.StartCoroutine(GameManager.instance.ScaleText(reconnected.transform, 1));
+
+        // Setup controller
         Invoke("ReconnectController", .2f);
+
+        // Destroy text in 3 seconds
         Destroy(reconnected, 3);
     }
 
@@ -767,6 +847,7 @@ public class Player : MonoBehaviour
         body.material.color = color;
         handL.material.color = color;
         handR.material.color = color;
+        throwArrow.material.color = color;
     }
 
     public void SlowDown(bool slow)
@@ -810,17 +891,6 @@ public class Player : MonoBehaviour
 
             if (player.dashing && holdBasket != null)
                 LaunchBasket(player.gfx.forward);
-        }
-
-        if (holdProduct != null || holdBasket != null) return;
-
-        if (collision.collider.TryGetComponent(out Product product))
-        {
-            if (product.rb.velocity.magnitude > 2.5f && GameManager.instance.roundStarted)
-            {
-                product.rb.velocity = Vector3.zero;
-                PickUpProduct(product);
-            }
         }
     }
 

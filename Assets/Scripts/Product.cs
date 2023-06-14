@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class Product : MonoBehaviour
 {
@@ -13,14 +14,35 @@ public class Product : MonoBehaviour
     [HideInInspector]
     public Rigidbody rb;
     public Basket basket;
+    public float pickUpCD;
+    public bool thrown;
 
-    void Awake() => rb = GetComponent<Rigidbody>();    
+    private bool called;
+
+    void Awake() => rb = GetComponent<Rigidbody>();
+
+    private void Update()
+    {
+        if (pickUpCD > 0)
+        {
+            called = false;
+            pickUpCD -= Time.deltaTime;
+        }
+        else
+        {
+            if (!called)
+            {
+                canPickUp = true;
+                called = true;
+            }
+        }
+    }
 
     public IEnumerator Enlarge()
     {
         YieldInstruction instruction = new WaitForFixedUpdate();
 
-        while(transform.localScale.x < 1)
+        while (transform.localScale.x < 1)
         {
             transform.localScale += Vector3.one * .1f;
             yield return instruction;
@@ -71,11 +93,40 @@ public class Product : MonoBehaviour
 
     private void OnCollisionEnter(Collision collision)
     {
+        DisableTrail();
+
+        if (thrown)
+        {
+            if (collision.collider.TryGetComponent(out Player player))
+            {
+                if (player.holdBasket != null) return;
+
+                if (GameManager.instance.roundStarted || SceneManager.GetActiveScene().buildIndex == 0)
+                {
+                    rb.velocity = Vector3.zero;
+                    // Swap products
+                    if (player.holdProduct != null) player.PickUpProduct(false);
+                    player.PickUpProduct(true);
+                }
+            }
+            thrown = false;
+        }
+    }
+
+    public void DisableTrail()
+    {
         // If trail active - disable
         if (GetComponentInChildren<ParticleSystem>())
         {
             GetComponentInChildren<ParticleSystem>().Stop();
             Destroy(GetComponentInChildren<ParticleSystem>().gameObject, 2);
         }
+
+        
+    }
+
+    private void OnCollisionStay(Collision collision)
+    {
+        
     }
 }

@@ -16,7 +16,7 @@ public class Tutorial : MonoBehaviour
     {
         if (instance == null) instance = this;
 
-        if (PlayerPrefs.HasKey(completedString)) tutorialCompleted = PlayerPrefs.GetInt(completedString);
+        //if (PlayerPrefs.HasKey(completedString)) tutorialCompleted = PlayerPrefs.GetInt(completedString);
 
         if (tutorialCompleted > 0)
         {

@@ -20,7 +20,8 @@ public class ShoppingItem : MonoBehaviour
     {
         icon.sprite = Resources.Load<Sprite>(key + "Icon");
 
-        if (value > 0) text.text = value + " " + key;
+        if (value > 1) text.text = value + " " + key;
+        else if (value == 1) text.text = key;
         else
         {
             text.text = "<s>" + key + "</s>";

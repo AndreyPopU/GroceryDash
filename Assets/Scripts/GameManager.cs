@@ -95,23 +95,26 @@ public class GameManager : MonoBehaviour
         int randomColor = UnityEngine.Random.Range(0, CustomizationManager.instance.colors.Count);
         Player player = input.GetComponent<Player>();
         player.index = input.playerIndex;
+
         // Hat
         GameObject hat = Instantiate(CustomizationManager.instance.hats[randomHat], player.hatPosition.position, Quaternion.identity);
         hat.transform.SetParent(player.hatPosition);
         hat.transform.localRotation = Quaternion.identity;
         player.hat = hat;
+
         // Color
         player.color = CustomizationManager.instance.colors[randomColor];
         player.colorName = CustomizationManager.instance.colorNames[randomColor];
         CustomizationManager.instance.colors.RemoveAt(randomColor);
-        players.Add(player);
 
         // Add to camera follow targets
+        players.Add(player);
         CameraManager.instance.targets.Add(player.transform);
 
         // Set Controller Color to player color
         player.EnableController(true);
 
+        // Keep track of keyboard player
         var device = input.devices[0];
         if (device.name.ToString() == "Keyboard") keyboardPlayer = player;
     }
@@ -189,11 +192,6 @@ public class GameManager : MonoBehaviour
         else StartCoroutine(EndGame(false));
     }
 
-    private void Update()
-    {
-        Camera.main.ViewportToScreenPoint(UnityEngine.Input.mousePosition);
-    }
-
     public IEnumerator ScaleText(Transform text, int desire)
     {
         YieldInstruction waitForFixedUpdate = new WaitForFixedUpdate();
@@ -225,11 +223,11 @@ public class GameManager : MonoBehaviour
         Timer timer = GetComponent<Timer>();
         timer.enabled = false;
         timer.roundText.gameObject.SetActive(false);
-        LevelManager.instance.EndRound();
 
         // Display winners
         if (!playerInvoked)
         {
+            LevelManager.instance.EndRound();
             resultText.gameObject.SetActive(true);
             resultText.transform.localScale = Vector3.zero;
 
@@ -461,13 +459,6 @@ public class GameManager : MonoBehaviour
             }
         }
     }
-
-    public void GenerateShoppingList(Player[] players) // Teams
-    {
-        // What do we do in case of 3 players
-
-        // Assign player.teammate
-    }  
 
     public void UpdateJoinSpots()
     {

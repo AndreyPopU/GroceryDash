@@ -29,7 +29,7 @@ public class SettingsMenu : MonoBehaviour
 
         foreach (Resolution resolution in resolutions)
         {
-            // Add only resolutions that match the screen hertz
+            // Add only resolutions that match the current screen hertz
             if (resolution.refreshRate == Screen.currentResolution.refreshRate)
             {
                 options.Add(resolution.width + " x " + resolution.height);
@@ -39,6 +39,7 @@ public class SettingsMenu : MonoBehaviour
             }
         }
 
+        // Update UI
         resolutionDropdown.AddOptions(options);
         resolutionDropdown.UpdateCurrentOption(currentResolution);
         resolutionDropdown.RefreshShownValue();
@@ -48,12 +49,6 @@ public class SettingsMenu : MonoBehaviour
 
     public void LoadSettings()
     {
-        // Quality
-        //if (PlayerPrefs.HasKey(SaveLoadManager.qualityString)) qualityDropdown.UpdateCurrentOption(PlayerPrefs.GetInt(SaveLoadManager.qualityString));
-        //else qualityDropdown.UpdateCurrentOption(0);
-        //qualityDropdown.RefreshShownValue();
-        //SetQuality();
-
         // Resolution
         FindResolution(PlayerPrefs.HasKey(SaveLoadManager.resolutionString));
 
@@ -87,16 +82,10 @@ public class SettingsMenu : MonoBehaviour
         SaveLoadManager.SaveSettings(soundSlider.index, musicSlider.index, SaveLoadManager.BoolToInt(fullscreenToggle.isOn), resolutionDropdown.index);
     }
 
-    // Quality
-    //public void SetQuality() => QualitySettings.SetQualityLevel(qualityDropdown.index);
-
     // Resolution
     public void SetResolution()
     {
         Resolution resolution = relevantResolutions[resolutionDropdown.index];
         Screen.SetResolution(resolution.width, resolution.height, Screen.fullScreen);
     }
-
-    // Fullscreen
-    //public void Fullscreen() => isFulscreen = fullscreenToggle.isOn;
 }

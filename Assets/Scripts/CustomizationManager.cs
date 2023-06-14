@@ -22,6 +22,7 @@ public class CustomizationManager : MonoBehaviour
 
     private void Awake()
     {
+        // Singleton
         if (instance == null) instance = this;
         animator = GetComponent<Animator>();
     }
@@ -30,6 +31,7 @@ public class CustomizationManager : MonoBehaviour
     {
         source = GetComponent<AudioSource>();
 
+        // If player are already connected remove their colors from the possible colors
         if (GameManager.instance.players.Count > 0)
         {
             foreach (Player player in GameManager.instance.players)
@@ -49,12 +51,10 @@ public class CustomizationManager : MonoBehaviour
         // Protect from out of bounds
         if (hatIndex >= hats.Count) hatIndex = 0;
 
-        // Add previous hat of player to available hats
+        // Remove previous hat
         Destroy(player.hat);
 
         // Change player hat
-
-        // Remove previous hat
         GameObject hat = Instantiate(hats[hatIndex], player.hatPosition.position, Quaternion.identity);
         hat.transform.SetParent(player.hatPosition);
         hat.transform.localRotation = Quaternion.identity;
@@ -81,6 +81,7 @@ public class CustomizationManager : MonoBehaviour
         // Set Controller Color to player color
         player.EnableController(true);
     }
+
     public void PlaySound(AudioClip sound)
     {
         source.clip = sound;

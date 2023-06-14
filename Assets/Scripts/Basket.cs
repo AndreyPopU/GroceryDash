@@ -23,7 +23,9 @@ public class Basket : MonoBehaviour
     public Player player;
     public Player lastOwner;
     public bool canPickUp = true;
+    public float pickUpCD;
 
+    private bool called;
     private Transform canvas;
 
     void Start()
@@ -40,6 +42,20 @@ public class Basket : MonoBehaviour
     {
         // Canvas always face camera
         canvas.eulerAngles = new Vector3(canvas.eulerAngles.x, 0, canvas.eulerAngles.z);
+
+        if (pickUpCD > 0)
+        {
+            called = false;
+            pickUpCD -= Time.deltaTime;
+        }
+        else
+        {
+            if (!called)
+            {
+                canPickUp = true;
+                called = true;
+            }
+        }
     }
 
     public void AddProduct(Product product)
@@ -178,8 +194,10 @@ public class Basket : MonoBehaviour
             }
         }
     }
+    
+    private void OnCollisionEnter(Collision collision) => DisableTrail();
 
-    private void OnCollisionEnter(Collision collision)
+    public void DisableTrail()
     {
         // If trail active - disable
         if (GetComponentInChildren<ParticleSystem>())

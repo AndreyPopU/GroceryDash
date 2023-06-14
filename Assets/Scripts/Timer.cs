@@ -19,11 +19,11 @@ public class Timer : MonoBehaviour
             // When round hasn't started and countdown hits 0 - start
             if (!roundText.gameObject.activeInHierarchy)
             {
+                GameManager.instance.StartRound(true);
+                CanvasManager.instance.canPause = true;
                 roundText.gameObject.SetActive(true);
                 countdownText.gameObject.SetActive(false);
                 currentTime = 90;
-                GameManager.instance.StartRound(true);
-                CanvasManager.instance.canPause = true;
             }
             else GameManager.instance.StartRound(false);
         }

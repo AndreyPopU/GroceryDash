@@ -9,15 +9,18 @@ public class SpillMilk : MonoBehaviour
 
     private void OnCollisionEnter(Collision collision)
     {
+        // Strip the gameObject from it's components
         Destroy(GetComponent<Rigidbody>());
         Destroy(GetComponent<BoxCollider>());
         Destroy(GetComponent<MeshFilter>());
         Destroy(GetComponent<MeshRenderer>());
+
+        // Effects
         spillEffect.Play();
         StartCoroutine(MilkSpill());
     }
 
-    IEnumerator MilkSpill()
+    IEnumerator MilkSpill() // Scale up milk for a smooth effect
     {
         YieldInstruction waitForFixedUpdate = new WaitForFixedUpdate();
 

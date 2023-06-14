@@ -1475,6 +1475,26 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 3404641538760158655, guid: 5414be86607ec76448396770124e22e0, type: 3}
+      propertyPath: joinAction.m_SingletonActionBindings.Array.size
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 3404641538760158655, guid: 5414be86607ec76448396770124e22e0, type: 3}
+      propertyPath: joinAction.m_SingletonActionBindings.Array.data[0].m_Id
+      value: c1af5241-d9e7-4c79-b253-4e8dd76e7ad4
+      objectReference: {fileID: 0}
+    - target: {fileID: 3404641538760158655, guid: 5414be86607ec76448396770124e22e0, type: 3}
+      propertyPath: joinAction.m_SingletonActionBindings.Array.data[1].m_Id
+      value: 58773228-40df-4f80-aac6-fa47ededccc1
+      objectReference: {fileID: 0}
+    - target: {fileID: 3404641538760158655, guid: 5414be86607ec76448396770124e22e0, type: 3}
+      propertyPath: joinAction.m_SingletonActionBindings.Array.data[0].m_Path
+      value: <Gamepad>/buttonSouth
+      objectReference: {fileID: 0}
+    - target: {fileID: 3404641538760158655, guid: 5414be86607ec76448396770124e22e0, type: 3}
+      propertyPath: joinAction.m_SingletonActionBindings.Array.data[1].m_Path
+      value: <Keyboard>/e
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 5414be86607ec76448396770124e22e0, type: 3}
 --- !u!1001 &355999038
@@ -2760,50 +2780,6 @@ BoxCollider:
   serializedVersion: 2
   m_Size: {x: 18, y: 5, z: 1}
   m_Center: {x: 0, y: 2, z: 0}
---- !u!1 &695707868
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 695707870}
-  - component: {fileID: 695707869}
-  m_Layer: 0
-  m_Name: Console
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 0
---- !u!114 &695707869
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 695707868}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1d1a67a9b6ff0ab4d80e0276e3415d92, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
---- !u!4 &695707870
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 695707868}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_RootOrder: 14
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &703300225
 GameObject:
   m_ObjectHideFlags: 0
@@ -13858,7 +13834,7 @@ BoxCollider:
   m_IsTrigger: 1
   m_Enabled: 0
   serializedVersion: 2
-  m_Size: {x: 1.5, y: 3, z: 1.5}
+  m_Size: {x: 1, y: 3, z: 1}
   m_Center: {x: 0, y: 1.8, z: 0}
 --- !u!114 &8125808540860845102
 MonoBehaviour:
